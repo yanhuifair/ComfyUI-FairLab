@@ -10,5 +10,5 @@ Repository = "https://github.com/yanhuifair/ComfyUI-FairLab"
 
 [tool.comfy]
 PublisherId = "comfyui_fair_lab"
-DisplayName = "FairLab"
+DisplayName = "ComfyUI-FairLab"
 Icon = ""
