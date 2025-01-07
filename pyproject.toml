@@ -1,5 +1,5 @@
 [project]
-name = "ComfyUI-FairLab"
+name = "comfyui-fairlab"
 description = ""
 version = "1.0.1"
 license = { file = "LICENSE" }
@@ -10,6 +10,6 @@ Repository = "https://github.com/yanhuifair/ComfyUI-FairLab"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = "ComfyUI-FairLab"
+PublisherId = "fffffair"
 DisplayName = "ComfyUI-FairLab"
 Icon = ""
