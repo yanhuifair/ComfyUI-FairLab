@@ -1,14 +1,12 @@
 [project]
 name = "comfyui-fairlab"
 description = ""
-version = "1.0.1"
+version = "1.0.2"
 license = { file = "LICENSE" }
 dependencies = ["googletrans-py==4.0.0", "datetime"]
 
 [project.urls]
 Repository = "https://github.com/yanhuifair/ComfyUI-FairLab"
-#  Used by Comfy Registry https://comfyregistry.org
-
 [tool.comfy]
 PublisherId = "fffffair"
 DisplayName = "ComfyUI-FairLab"
