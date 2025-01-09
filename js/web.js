@@ -1,5 +1,6 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
+import { $el } from "../../../scripts/ui.js";
 
 let extension = {
     name: "FairLab",
@@ -49,7 +50,7 @@ let extension = {
 
     async setup() {
         //old ui
-        const restartButton = document.createElement("button");
+        let restartButton = document.createElement("button");
         restartButton.textContent = "Restart";
         restartButton.title = "Restart the server";
         restartButton.onclick = () => {
@@ -60,15 +61,19 @@ let extension = {
         if (menu) menu.appendChild(restartButton);
 
         //new ui
-        const comfyui_button_restart = document.createElement("button");
-        comfyui_button_restart.textContent = "Restart";
-        comfyui_button_restart.className = "comfyui-button";
-        comfyui_button_restart.title = "Restart the server";
-        comfyui_button_restart.onclick = () => {
-            api.fetchApi("/manager/reboot");
-        };
-        var comfyui_menu_group = document.querySelector(".comfyui-button-group");
-        if (comfyui_menu_group) comfyui_menu_group.appendChild(comfyui_button_restart);
+        if (!app.menu?.element.style.display && app.menu?.settingsGroup) {
+            restartButton = new (await import("../../../scripts/ui/components/button.js")).ComfyButton({
+                icon: "",
+                action: () => {
+                    api.fetchApi("/manager/reboot");
+                },
+                tooltip: "Restart the server",
+                content: "Restart",
+            });
+            restartButton.enabled = true;
+            restartButton.element.style.display = "";
+            app.menu.settingsGroup.append(restartButton);
+        }
     },
 };
 
