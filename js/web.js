@@ -49,10 +49,12 @@ let extension = {
     },
 
     async setup() {
+        let restartButton;
+
         //old ui
-        let restartButton = document.createElement("button");
+        restartButton = document.createElement("button");
         restartButton.textContent = "Restart";
-        restartButton.title = "Restart the server";
+        restartButton.tooltip = "Restart the server";
         restartButton.onclick = () => {
             api.fetchApi("/manager/reboot");
         };
@@ -63,7 +65,7 @@ let extension = {
         //new ui
         if (!app.menu?.element.style.display && app.menu?.settingsGroup) {
             restartButton = new (await import("../../../scripts/ui/components/button.js")).ComfyButton({
-                icon: "",
+                icon: "restart",
                 action: () => {
                     api.fetchApi("/manager/reboot");
                 },
