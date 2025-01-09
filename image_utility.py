@@ -14,7 +14,7 @@ from comfy.utils import ProgressBar
 import torch.nn.functional as NNF
 
 
-class DownloadImageClass:
+class DownloadImageNode:
     def __init__(self):
         self.output_dir = folder_paths.get_temp_directory()
         self.type = "temp"
@@ -86,7 +86,7 @@ class DownloadImageClass:
         return {"ui": {"images": results}}
 
 
-class SaveImagesToFolderClass:
+class SaveImagesToFolderNode:
     def __init__(self):
         self.compress_level = 4
 
@@ -124,7 +124,7 @@ class SaveImagesToFolderClass:
         return ()
 
 
-class SaveImageToFolderClass:
+class SaveImageToFolderNode:
     def __init__(self):
         self.compress_level = 4
 
@@ -155,7 +155,7 @@ class SaveImageToFolderClass:
         return ()
 
 
-class ImageResizeClass:
+class ImageResizeNode:
     def __init__(self):
         self.compress_level = 4
 

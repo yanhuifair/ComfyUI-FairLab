@@ -1,44 +1,47 @@
-from .translate_utility import CLIPTranslatedClass
-from .translate_utility import TranslateStringClass
+from .translate_utility import CLIPTranslatedNode
+from .translate_utility import TranslateStringNode
 
-from .load_images_from_folder import LoadImageFromFolderClass
+from .load_images_from_folder import LoadImageFromFolderNode
 
-from .text_utility import SaveStringToFolderClass
-from .text_utility import FixUTF8StringClass
-from .text_utility import StringCombineClass
-from .text_utility import StringFieldClass
+from .text_utility import SaveStringToFolderNode
+from .text_utility import FixUTF8StringNode
+from .text_utility import StringCombineNode
+from .text_utility import StringFieldNode
+from .text_utility import SequenceStringListNode
 
-from .image_utility import DownloadImageClass
-from .image_utility import SaveImagesToFolderClass
-from .image_utility import SaveImageToFolderClass
-from .image_utility import ImageResizeClass
+from .image_utility import DownloadImageNode
+from .image_utility import SaveImagesToFolderNode
+from .image_utility import SaveImageToFolderNode
+from .image_utility import ImageResizeNode
 
 NODE_CLASS_MAPPINGS = {
-    "CLIPTranslatedClass": CLIPTranslatedClass,
-    "TranslateStringClass": TranslateStringClass,
-    "LoadImageFromFolderClass": LoadImageFromFolderClass,
-    "SaveStringToFolderClass": SaveStringToFolderClass,
-    "FixUTF8StringClass": FixUTF8StringClass,
-    "StringCombineClass": StringCombineClass,
-    "StringFieldClass": StringFieldClass,
-    "DownloadImageClass": DownloadImageClass,
-    "SaveImagesToFolderClass": SaveImagesToFolderClass,
-    "SaveImageToFolderClass": SaveImageToFolderClass,
-    "ImageResizeClass": ImageResizeClass,
+    "CLIPTranslatedNode": CLIPTranslatedNode,
+    "TranslateStringNode": TranslateStringNode,
+    "LoadImageFromFolderNode": LoadImageFromFolderNode,
+    "SaveStringToFolderNode": SaveStringToFolderNode,
+    "FixUTF8StringNode": FixUTF8StringNode,
+    "StringCombineNode": StringCombineNode,
+    "StringFieldNode": StringFieldNode,
+    "SequenceStringListNode": SequenceStringListNode,
+    "DownloadImageNode": DownloadImageNode,
+    "SaveImagesToFolderNode": SaveImagesToFolderNode,
+    "SaveImageToFolderNode": SaveImageToFolderNode,
+    "ImageResizeNode": ImageResizeNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "CLIPTranslatedClass": "CLIP Text Encode Translated",
-    "TranslateStringClass": "Translate String",
-    "LoadImageFromFolderClass": "Load Image From Folder",
-    "SaveStringToFolderClass": "Save String To Folder",
-    "FixUTF8StringClass": "Fix UTF-8 String",
-    "StringCombineClass": "String Combine",
-    "StringFieldClass": "String Field",
-    "DownloadImageClass": "Download Image",
-    "SaveImagesToFolderClass": "Save Images To Folder",
-    "SaveImageToFolderClass": "Save Image To Folder",
-    "ImageResizeClass": "Image Resize",
+    "CLIPTranslatedNode": "CLIP Text Encode Translated",
+    "TranslateStringNode": "Translate String",
+    "LoadImageFromFolderNode": "Load Image From Folder",
+    "SaveStringToFolderNode": "Save String To Folder",
+    "FixUTF8StringNode": "Fix UTF-8 String",
+    "StringCombineNode": "String Combine",
+    "StringFieldNode": "String Field",
+    "SequenceStringListNode": "Sequence String List",
+    "DownloadImageNode": "Download Image",
+    "SaveImagesToFolderNode": "Save Images To Folder",
+    "SaveImageToFolderNode": "Save Image To Folder",
+    "ImageResizeNode": "Image Resize",
 }
 
 

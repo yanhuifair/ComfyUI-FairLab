@@ -17,7 +17,7 @@ def translate(prompt, srcTrans=None, toTrans=None):
     return translate_text_prompt.text if hasattr(translate_text_prompt, "text") else ""
 
 
-class CLIPTranslatedClass:
+class CLIPTranslatedNode:
     def __init__(self):
         pass
 
@@ -45,7 +45,7 @@ class CLIPTranslatedClass:
         return ([[cond, {"pooled_output": pooled}]], text_tranlsated)
 
 
-class TranslateStringClass:
+class TranslateStringNode:
     def __init__(self):
         pass
 

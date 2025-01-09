@@ -169,7 +169,7 @@ def load_images_func(
     return (images, folder, image_name_no_postfix_list)
 
 
-class LoadImageFromFolderClass:
+class LoadImageFromFolderNode:
 
     def __init__(self):
         pass

@@ -3,7 +3,7 @@ import os
 import string
 
 
-class SaveStringToFolderClass:
+class SaveStringToFolderNode:
     def __init__(self):
         pass
 
@@ -33,7 +33,7 @@ class SaveStringToFolderClass:
         return ()
 
 
-class FixUTF8StringClass:
+class FixUTF8StringNode:
     def __init__(self):
         pass
 
@@ -109,7 +109,7 @@ class FixUTF8StringClass:
         return (out_string,)
 
 
-class StringCombineClass:
+class StringCombineNode:
     def __init__(self):
         pass
 
@@ -118,7 +118,14 @@ class StringCombineClass:
         return {
             "required": {
                 "string": ("STRING", {"defaultInput": True}),
-                "string_combine": ("STRING", {"defaultInput": True}),
+                "combine": ("STRING", {"defaultInput": True}),
+                "combine_at": (
+                    ["start", "end"],
+                    {
+                        "default": "start",
+                        "defaultInput": False,
+                    },
+                ),
             }
         }
 
@@ -128,15 +135,29 @@ class StringCombineClass:
     FUNCTION = "function"
     OUTPUT_NODE = True
 
-    def function(self, string, string_combine):
-        out_string_list = []
-        for string_combine in string_combine:
-            combine_string = string + string_combine
-            out_string_list.append(combine_string)
-        return (out_string_list,)
+    def function(self, string, combine, combine_at):
+        if type(string).__name__ == "list":
+            out_string_list = []
+
+            for sc in string:
+                if combine_at == "start":
+                    combined = combine + sc
+                else:
+                    combined = sc + combine
+                out_string_list.append(combined)
+
+            return (out_string_list,)
+
+        else:
+
+            if combine_at == "start":
+                combined = combine + string
+            else:
+                combined = string + combine
+            return (combined,)
 
 
-class StringFieldClass:
+class StringFieldNode:
     def __init__(self):
         pass
 
@@ -152,3 +173,24 @@ class StringFieldClass:
 
     def function(self, string):
         return (string,)
+
+
+class SequenceStringListNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {}
+
+    RETURN_TYPES = ("STRING",)
+    CATEGORY = "Fair/string"
+
+    FUNCTION = "function"
+    OUTPUT_NODE = True
+
+    def function(self):
+        out = []
+        for i in range(10):
+            out.append(f"{i}")
+        return (out,)
