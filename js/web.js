@@ -5,7 +5,7 @@ import { $el } from "../../../scripts/ui.js";
 let extension = {
     name: "FairLab",
     nodeCreated(node, app) {
-        if (node?.comfyClass === "DownloadImageClass") {
+        if (node?.comfyClass === "DownloadImageNode") {
             node.onExecuted = function (output) {
                 let imgURLs = [];
                 if (output?.images) {
