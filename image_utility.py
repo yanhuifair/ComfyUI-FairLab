@@ -247,7 +247,7 @@ class VideoToImagesNode:
                 "capture_rate": ("INT", {"default": 30}),
                 "frame_offset": ("INT", {"default": 0}),
                 "images_dir": ("STRING", {"defaultInput": False}),
-                "output_name": ("STRING", {"defaultInput": False}),
+                "images_name_prefix": ("STRING", {"defaultInput": False}),
             }
         }
 
@@ -257,7 +257,7 @@ class VideoToImagesNode:
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def function(self, video_file, capture_rate, frame_offset, images_dir, output_name):
+    def function(self, video_file, capture_rate, frame_offset, images_dir, images_name_prefix):
         video_file = video_file.replace('"', "")
         images_dir = images_dir.replace('"', "")
 
@@ -279,6 +279,7 @@ class VideoToImagesNode:
                 if frame_success:
                     if counter % capture_rate == 0:
                         file_name = str(counter) + ".jpg"
+                        file_name = images_name_prefix + file_name
                         image_path = os.path.join(images_dir, file_name)
                         image_path_list.append(image_path)
                         cv2.imwrite(image_path, frame_image)
@@ -302,7 +303,7 @@ class ImagesToVideoNode:
                 "images_dir": ("STRING", {"defaultInput": False}),
                 "frame_rate": ("INT", {"default": 30}),
                 "video_dir": ("STRING", {"defaultInput": False}),
-                "video_name": ("STRING", {"defaultInput": False}),
+                "video_name": ("STRING", {"defaultInput": False, "default": "output"}),
             }
         }
 
