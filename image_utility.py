@@ -251,7 +251,8 @@ class VideoToImagesNode:
             }
         }
 
-    RETURN_TYPES = ()
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("image_path_list",)
     FUNCTION = "function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
@@ -271,22 +272,23 @@ class VideoToImagesNode:
         progress_bar = ProgressBar(bar_total)
 
         counter = 1 - frame_offset
-
+        image_path_list = []
         if vc.isOpened():
             while True:
                 frame_success, frame_image = vc.read()
                 if frame_success:
                     if counter % capture_rate == 0:
                         file_name = str(counter) + ".jpg"
-                        full_path = os.path.join(images_dir, file_name)
-                        cv2.imwrite(full_path, frame_image)
+                        image_path = os.path.join(images_dir, file_name)
+                        image_path_list.append(image_path)
+                        cv2.imwrite(image_path, frame_image)
                 else:
                     break
                 counter += 1
                 progress_bar.update_absolute(counter, bar_total)
         vc.release()
 
-        return ()
+        return (image_path_list,)
 
 
 class ImagesToVideoNode:
@@ -304,7 +306,11 @@ class ImagesToVideoNode:
             }
         }
 
-    RETURN_TYPES = ()
+    RETURN_TYPES = (
+        "STRING",
+        "STRING",
+    )
+    RETURN_NAMES = ("image_path_list", "video_path")
     FUNCTION = "function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
@@ -312,26 +318,34 @@ class ImagesToVideoNode:
     def function(self, images_dir, frame_rate, video_dir, video_name):
         images_dir = images_dir.replace('"', "")
         video_dir = video_dir.replace('"', "")
-        video_output_file = os.path.join(video_dir, f"{video_name}.mp4")
+        video_path = os.path.join(video_dir, f"{video_name}.mp4")
 
+        image_path_list = []
         image_name_list = os.listdir(images_dir)
+        for image_path in image_name_list:
+            image_path_list.append(os.path.join(images_dir, image_path))
+
         bar_total = len(image_name_list)
         progress_bar = ProgressBar(bar_total)
 
-        img0 = cv2.imread(os.path.join(images_dir, image_name_list[0]))
+        img0 = cv2.imread(image_path_list[0])
         height, width, layers = img0.shape
         print(f"video resolution:{width}*{height}")
 
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        video_writer = cv2.VideoWriter(video_output_file, fourcc, frame_rate, (width, height))
+        video_writer = cv2.VideoWriter(video_path, fourcc, frame_rate, (width, height))
 
         bar_counter = 0
-        for name in image_name_list:
-            img = cv2.imread(os.path.join(images_dir, name))
+        for image_path in image_path_list:
+            img = cv2.imread(image_path)
             video_writer.write(img)
 
             bar_counter += 1
             progress_bar.update_absolute(bar_counter, bar_total)
 
         video_writer.release()
-        return ()
+
+        return (
+            image_path_list,
+            video_path,
+        )
