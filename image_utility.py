@@ -1,8 +1,9 @@
 import os
+import requests
 import json
 import numpy as np
 import cv2
-
+from io import BytesIO
 from PIL import Image, ImageOps, ImageSequence, ImageFile
 from PIL.PngImagePlugin import PngInfo
 
@@ -12,7 +13,43 @@ from comfy.cli_args import args
 from datetime import datetime
 from comfy.utils import ProgressBar
 
+import torch
 import torch.nn.functional as NNF
+
+
+def pil2tensor(img):
+    output_images = []
+    output_masks = []
+    for i in ImageSequence.Iterator(img):
+        i = ImageOps.exif_transpose(i)
+        if i.mode == "I":
+            i = i.point(lambda i: i * (1 / 255))
+        image = i.convert("RGB")
+        image = np.array(image).astype(np.float32) / 255.0
+        image = torch.from_numpy(image)[None,]
+        if "A" in i.getbands():
+            mask = np.array(i.getchannel("A")).astype(np.float32) / 255.0
+            mask = 1.0 - torch.from_numpy(mask)
+        else:
+            mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+        output_images.append(image)
+        output_masks.append(mask.unsqueeze(0))
+
+    if len(output_images) > 1:
+        output_image = torch.cat(output_images, dim=0)
+        output_mask = torch.cat(output_masks, dim=0)
+    else:
+        output_image = output_images[0]
+        output_mask = output_masks[0]
+
+    return (output_image, output_mask)
+
+
+def load_image(url):
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    file_name = url.split("/")[-1]
+    return img, file_name
 
 
 class DownloadImageNode:
@@ -350,3 +387,22 @@ class ImagesToVideoNode:
             image_path_list,
             video_path,
         )
+
+
+class LoadImageFormURLNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"url": ("STRING", {"defaultInput": False})}}
+
+    RETURN_TYPES = ("IMAGE", "MASK", "STRING")
+    RETURN_NAMES = ("image", "mask", "file_name")
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+
+    def node_function(self, url):
+        img, file_name = load_image(url)
+        img_out, mask_out = pil2tensor(img)
+        return (img_out, mask_out, file_name)

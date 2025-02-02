@@ -15,6 +15,7 @@ from .image_utility import SaveImageToFolderNode
 from .image_utility import ImageResizeNode
 from .image_utility import VideoToImagesNode
 from .image_utility import ImagesToVideoNode
+from .image_utility import LoadImageFormURLNode
 
 NODE_CLASS_MAPPINGS = {
     "CLIPTranslatedNode": CLIPTranslatedNode,
@@ -31,6 +32,7 @@ NODE_CLASS_MAPPINGS = {
     "ImageResizeNode": ImageResizeNode,
     "VideoToImagesNode": VideoToImagesNode,
     "ImagesToVideoNode": ImagesToVideoNode,
+    "LoadImageFormURLNode": LoadImageFormURLNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -48,6 +50,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImageResizeNode": "Image Resize",
     "VideoToImagesNode": "Video To Images",
     "ImagesToVideoNode": "Images To Video",
+    "LoadImageFormURLNode": "Load Image Form URL",
 }
 
 
