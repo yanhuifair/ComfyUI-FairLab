@@ -2,6 +2,7 @@ from .translate_utility import CLIPTranslatedNode
 from .translate_utility import TranslateStringNode
 
 from .load_images_from_folder import LoadImageFromFolderNode
+from .load_images_from_folder import LoadImagesFromFolderNode
 
 from .text_utility import SaveStringToFolderNode
 from .text_utility import FixUTF8StringNode
@@ -17,10 +18,14 @@ from .image_utility import VideoToImagesNode
 from .image_utility import ImagesToVideoNode
 from .image_utility import LoadImageFormURLNode
 
+from .utility import PrintAnyNode
+from .utility import PrintImageNode
+
 NODE_CLASS_MAPPINGS = {
     "CLIPTranslatedNode": CLIPTranslatedNode,
     "TranslateStringNode": TranslateStringNode,
     "LoadImageFromFolderNode": LoadImageFromFolderNode,
+    "LoadImagesFromFolderNode": LoadImagesFromFolderNode,
     "SaveStringToFolderNode": SaveStringToFolderNode,
     "FixUTF8StringNode": FixUTF8StringNode,
     "StringCombineNode": StringCombineNode,
@@ -33,12 +38,15 @@ NODE_CLASS_MAPPINGS = {
     "VideoToImagesNode": VideoToImagesNode,
     "ImagesToVideoNode": ImagesToVideoNode,
     "LoadImageFormURLNode": LoadImageFormURLNode,
+    "PrintAnyNode": PrintAnyNode,
+    "PrintImageNode": PrintImageNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "CLIPTranslatedNode": "CLIP Text Encode Translated",
     "TranslateStringNode": "Translate String",
     "LoadImageFromFolderNode": "Load Image From Folder",
+    "LoadImagesFromFolderNode": "Load Images From Folder",
     "SaveStringToFolderNode": "Save String To Folder",
     "FixUTF8StringNode": "Fix UTF-8 String",
     "StringCombineNode": "String Combine",
@@ -51,6 +59,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "VideoToImagesNode": "Video To Images",
     "ImagesToVideoNode": "Images To Video",
     "LoadImageFormURLNode": "Load Image Form URL",
+    "PrintAnyNode": "Print Any",
+    "PrintImageNode": "Print Image",
 }
 
 

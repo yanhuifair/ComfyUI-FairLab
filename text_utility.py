@@ -24,11 +24,11 @@ class SaveStringToFolderNode:
     OUTPUT_NODE = True
 
     def function(self, string, folder, name):
-        for content, file_name in zip(string, name):
+        for file_string, file_folder, file_name in zip(string, folder, name):
             file_name_suffix = f"{file_name}.txt"
-            full_path = os.path.join(folder, file_name_suffix)
+            full_path = os.path.join(file_folder, file_name_suffix)
             with open(full_path, "w", encoding="utf-8") as file:
-                file.write(content)
+                file.write(file_string)
 
         return ()
 
@@ -90,9 +90,7 @@ class FixUTF8StringNode:
 
         # Remove all characters not in printable set or replace if in the replacements dictionary
         printable = set(string.printable)
-        result = "".join(
-            replacements.get(c, c) if c not in printable else c for c in text
-        )
+        result = "".join(replacements.get(c, c) if c not in printable else c for c in text)
         return result
 
     def remove_special_characters(self, text):

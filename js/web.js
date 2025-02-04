@@ -52,15 +52,16 @@ let extension = {
         let restartButton;
 
         //old ui
-        restartButton = document.createElement("button");
-        restartButton.textContent = "Restart";
-        restartButton.tooltip = "Restart the server";
-        restartButton.onclick = () => {
-            api.fetchApi("/manager/reboot");
-        };
-
         const menu = document.querySelector(".comfy-menu");
-        if (menu) menu.appendChild(restartButton);
+        if (menu) {
+            restartButton = document.createElement("button");
+            restartButton.textContent = "Restart";
+            restartButton.tooltip = "Restart the server";
+            restartButton.onclick = () => {
+                api.fetchApi("/manager/reboot");
+            };
+            menu.appendChild(restartButton);
+        }
 
         //new ui
         if (!app.menu?.element.style.display && app.menu?.settingsGroup) {

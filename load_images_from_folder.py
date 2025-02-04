@@ -6,6 +6,7 @@ import itertools
 from comfy.utils import common_upscale, ProgressBar
 from comfy.k_diffusion.utils import FolderOfImages
 from typing import Iterable
+from torchvision import transforms
 
 
 def validate_load_images(directory: str):
@@ -67,9 +68,7 @@ def images_generator(
 ):
     if not os.path.isdir(directory):
         raise FileNotFoundError(f"Directory '{directory} cannot be found.")
-    dir_files = get_sorted_dir_files_from_directory(
-        directory, skip_first_images, select_every_nth, FolderOfImages.IMG_EXTENSIONS
-    )
+    dir_files = get_sorted_dir_files_from_directory(directory, skip_first_images, select_every_nth, FolderOfImages.IMG_EXTENSIONS)
 
     if len(dir_files) == 0:
         raise FileNotFoundError(f"No files in directory '{directory}'.")
@@ -153,16 +152,13 @@ def load_images_func(
 
     if meta_batch is not None:
         gen = itertools.islice(gen, meta_batch.frames_per_batch)
-    images = torch.from_numpy(
-        np.fromiter(gen, np.dtype((np.float32, (height, width, 3 + has_alpha))))
-    )
+    images = torch.from_numpy(np.fromiter(gen, np.dtype((np.float32, (height, width, 3 + has_alpha)))))
+
     if has_alpha:
         images = images[:, :, :, :3]
     if len(images) == 0:
         raise FileNotFoundError(f"No images could be loaded from directory '{folder}'.")
-    image_paths = get_sorted_dir_files_from_directory(
-        folder, skip_first_images, select_every_nth, FolderOfImages.IMG_EXTENSIONS
-    )
+    image_paths = get_sorted_dir_files_from_directory(folder, skip_first_images, select_every_nth, FolderOfImages.IMG_EXTENSIONS)
 
     image_name_list = [os.path.basename(x) for x in image_paths]
     image_name_no_postfix_list = [os.path.splitext(x)[0] for x in image_name_list]
@@ -176,9 +172,7 @@ class LoadImageFromFolderNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {
-            "required": {"folder": ("STRING", {"default": "", "forceInput": False})}
-        }
+        return {"required": {"folder": ("STRING", {"default": "", "forceInput": False})}}
 
     RETURN_TYPES = ("IMAGE", "STRING", "STRING")
     RETURN_NAMES = ("IMAGE", "FOLDER", "NAME")
@@ -191,3 +185,79 @@ class LoadImageFromFolderNode:
             raise Exception("directory is not valid: " + folder)
 
         return load_images_func(folder, **kwargs)
+
+
+def load_images_to_tensors(folder_path, recursive, convert_to_rgb):
+    image_file_paths = []
+    if recursive:
+        for root, _, files in os.walk(folder_path):
+            for file_name in files:
+                if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
+                    image_file_paths.append(os.path.join(root, file_name))
+    else:
+        for file_name in os.listdir(folder_path):
+            if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
+                image_file_paths.append(os.path.join(folder_path, file_name))
+
+    image_tensors = []
+    image_nps = []
+    images = []
+    max_w, max_h = 0, 0
+
+    for image_path in image_file_paths:
+        image = Image.open(image_path)
+        image = ImageOps.exif_transpose(image)
+        w, h = image.size
+        max_w = max(max_w, w)
+        max_h = max(max_h, h)
+        images.append(image)
+
+    for image in images:
+        if image.size[0] != max_w or image.size[1] != max_h:
+            image = image.resize((max_w, max_h), Image.LANCZOS)
+
+        if convert_to_rgb:
+            image = image.convert("RGB")
+
+        image_np = np.array(image, dtype=np.float32)
+        image_nps.append(image_np)
+        image_tensor = torch.from_numpy(image_np).div(255.0)
+        image_tensors.append(image_tensor)
+
+    image_tensors = torch.cat(image_tensors)
+    image_tensors = image_tensors.reshape(-1, max_h, max_w, 3)
+
+    # names
+    image_name_list = [os.path.basename(x) for x in image_file_paths]
+    image_names = [os.path.splitext(x)[0] for x in image_name_list]
+    image_folders = [os.path.dirname(p) for p in image_file_paths]
+
+    return image_tensors, image_folders, image_names
+
+
+class LoadImagesFromFolderNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "folder_path": ("STRING", {"default": "", "forceInput": False}),
+                "recursive": ("BOOLEAN", {"default": False}),
+                "convert_to_rgb": ("BOOLEAN", {"default": True}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("IMAGE", "FOLDER", "NAME")
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+
+    def node_function(self, folder_path, recursive, convert_to_rgb):
+        if not folder_path or not os.path.isdir(folder_path):
+            raise Exception("folder_path is not valid: " + folder_path)
+
+        out_images, out_folders, out_image_names = load_images_to_tensors(folder_path, recursive, convert_to_rgb)
+
+        return (out_images, out_folders, out_image_names)

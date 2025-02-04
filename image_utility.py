@@ -395,7 +395,7 @@ class LoadImageFormURLNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"url": ("STRING", {"defaultInput": False})}}
+        return {"required": {"url": ("STRING", {"defaultInput": False, "multiline": True})}}
 
     RETURN_TYPES = ("IMAGE", "MASK", "STRING")
     RETURN_NAMES = ("image", "mask", "file_name")
