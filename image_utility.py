@@ -272,7 +272,7 @@ class ImageResizeNode:
         return (image, mask_opt)
 
 
-class VideoToImagesNode:
+class VideoToImageNode:
     def __init__(self):
         pass
 
@@ -280,56 +280,56 @@ class VideoToImagesNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "video_file": ("STRING", {"defaultInput": False}),
+                "video_path": ("STRING", {"defaultInput": False}),
                 "capture_rate": ("INT", {"default": 30}),
                 "frame_offset": ("INT", {"default": 0}),
-                "images_dir": ("STRING", {"defaultInput": False}),
-                "images_name_prefix": ("STRING", {"defaultInput": False}),
+                "image_dir": ("STRING", {"defaultInput": False}),
+                "image_name_prefix": ("STRING", {"defaultInput": False}),
             }
         }
 
     RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("image_path_list",)
+    RETURN_NAMES = ("image_paths",)
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def node_function(self, video_file, capture_rate, frame_offset, images_dir, images_name_prefix):
-        video_file = video_file.replace('"', "")
-        images_dir = images_dir.replace('"', "")
+    def node_function(self, video_path, capture_rate, frame_offset, image_dir, image_name_prefix):
+        video_path = video_path.replace('"', "")
+        image_dir = image_dir.replace('"', "")
 
-        vc = cv2.VideoCapture(video_file)
+        vc = cv2.VideoCapture(video_path)
         width = vc.get(cv2.CAP_PROP_FRAME_WIDTH)
         height = vc.get(cv2.CAP_PROP_FRAME_HEIGHT)
         fps = vc.get(cv2.CAP_PROP_FPS)
-        num_frames = vc.get(cv2.CAP_PROP_FRAME_COUNT)
-        print("width:{} \nheight:{} \nfps:{} \nnum_frames:{}".format(width, height, fps, num_frames))
+        frame_count = vc.get(cv2.CAP_PROP_FRAME_COUNT)
+        print("width:{} \nheight:{} \nfps:{} \nnum_frames:{}".format(width, height, fps, frame_count))
 
-        bar_total = num_frames
-        progress_bar = ProgressBar(bar_total)
+        progress_total = frame_count
+        progress_bar = ProgressBar(progress_total)
 
-        counter = 1 - frame_offset
-        image_path_list = []
+        frame_counter = 1 - frame_offset
+        image_paths = []
         if vc.isOpened():
             while True:
                 frame_success, frame_image = vc.read()
                 if frame_success:
-                    if counter % capture_rate == 0:
-                        file_name = str(counter) + ".jpg"
-                        file_name = images_name_prefix + file_name
-                        image_path = os.path.join(images_dir, file_name)
-                        image_path_list.append(image_path)
+                    if frame_counter % capture_rate == 0:
+                        file_name = str(frame_counter) + ".jpg"
+                        file_name = image_name_prefix + file_name
+                        image_path = os.path.join(image_dir, file_name)
+                        image_paths.append(image_path)
                         cv2.imwrite(image_path, frame_image)
                 else:
                     break
-                counter += 1
-                progress_bar.update_absolute(counter, bar_total)
+                frame_counter += 1
+                progress_bar.update_absolute(frame_counter, progress_total)
         vc.release()
 
-        return (image_path_list,)
+        return (image_paths,)
 
 
-class ImagesToVideoNode:
+class ImageToVideoNode:
     def __init__(self):
         pass
 
@@ -337,56 +337,50 @@ class ImagesToVideoNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "images_dir": ("STRING", {"defaultInput": False}),
+                "image_dir": ("STRING", {"defaultInput": False}),
                 "frame_rate": ("INT", {"default": 30}),
                 "video_dir": ("STRING", {"defaultInput": False}),
                 "video_name": ("STRING", {"defaultInput": False, "default": "output"}),
             }
         }
 
-    RETURN_TYPES = (
-        "STRING",
-        "STRING",
-    )
-    RETURN_NAMES = ("image_path_list", "video_path")
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("image_paths", "video_path")
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def node_function(self, images_dir, frame_rate, video_dir, video_name):
-        images_dir = images_dir.replace('"', "")
+    def node_function(self, image_dir, frame_rate, video_dir, video_name):
+        image_dir = image_dir.replace('"', "")
         video_dir = video_dir.replace('"', "")
         video_path = os.path.join(video_dir, f"{video_name}.mp4")
 
-        image_path_list = []
-        image_name_list = os.listdir(images_dir)
-        for image_path in image_name_list:
-            image_path_list.append(os.path.join(images_dir, image_path))
+        image_paths = []
+        image_name_list = os.listdir(image_dir)
+        for image_name in image_name_list:
+            image_paths.append(os.path.join(image_dir, image_name))
 
-        bar_total = len(image_name_list)
-        progress_bar = ProgressBar(bar_total)
+        progress_total = len(image_name_list)
+        progress_bar = ProgressBar(progress_total)
 
-        img0 = cv2.imread(image_path_list[0])
+        img0 = cv2.imread(image_paths[0])
         height, width, layers = img0.shape
         print(f"video resolution:{width}*{height}")
 
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         video_writer = cv2.VideoWriter(video_path, fourcc, frame_rate, (width, height))
 
-        bar_counter = 0
-        for image_path in image_path_list:
+        progress_counter = 0
+        for image_path in image_paths:
             img = cv2.imread(image_path)
             video_writer.write(img)
 
-            bar_counter += 1
-            progress_bar.update_absolute(bar_counter, bar_total)
+            progress_counter += 1
+            progress_bar.update_absolute(progress_counter, progress_total)
 
         video_writer.release()
 
-        return (
-            image_path_list,
-            video_path,
-        )
+        return (image_paths, video_path)
 
 
 class LoadImageFromURLNode:

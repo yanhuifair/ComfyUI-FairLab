@@ -10,8 +10,8 @@ from .text_utility import SequenceStringListNode
 from .image_utility import DownloadImageNode
 from .image_utility import SaveImageToDirectoryNode
 from .image_utility import ImageResizeNode
-from .image_utility import VideoToImagesNode
-from .image_utility import ImagesToVideoNode
+from .image_utility import VideoToImageNode
+from .image_utility import ImageToVideoNode
 from .image_utility import LoadImageFromURLNode
 from .image_utility import LoadImageFromDirectoryNode
 
@@ -30,8 +30,8 @@ NODE_CLASS_MAPPINGS = {
     "DownloadImageNode": DownloadImageNode,
     "SaveImageToDirectoryNode": SaveImageToDirectoryNode,
     "ImageResizeNode": ImageResizeNode,
-    "VideoToImagesNode": VideoToImagesNode,
-    "ImagesToVideoNode": ImagesToVideoNode,
+    "VideoToImageNode": VideoToImageNode,
+    "ImageToVideoNode": ImageToVideoNode,
     "LoadImageFromURLNode": LoadImageFromURLNode,
     "PrintAnyNode": PrintAnyNode,
     "PrintImageNode": PrintImageNode,
@@ -49,8 +49,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DownloadImageNode": "Download Image",
     "SaveImageToDirectoryNode": "Save Image To Directory",
     "ImageResizeNode": "Image Resize",
-    "VideoToImagesNode": "Video To Images",
-    "ImagesToVideoNode": "Images To Video",
+    "VideoToImageNode": "Video To Image",
+    "ImageToVideoNode": "Image To Video",
     "LoadImageFromURLNode": "Load Image From URL",
     "PrintAnyNode": "Print Any",
     "PrintImageNode": "Print Image",
