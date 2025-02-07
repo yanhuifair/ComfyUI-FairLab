@@ -3,7 +3,7 @@ import os
 import string
 
 
-class SaveStringToFolderNode:
+class SaveStringToDirectoryNode:
     def __init__(self):
         pass
 
@@ -12,7 +12,7 @@ class SaveStringToFolderNode:
         return {
             "required": {
                 "string": ("STRING", {"defaultInput": True}),
-                "folder": ("STRING", {"defaultInput": True}),
+                "directory": ("STRING", {"defaultInput": True}),
                 "name": ("STRING", {"defaultInput": True}),
             }
         }
@@ -23,10 +23,10 @@ class SaveStringToFolderNode:
     FUNCTION = "function"
     OUTPUT_NODE = True
 
-    def function(self, string, folder, name):
-        for file_string, file_folder, file_name in zip(string, folder, name):
-            file_name_suffix = f"{file_name}.txt"
-            full_path = os.path.join(file_folder, file_name_suffix)
+    def function(self, string, directory, name):
+        for file_string, file_directory, file_name in zip(string, directory, name):
+            file_name_with_suffix = f"{file_name}.txt"
+            full_path = os.path.join(file_directory, file_name_with_suffix)
             with open(full_path, "w", encoding="utf-8") as file:
                 file.write(file_string)
 

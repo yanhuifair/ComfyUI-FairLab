@@ -20,10 +20,6 @@ def validate_load_images(directory: str):
 
 
 def strip_path(path):
-    # This leaves whitespace inside quotes and only a single "
-    # thus ' ""test"' -> '"test'
-    # consider path.strip(string.whitespace+"\"")
-    # or weightier re.fullmatch("[\\s\"]*(.+?)[\\s\"]*", path).group(1)
     path = path.strip()
     if path.startswith('"'):
         path = path[1:]
@@ -185,79 +181,3 @@ class LoadImageFromFolderNode:
             raise Exception("directory is not valid: " + folder)
 
         return load_images_func(folder, **kwargs)
-
-
-def load_images_to_tensors(folder_path, recursive, convert_to_rgb):
-    image_file_paths = []
-    if recursive:
-        for root, _, files in os.walk(folder_path):
-            for file_name in files:
-                if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
-                    image_file_paths.append(os.path.join(root, file_name))
-    else:
-        for file_name in os.listdir(folder_path):
-            if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
-                image_file_paths.append(os.path.join(folder_path, file_name))
-
-    image_tensors = []
-    image_nps = []
-    images = []
-    max_w, max_h = 0, 0
-
-    for image_path in image_file_paths:
-        image = Image.open(image_path)
-        image = ImageOps.exif_transpose(image)
-        w, h = image.size
-        max_w = max(max_w, w)
-        max_h = max(max_h, h)
-        images.append(image)
-
-    for image in images:
-        if image.size[0] != max_w or image.size[1] != max_h:
-            image = image.resize((max_w, max_h), Image.LANCZOS)
-
-        if convert_to_rgb:
-            image = image.convert("RGB")
-
-        image_np = np.array(image, dtype=np.float32)
-        image_nps.append(image_np)
-        image_tensor = torch.from_numpy(image_np).div(255.0)
-        image_tensors.append(image_tensor)
-
-    image_tensors = torch.cat(image_tensors)
-    image_tensors = image_tensors.reshape(-1, max_h, max_w, 3)
-
-    # names
-    image_name_list = [os.path.basename(x) for x in image_file_paths]
-    image_names = [os.path.splitext(x)[0] for x in image_name_list]
-    image_folders = [os.path.dirname(p) for p in image_file_paths]
-
-    return image_tensors, image_folders, image_names
-
-
-class LoadImagesFromFolderNode:
-    def __init__(self):
-        pass
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "folder_path": ("STRING", {"default": "", "forceInput": False}),
-                "recursive": ("BOOLEAN", {"default": False}),
-                "convert_to_rgb": ("BOOLEAN", {"default": True}),
-            }
-        }
-
-    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
-    RETURN_NAMES = ("IMAGE", "FOLDER", "NAME")
-    FUNCTION = "node_function"
-    CATEGORY = "Fair/image"
-
-    def node_function(self, folder_path, recursive, convert_to_rgb):
-        if not folder_path or not os.path.isdir(folder_path):
-            raise Exception("folder_path is not valid: " + folder_path)
-
-        out_images, out_folders, out_image_names = load_images_to_tensors(folder_path, recursive, convert_to_rgb)
-
-        return (out_images, out_folders, out_image_names)
