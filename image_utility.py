@@ -479,6 +479,6 @@ class LoadImageFromDirectoryNode:
         if not directory or not os.path.isdir(directory):
             raise Exception("folder_path is not valid: " + directory)
 
-        out_images, out_folders, out_image_names = load_image_to_tensor(directory, recursive, convert_to_rgb)
+        out_image, out_dir, out_name = load_image_to_tensor(directory, recursive, convert_to_rgb)
 
-        return (out_images, out_folders, out_image_names)
+        return (out_image, out_dir, out_name)

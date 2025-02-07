@@ -1,8 +1,6 @@
 from .translate_utility import CLIPTranslatedNode
 from .translate_utility import TranslateStringNode
 
-from .load_images_from_folder import LoadImageFromFolderNode
-
 from .text_utility import SaveStringToDirectoryNode
 from .text_utility import FixUTF8StringNode
 from .text_utility import StringCombineNode
@@ -24,7 +22,6 @@ from .utility import PrintImageNode
 NODE_CLASS_MAPPINGS = {
     "CLIPTranslatedNode": CLIPTranslatedNode,
     "TranslateStringNode": TranslateStringNode,
-    "LoadImageFromFolderNode": LoadImageFromFolderNode,
     "LoadImageFromDirectoryNode": LoadImageFromDirectoryNode,
     "SaveStringToDirectoryNode": SaveStringToDirectoryNode,
     "FixUTF8StringNode": FixUTF8StringNode,
@@ -45,7 +42,6 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "CLIPTranslatedNode": "CLIP Text Encode Translated",
     "TranslateStringNode": "Translate String",
-    "LoadImageFromFolderNode": "Load Image From Folder",
     "LoadImageFromDirectoryNode": "Load Image From Directory",
     "SaveStringToDirectoryNode": "Save String To Directory",
     "FixUTF8StringNode": "Fix UTF-8 String",
