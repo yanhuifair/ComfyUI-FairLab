@@ -26,7 +26,7 @@ def pil2tensor(img):
             i = i.point(lambda i: i * (1 / 255))
         image = i.convert("RGB")
         image = np.array(image).astype(np.float32) / 255.0
-        image = torch.from_numpy(image)[None,]
+        image = torch.from_numpy(image)
         if "A" in i.getbands():
             mask = np.array(i.getchannel("A")).astype(np.float32) / 255.0
             mask = 1.0 - torch.from_numpy(mask)
@@ -45,7 +45,40 @@ def pil2tensor(img):
     return (output_image, output_mask)
 
 
-def load_image(url):
+def tensor2pil(tensor):
+    tensor = tensor.cpu().numpy()
+    tensor = np.clip(tensor, 0, 1) * 255
+    tensor = tensor.astype(np.uint8)
+    img = Image.fromarray(tensor)
+    return img
+
+
+def img_to_tensor(img):
+    img = ImageOps.exif_transpose(img)
+
+    if "A" in img.getbands():
+        out_mask = np.array(img.getchannel("A")).astype(np.float32) / 255.0
+        out_mask = 1.0 - torch.from_numpy(out_mask)
+    else:
+        out_mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+
+    out_mask = out_mask.unsqueeze(0)
+
+    img_np = np.array(img).astype(np.float32) / 255.0
+    out_tensor = torch.from_numpy(img_np)
+
+    return out_tensor, out_mask
+
+
+def tensor_to_img(tensor):
+    tensor = tensor.cpu().numpy()
+    tensor = np.clip(tensor, 0, 1) * 255
+    tensor = tensor.astype(np.uint8)
+    img = Image.fromarray(tensor)
+    return img
+
+
+def load_image_from_url(url):
     response = requests.get(url)
     img = Image.open(BytesIO(response.content))
     file_name = url.split("/")[-1]
@@ -64,10 +97,7 @@ class DownloadImageNode:
         return {
             "required": {
                 "images": ("IMAGE",),
-                "filename_prefix": (
-                    "STRING",
-                    {"default": "ComfyUI_%time%_%batch_num%"},
-                ),
+                "filename_prefix": ("STRING", {"default": "ComfyUI_%time%_%batch_num%"}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -116,45 +146,7 @@ class DownloadImageNode:
         return {"ui": {"images": results}}
 
 
-class SaveImagesToFolderNode:
-    def __init__(self):
-        self.compress_level = 4
-
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "images": ("IMAGE", {"defaultInput": True}),
-                "folder": ("STRING", {"defaultInput": True}),
-                "names": ("STRING", {"defaultInput": True}),
-            }
-        }
-
-    RETURN_TYPES = ()
-    FUNCTION = "function"
-    OUTPUT_NODE = True
-    CATEGORY = "Fair/image"
-
-    def function(self, images, folder, names):
-        total_bar = len(images)
-        pbar = ProgressBar(total_bar)
-        processed_bar = 0
-        for image, file_name in zip(images, names):
-            i = 255.0 * image.cpu().numpy()
-            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-            file = f"{file_name}.png"
-            img.save(
-                os.path.join(folder, file),
-                compress_level=self.compress_level,
-            )
-
-            processed_bar += 1
-            pbar.update_absolute(processed_bar, total_bar)
-
-        return ()
-
-
-class SaveImageToFolderNode:
+class SaveImageToDirectoryNode:
     def __init__(self):
         self.compress_level = 4
 
@@ -163,8 +155,8 @@ class SaveImageToFolderNode:
         return {
             "required": {
                 "image": ("IMAGE", {"defaultInput": True}),
-                "folder": ("STRING", {"defaultInput": False}),
-                "name": ("STRING", {"defaultInput": False}),
+                "directory": ("STRING", {"defaultInput": True}),
+                "name": ("STRING", {"defaultInput": True}),
             }
         }
 
@@ -173,14 +165,22 @@ class SaveImageToFolderNode:
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def function(self, image, folder, name):
-        i = 255.0 * image.cpu().numpy()
-        img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-        file = f"{name}.png"
-        img.save(
-            os.path.join(folder, file),
-            compress_level=self.compress_level,
-        )
+    def function(self, image, directory, name):
+        progress_total = len(image)
+        progress_bar = ProgressBar(progress_total)
+        progress_counter = 0
+
+        for img, file_name in zip(image, name):
+            i = 255.0 * img.cpu().numpy()
+            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+            file = f"{file_name}.png"
+            img.save(
+                os.path.join(directory, file),
+                compress_level=self.compress_level,
+            )
+
+            progress_counter += 1
+            progress_bar.update_absolute(progress_counter, progress_total)
 
         return ()
 
@@ -218,11 +218,11 @@ class ImageResizeNode:
     RETURN_TYPES = ("IMAGE", "MASK")
     RETURN_NAMES = ("image", "mask")
 
-    FUNCTION = "function"
+    FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def function(self, image, resize_to, side, interpolation, mask_opt=None):
+    def node_function(self, image, resize_to, side, interpolation, mask_opt=None):
 
         image = image.movedim(-1, 1)
 
@@ -290,11 +290,11 @@ class VideoToImagesNode:
 
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("image_path_list",)
-    FUNCTION = "function"
+    FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def function(self, video_file, capture_rate, frame_offset, images_dir, images_name_prefix):
+    def node_function(self, video_file, capture_rate, frame_offset, images_dir, images_name_prefix):
         video_file = video_file.replace('"', "")
         images_dir = images_dir.replace('"', "")
 
@@ -349,11 +349,11 @@ class ImagesToVideoNode:
         "STRING",
     )
     RETURN_NAMES = ("image_path_list", "video_path")
-    FUNCTION = "function"
+    FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def function(self, images_dir, frame_rate, video_dir, video_name):
+    def node_function(self, images_dir, frame_rate, video_dir, video_name):
         images_dir = images_dir.replace('"', "")
         video_dir = video_dir.replace('"', "")
         video_path = os.path.join(video_dir, f"{video_name}.mp4")
@@ -389,7 +389,7 @@ class ImagesToVideoNode:
         )
 
 
-class LoadImageFormURLNode:
+class LoadImageFromURLNode:
     def __init__(self):
         pass
 
@@ -398,14 +398,14 @@ class LoadImageFormURLNode:
         return {"required": {"url": ("STRING", {"defaultInput": False, "multiline": True})}}
 
     RETURN_TYPES = ("IMAGE", "MASK", "STRING")
-    RETURN_NAMES = ("image", "mask", "file_name")
+    RETURN_NAMES = ("image", "mask", "name")
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
 
     def node_function(self, url):
-        img, file_name = load_image(url)
+        img, name = load_image_from_url(url)
         img_out, mask_out = pil2tensor(img)
-        return (img_out, mask_out, file_name)
+        return (img_out, mask_out, name)
 
 
 def load_image_to_tensor(folder_path, recursive, convert_to_rgb):
@@ -421,7 +421,6 @@ def load_image_to_tensor(folder_path, recursive, convert_to_rgb):
                 image_file_paths.append(os.path.join(folder_path, file_name))
 
     image_tensors = []
-    image_nps = []
     images = []
     max_w, max_h = 0, 0
 
@@ -440,9 +439,8 @@ def load_image_to_tensor(folder_path, recursive, convert_to_rgb):
         if convert_to_rgb:
             image = image.convert("RGB")
 
-        image_np = np.array(image, dtype=np.float32)
-        image_nps.append(image_np)
-        image_tensor = torch.from_numpy(image_np).div(255.0)
+        image_np = np.array(image, dtype=np.float32) / 255.0
+        image_tensor = torch.from_numpy(image_np)
         image_tensors.append(image_tensor)
 
     image_tensors = torch.cat(image_tensors)
