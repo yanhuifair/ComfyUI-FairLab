@@ -1,9 +1,9 @@
 [project]
 name = "comfyui-fairlab"
 description = ""
-version = "1.0.18"
+version = "1.0.20"
 license = { file = "LICENSE" }
-dependencies = ["googletrans-py==4.0.0", "datetime"]
+dependencies = ["googletrans-py==4.0.0", "datetime","opencv-python","asyncio","requests"]
 
 [project.urls]
 Repository = "https://github.com/yanhuifair/ComfyUI-FairLab"

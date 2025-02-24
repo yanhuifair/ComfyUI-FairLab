@@ -14,6 +14,7 @@ from .image_utility import VideoToImageNode
 from .image_utility import ImageToVideoNode
 from .image_utility import LoadImageFromURLNode
 from .image_utility import LoadImageFromDirectoryNode
+from .image_utility import FillAlphaNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
@@ -22,6 +23,7 @@ NODE_CLASS_MAPPINGS = {
     "CLIPTranslatedNode": CLIPTranslatedNode,
     "TranslateStringNode": TranslateStringNode,
     "LoadImageFromDirectoryNode": LoadImageFromDirectoryNode,
+    "FillAlphaNode": FillAlphaNode,
     "SaveStringToDirectoryNode": SaveStringToDirectoryNode,
     "FixUTF8StringNode": FixUTF8StringNode,
     "StringCombineNode": StringCombineNode,
@@ -41,6 +43,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "CLIPTranslatedNode": "CLIP Text Encode Translated",
     "TranslateStringNode": "Translate String",
     "LoadImageFromDirectoryNode": "Load Image From Directory",
+    "FillAlphaNode": "Fill Alpha",
     "SaveStringToDirectoryNode": "Save String To Directory",
     "FixUTF8StringNode": "Fix UTF-8 String",
     "StringCombineNode": "String Combine",

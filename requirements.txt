@@ -2,3 +2,4 @@ googletrans-py==4.0.0
 datetime
 opencv-python
 asyncio
+requests
