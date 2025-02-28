@@ -15,6 +15,11 @@ from comfy.utils import ProgressBar
 
 import torch
 import torch.nn.functional as NNF
+from torchvision import transforms
+
+# tensor [b,c,h,w]
+# pil [h,w,c]
+# np [h,w,c]
 
 
 def pil2tensor_mask(pil):
@@ -45,16 +50,18 @@ def pil2tensor_mask(pil):
     return (output_image, output_mask)
 
 
+toPIL = transforms.ToPILImage()
+toTensor = transforms.ToTensor()
+
+
 def pil2tensor(pil):
-    image_np = np.array(pil).astype(np.float32) / 255.0
-    image_tensor = torch.from_numpy(image_np)
-    return image_tensor
+    # [C, H, W] to [H, W, C]
+    return toTensor(pil).permute(1, 2, 0)
 
 
 def tensor2pil(tensor):
-    tensor = (tensor.clamp(0, 1) * 255).byte()
-    pil = Image.fromarray(tensor.numpy())
-    return pil
+    # [H, W, C] to [C, H, W]
+    return toPIL(tensor.permute(2, 0, 1))
 
 
 def load_pil_from_url(url):
@@ -92,7 +99,9 @@ def load_image_to_tensor(folder_path, recursive, channels):
         if pil.size[0] != max_w or pil.size[1] != max_h:
             pil = pil.resize((max_w, max_h), Image.LANCZOS)
 
-        pil = pil.convert(channels)
+        bg = Image.new(channels, pil.size, (255, 255, 255) if channels == "RGB" else (0, 0, 0, 0))
+        bg.paste(pil, pil)
+        pil = bg
 
         image_tensor = pil2tensor(pil)
         image_tensors.append(image_tensor)
@@ -496,8 +505,9 @@ class FillAlphaNode:
         return image_tensor
 
     def node_function(self, image, alpha_threshold, r, g, b):
-        height = image.shape[0][0]
-        width = image.shape[0][1]
+        height = image[0].shape[0]
+        width = image[0].shape[1]
+        print(height, width)
         progress_bar = ProgressBar(image.shape[0])
 
         image_tensors = []
