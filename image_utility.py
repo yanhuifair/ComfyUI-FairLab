@@ -52,10 +52,8 @@ def pil2tensor(pil):
 
 
 def tensor2pil(tensor):
-    image_np = tensor.cpu().numpy()
-    image_np = np.clip(image_np, 0, 1) * 255.0
-    image_np = image_np.astype(np.uint8)
-    pil = Image.fromarray(image_np)
+    tensor = (tensor.clamp(0, 1) * 255).byte()
+    pil = Image.fromarray(tensor.numpy())
     return pil
 
 
@@ -79,25 +77,24 @@ def load_image_to_tensor(folder_path, recursive, channels):
                 image_file_paths.append(os.path.join(folder_path, file_name))
 
     image_tensors = []
-    images = []
+    pils = []
     max_w, max_h = 0, 0
 
     for image_path in image_file_paths:
-        image = Image.open(image_path)
-        image = ImageOps.exif_transpose(image)
-        w, h = image.size
+        pil = Image.open(image_path)
+        pil = ImageOps.exif_transpose(pil)
+        w, h = pil.size
         max_w = max(max_w, w)
         max_h = max(max_h, h)
-        images.append(image)
+        pils.append(pil)
 
-    for image in images:
-        if image.size[0] != max_w or image.size[1] != max_h:
-            image = image.resize((max_w, max_h), Image.LANCZOS)
+    for pil in pils:
+        if pil.size[0] != max_w or pil.size[1] != max_h:
+            pil = pil.resize((max_w, max_h), Image.LANCZOS)
 
-        image = image.convert(channels)
+        pil = pil.convert(channels)
 
-        image_np = np.array(image, dtype=np.float32) / 255.0
-        image_tensor = torch.from_numpy(image_np)
+        image_tensor = pil2tensor(pil)
         image_tensors.append(image_tensor)
 
     image_tensors = torch.cat(image_tensors)
@@ -109,9 +106,9 @@ def load_image_to_tensor(folder_path, recursive, channels):
     # names
     image_name_list = [os.path.basename(x) for x in image_file_paths]
     image_names = [os.path.splitext(x)[0] for x in image_name_list]
-    image_folders = [os.path.dirname(p) for p in image_file_paths]
+    image_dirs = [os.path.dirname(x) for x in image_file_paths]
 
-    return (image_tensors, image_folders, image_names)
+    return (image_tensors, image_dirs, image_names)
 
 
 class DownloadImageNode:
@@ -189,28 +186,22 @@ class SaveImageToDirectoryNode:
     CATEGORY = "Fair/image"
 
     def function(self, image, directory, name):
-        progress_total = len(image)
-        progress_bar = ProgressBar(progress_total)
-        progress_counter = 0
+        progress_bar = ProgressBar(image.shape[0])
 
-        if type(image) != list:
-            image = [image]
+        tensors = []
+        for i in range(image.shape[0]):
+            tensors.append(image[i])
+
         if type(directory) != list:
             directory = [directory]
         if type(name) != list:
             name = [name]
 
-        for img, file_dir, file_name in zip(image, directory, name):
-            i = 255.0 * img.cpu().numpy()
-            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-            file = f"{file_name}.png"
-            img.save(
-                os.path.join(file_dir, file),
-                compress_level=self.compress_level,
-            )
-
-            progress_counter += 1
-            progress_bar.update_absolute(progress_counter, progress_total)
+        for tensor, file_dir, file_name in zip(tensors, directory, name):
+            pil = tensor2pil(tensor)
+            name = f"{file_name}.png"
+            pil.save(os.path.join(file_dir, name), compress_level=self.compress_level)
+            progress_bar.update(1)
 
         return ()
 
@@ -461,7 +452,7 @@ class LoadImageFromDirectoryNode:
         if not directory or not os.path.isdir(directory):
             raise Exception("folder_path is not valid: " + directory)
 
-        out_image, out_dir, out_name = load_image_to_tensor(directory, recursive, channels)
+        (out_image, out_dir, out_name) = load_image_to_tensor(directory, recursive, channels)
 
         return (out_image, out_dir, out_name)
 
@@ -474,10 +465,10 @@ class FillAlphaNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"default": "", "forceInput": False}),
+                "image": ("IMAGE", {"default": "", "forceInput": True}),
                 "alpha_threshold": ("INT", {"default": "128"}),
                 "r": ("INT", {"default": "0"}),
-                "g": ("INT", {"default": "255"}),
+                "g": ("INT", {"default": "128"}),
                 "b": ("INT", {"default": "0"}),
             }
         }
@@ -505,15 +496,18 @@ class FillAlphaNode:
         return image_tensor
 
     def node_function(self, image, alpha_threshold, r, g, b):
-        progress_total = len(image)
-        progress_bar = ProgressBar(progress_total)
-        progress_counter = 0
+        height = image.shape[0][0]
+        width = image.shape[0][1]
+        progress_bar = ProgressBar(image.shape[0])
 
-        out_image = []
+        image_tensors = []
 
-        for img in image:
-            out_image.append(self.fill_alpha(img, alpha_threshold, (r, g, b)))
-            progress_counter += 1
-            progress_bar.update_absolute(progress_counter, progress_total)
+        for i in range(image.shape[0]):
+            tensor_filled = self.fill_alpha(image[i], alpha_threshold, (r, g, b))
+            image_tensors.append(tensor_filled)
+            progress_bar.update(1)
 
-        return (out_image,)
+        image_tensors = torch.cat(image_tensors)
+        image_tensors = image_tensors.reshape(-1, height, width, 3)
+
+        return (image_tensors,)
