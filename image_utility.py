@@ -77,6 +77,12 @@ def batch2list(tensor_batch):
     return tensors
 
 
+def rgba2rgb(pil):
+    bg = Image.new("RGB", pil.size, (255, 255, 255))
+    bg.paste(pil, pil)
+    pil = bg
+
+
 def load_pil_from_url(url):
     response = requests.get(url)
     pil = Image.open(BytesIO(response.content))
@@ -112,12 +118,8 @@ def load_image_to_tensor(folder_path, recursive, channels):
         if pil.size[0] != max_w or pil.size[1] != max_h:
             pil = pil.resize((max_w, max_h), Image.LANCZOS)
 
-        print(pil.mode)
         if pil.mode == "RGBA" and channels == "RGB":
-            bg = Image.new(channels, pil.size, (255, 255, 255) if channels == "RGB" else (0, 0, 0, 0))
-            bg.paste(pil, pil)
-            pil = bg
-
+            pil = rgba2rgb(pil)
         elif pil.mode == "RGBA" and channels == "RGBA":
             pil = pil.convert("RGBA")
         elif pil.mode == "RGB" and channels == "RGBA":
@@ -533,7 +535,7 @@ class FillAlphaNode:
     def node_function(self, image, alpha_threshold, r, g, b):
         height = image[0].shape[0]
         width = image[0].shape[1]
-        print(height, width)
+
         progress_bar = ProgressBar(image.shape[0])
 
         image_tensors = []
