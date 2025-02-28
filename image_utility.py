@@ -64,6 +64,19 @@ def tensor2pil(tensor):
     return toPIL(tensor.permute(2, 0, 1))
 
 
+def tensor2batch(tensor, h, w, c):
+    tensor = torch.cat(tensor)
+    tensor = tensor.reshape(-1, h, w, c)
+    return tensor
+
+
+def batch2list(tensor_batch):
+    tensors = []
+    for i in range(tensor_batch.shape[0]):
+        tensors.append(tensor_batch[i])
+    return tensors
+
+
 def load_pil_from_url(url):
     response = requests.get(url)
     pil = Image.open(BytesIO(response.content))
@@ -99,9 +112,18 @@ def load_image_to_tensor(folder_path, recursive, channels):
         if pil.size[0] != max_w or pil.size[1] != max_h:
             pil = pil.resize((max_w, max_h), Image.LANCZOS)
 
-        bg = Image.new(channels, pil.size, (255, 255, 255) if channels == "RGB" else (0, 0, 0, 0))
-        bg.paste(pil, pil)
-        pil = bg
+        print(pil.mode)
+        if pil.mode == "RGBA" and channels == "RGB":
+            bg = Image.new(channels, pil.size, (255, 255, 255) if channels == "RGB" else (0, 0, 0, 0))
+            bg.paste(pil, pil)
+            pil = bg
+
+        elif pil.mode == "RGBA" and channels == "RGBA":
+            pil = pil.convert("RGBA")
+        elif pil.mode == "RGB" and channels == "RGBA":
+            pil = pil.convert("RGBA")
+        elif pil.mode == "RGB" and channels == "RGB":
+            pil = pil.convert("RGB")
 
         image_tensor = pil2tensor(pil)
         image_tensors.append(image_tensor)
@@ -488,7 +510,11 @@ class FillAlphaNode:
     CATEGORY = "Fair/image"
 
     def fill_alpha(self, tensor, alpha_threshold, fill_color):
+
         pil = tensor2pil(tensor)
+        if pil.mode != "RGBA":
+            raise Exception("Image mode is not RGBA")
+
         pixels = pil.getdata()
 
         new_pixels = []
@@ -512,12 +538,11 @@ class FillAlphaNode:
 
         image_tensors = []
 
-        for i in range(image.shape[0]):
-            tensor_filled = self.fill_alpha(image[i], alpha_threshold, (r, g, b))
+        for tensor in batch2list(image):
+            tensor_filled = self.fill_alpha(tensor, alpha_threshold, (r, g, b))
             image_tensors.append(tensor_filled)
             progress_bar.update(1)
 
-        image_tensors = torch.cat(image_tensors)
-        image_tensors = image_tensors.reshape(-1, height, width, 3)
+        image_tensors = tensor2batch(image_tensors, height, width, 3)
 
         return (image_tensors,)
