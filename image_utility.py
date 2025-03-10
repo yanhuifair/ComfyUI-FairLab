@@ -114,6 +114,8 @@ def load_image_to_tensor(folder_path, recursive, channels):
         max_h = max(max_h, h)
         pils.append(pil)
 
+    progress_bar = ProgressBar(pils.__len__())
+
     for pil in pils:
         if pil.size[0] != max_w or pil.size[1] != max_h:
             pil = pil.resize((max_w, max_h), Image.LANCZOS)
@@ -129,6 +131,7 @@ def load_image_to_tensor(folder_path, recursive, channels):
 
         image_tensor = pil2tensor(pil)
         image_tensors.append(image_tensor)
+        progress_bar.update(1)
 
     image_tensors = torch.cat(image_tensors)
     if channels == "RGB":

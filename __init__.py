@@ -6,6 +6,9 @@ from .text_utility import FixUTF8StringNode
 from .text_utility import StringCombineNode
 from .text_utility import StringFieldNode
 from .text_utility import SequenceStringListNode
+from .text_utility import PrependTagsNode
+from .text_utility import AppendTagsNode
+from .text_utility import BlacklistTagsNode
 
 from .image_utility import DownloadImageNode
 from .image_utility import SaveImageToDirectoryNode
@@ -29,6 +32,9 @@ NODE_CLASS_MAPPINGS = {
     "StringCombineNode": StringCombineNode,
     "StringFieldNode": StringFieldNode,
     "SequenceStringListNode": SequenceStringListNode,
+    "PrependTagsNode": PrependTagsNode,
+    "AppendTagsNode": AppendTagsNode,
+    "BlacklistTagsNode": BlacklistTagsNode,
     "DownloadImageNode": DownloadImageNode,
     "SaveImageToDirectoryNode": SaveImageToDirectoryNode,
     "ImageResizeNode": ImageResizeNode,
@@ -49,6 +55,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "StringCombineNode": "String Combine",
     "StringFieldNode": "String Field",
     "SequenceStringListNode": "Sequence String List",
+    "PrependTagsNode": "Prepend Tags",
+    "AppendTagsNode": "Append Tags",
+    "BlacklistTagsNode": "Blacklist Tags",
     "DownloadImageNode": "Download Image",
     "SaveImageToDirectoryNode": "Save Image To Directory",
     "ImageResizeNode": "Image Resize",
