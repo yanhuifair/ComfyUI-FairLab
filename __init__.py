@@ -4,7 +4,9 @@ from .translate_utility import TranslateStringNode
 from .text_utility import SaveStringToDirectoryNode
 from .text_utility import FixUTF8StringNode
 from .text_utility import StringCombineNode
-from .text_utility import StringFieldNode
+from .text_utility import StringNode
+from .text_utility import IntNode
+from .text_utility import FloatNode
 from .text_utility import SequenceStringListNode
 from .text_utility import PrependTagsNode
 from .text_utility import AppendTagsNode
@@ -30,7 +32,9 @@ NODE_CLASS_MAPPINGS = {
     "SaveStringToDirectoryNode": SaveStringToDirectoryNode,
     "FixUTF8StringNode": FixUTF8StringNode,
     "StringCombineNode": StringCombineNode,
-    "StringFieldNode": StringFieldNode,
+    "StringNode": StringNode,
+    "IntNode": IntNode,
+    "FloatNode": FloatNode,
     "SequenceStringListNode": SequenceStringListNode,
     "PrependTagsNode": PrependTagsNode,
     "AppendTagsNode": AppendTagsNode,
@@ -53,7 +57,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "SaveStringToDirectoryNode": "Save String To Directory",
     "FixUTF8StringNode": "Fix UTF-8 String",
     "StringCombineNode": "String Combine",
-    "StringFieldNode": "String Field",
+    "StringNode": "String",
+    "IntNode": "Int",
+    "FloatNode": "Float",
     "SequenceStringListNode": "Sequence String List",
     "PrependTagsNode": "Prepend Tags",
     "AppendTagsNode": "Append Tags",

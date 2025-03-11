@@ -14,6 +14,7 @@ class SaveStringToDirectoryNode:
                 "string": ("STRING", {"defaultInput": True}),
                 "directory": ("STRING", {"defaultInput": True}),
                 "name": ("STRING", {"defaultInput": True}),
+                "extension": ([".cap", ".caption", ".txt"], {"defaultInput": False, "default": ".txt"}),
             }
         }
 
@@ -23,9 +24,9 @@ class SaveStringToDirectoryNode:
     FUNCTION = "function"
     OUTPUT_NODE = True
 
-    def function(self, string, directory, name):
+    def function(self, string, directory, name, extension):
         for file_string, file_directory, file_name in zip(string, directory, name):
-            file_name_with_suffix = f"{file_name}.txt"
+            file_name_with_suffix = f"{file_name}{extension}"
             full_path = os.path.join(file_directory, file_name_with_suffix)
             with open(full_path, "w", encoding="utf-8") as file:
                 file.write(file_string)
@@ -155,13 +156,13 @@ class StringCombineNode:
             return (combined,)
 
 
-class StringFieldNode:
+class StringNode:
     def __init__(self):
         pass
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"string": ("STRING", {"multiline": True})}}
+        return {"required": {"string": ("STRING", {"multiline": True, "defaultInput": False})}}
 
     RETURN_TYPES = ("STRING",)
     CATEGORY = "Fair/string"
@@ -171,6 +172,42 @@ class StringFieldNode:
 
     def function(self, string):
         return (string,)
+
+
+class IntNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"number": ("INT", {"multiline": False, "defaultInput": False})}}
+
+    RETURN_TYPES = ("INT",)
+    CATEGORY = "Fair/string"
+
+    FUNCTION = "function"
+    OUTPUT_NODE = True
+
+    def function(self, number):
+        return (number,)
+
+
+class FloatNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"number": ("FLOAT", {"multiline": False, "defaultInput": False})}}
+
+    RETURN_TYPES = ("FLOAT",)
+    CATEGORY = "Fair/string"
+
+    FUNCTION = "function"
+    OUTPUT_NODE = True
+
+    def function(self, number):
+        return (number,)
 
 
 class SequenceStringListNode:
