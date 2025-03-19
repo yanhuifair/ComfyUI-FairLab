@@ -268,18 +268,17 @@ class ImageResizeNode:
                 ),
             },
             "optional": {
-                "mask_opt": ("MASK",),
+                "mask": ("MASK",),
             },
         }
 
     RETURN_TYPES = ("IMAGE", "MASK")
-    RETURN_NAMES = ("image", "mask")
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def node_function(self, image, resize_to, side, interpolation, mask_opt=None):
+    def node_function(self, image, resize_to, side, interpolation, mask=None):
 
         image = image.movedim(-1, 1)
 
@@ -308,25 +307,25 @@ class ImageResizeNode:
 
         image = comfy.utils.common_upscale(image, new_width, new_height, interpolation, "center")
 
-        if mask_opt is not None:
-            mask_opt = mask_opt.permute(0, 1, 2)
+        if mask is not None:
+            mask = mask.permute(0, 1, 2)
 
-            mask_opt = mask_opt.unsqueeze(0)
-            mask_opt = NNF.interpolate(
-                mask_opt,
+            mask = mask.unsqueeze(0)
+            mask = NNF.interpolate(
+                mask,
                 size=(new_height, new_width),
                 mode="bilinear",
                 align_corners=False,
             )
 
-            mask_opt = mask_opt.squeeze(0)
-            mask_opt = mask_opt.squeeze(0)
+            mask = mask.squeeze(0)
+            mask = mask.squeeze(0)
 
-            mask_opt = mask_opt.permute(0, 1)
+            mask = mask.permute(0, 1)
 
         image = image.movedim(1, -1)
 
-        return (image, mask_opt)
+        return (image, mask)
 
 
 class VideoToImageNode:
