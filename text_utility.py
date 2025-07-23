@@ -121,7 +121,7 @@ class StringCombineNode:
                 "combine_at": (
                     ["start", "end"],
                     {
-                        "default": "start",
+                        "default": "end",
                         "defaultInput": False,
                     },
                 ),
@@ -135,9 +135,9 @@ class StringCombineNode:
     OUTPUT_NODE = True
 
     def function(self, string, combine, combine_at):
-        if type(string).__name__ == "list":
-            out_string_list = []
+        out_string_list = []
 
+        if isinstance(string, list):
             for sc in string:
                 if combine_at == "start":
                     combined = combine + sc
@@ -145,15 +145,21 @@ class StringCombineNode:
                     combined = sc + combine
                 out_string_list.append(combined)
 
-            return (out_string_list,)
-
+        if isinstance(combine, list):
+            for com in combine:
+                if combine_at == "start":
+                    combined = com + string
+                else:
+                    combined = string + com
+                out_string_list.append(combined)
         else:
-
             if combine_at == "start":
                 combined = combine + string
             else:
                 combined = string + combine
-            return (combined,)
+            out_string_list.append(combined)
+
+        return (out_string_list,)
 
 
 class StringNode:
