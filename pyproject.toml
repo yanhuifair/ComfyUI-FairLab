@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-fairlab"
 description = ""
-version = "1.0.30"
+version = "1.0.31"
 license = { file = "LICENSE" }
 dependencies = ["googletrans-py==4.0.0", "datetime","opencv-python","asyncio","requests"]
 
