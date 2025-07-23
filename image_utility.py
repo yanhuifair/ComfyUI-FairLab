@@ -588,12 +588,12 @@ class ImageToBase64Node:
     CATEGORY = "Fair/image"
 
     def function(self, image):
-        img_strs = []
+        base64_strings = []
         for i in image:
             img = tensor2pil(i)
             encoded_image = image_to_base64(img)
-            img_strs.append(encoded_image)
-        return (img_strs,)
+            base64_strings.append(encoded_image)
+        return (base64_strings,)
 
 
 def base64_to_image(base64_string):
@@ -624,7 +624,7 @@ class Base64ToImageNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"multiline": True, "defaultInput": False}),
+                "string": ("STRING", {"defaultInput": True, "forceInput": True}),
             }
         }
 
@@ -634,14 +634,14 @@ class Base64ToImageNode:
     CATEGORY = "Fair/image"
 
     def function(self, string):
-        images = []
+        image_tensors = []
         if isinstance(string, list):
             for i in string:
                 image = base64_to_image(i)
                 image = pil2tensor(image)
-                images.append(image)
+                image_tensors.append(image)
         else:
             image = base64_to_image(string)
             image = pil2tensor(image)
-            images.append(image)
-        return (images,)
+            image_tensors.append(image)
+        return (image_tensors,)
