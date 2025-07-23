@@ -25,11 +25,9 @@ class PrintAnyNode:
     RETURN_TYPES = ()
 
     def node_function(self, any, log):
-        print("----------Print any start----------")
         print(f"log: {log}")
         print(f"type: {type(any)}")
         print(any)
-        print("----------Print any end----------")
 
         return ()
 
@@ -53,10 +51,8 @@ class PrintImageNode:
     RETURN_TYPES = ()
 
     def node_function(self, image, log):
-        print("----------Print image start----------")
         print(f"log: {log}")
         print(f"shape: {image.shape}")
         print(image)
-        print("----------Print image end----------")
 
         return ()

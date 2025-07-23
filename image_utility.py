@@ -1,4 +1,6 @@
+from email.mime import image
 import os
+import io
 import requests
 import json
 import numpy as np
@@ -16,6 +18,8 @@ from comfy.utils import ProgressBar
 import torch
 import torch.nn.functional as NNF
 from torchvision import transforms
+
+import base64
 
 # tensor [b,c,h,w]
 # pil [h,w,c]
@@ -279,7 +283,6 @@ class ImageResizeNode:
     CATEGORY = "Fair/image"
 
     def node_function(self, image, resize_to, side, interpolation, mask=None):
-
         image = image.movedim(-1, 1)
 
         image_height, image_width = image.shape[-2:]
@@ -306,6 +309,7 @@ class ImageResizeNode:
         new_height = int(new_height)
 
         image = comfy.utils.common_upscale(image, new_width, new_height, interpolation, "center")
+        image = image.movedim(1, -1)
 
         if mask is not None:
             mask = mask.permute(0, 1, 2)
@@ -322,8 +326,6 @@ class ImageResizeNode:
             mask = mask.squeeze(0)
 
             mask = mask.permute(0, 1)
-
-        image = image.movedim(1, -1)
 
         return (image, mask)
 
@@ -550,3 +552,96 @@ class FillAlphaNode:
         image_tensors = tensor2batch(image_tensors, height, width, 3)
 
         return (image_tensors,)
+
+
+def image_to_base64(pli_image, pnginfo=None):
+    # 创建一个BytesIO对象，用于临时存储图像数据
+    image_data = io.BytesIO()
+
+    # 将图像保存到BytesIO对象中，格式为PNG
+    pli_image.save(image_data, format="PNG", pnginfo=pnginfo)
+
+    # 将BytesIO对象的内容转换为字节串
+    image_data_bytes = image_data.getvalue()
+
+    # 将图像数据编码为Base64字符串
+    encoded_image = "data:image/png;base64," + base64.b64encode(image_data_bytes).decode("utf-8")
+
+    return encoded_image
+
+
+class ImageToBase64Node:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE", {"defaultInput": True}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    FUNCTION = "function"
+    OUTPUT_NODE = True
+    CATEGORY = "Fair/image"
+
+    def function(self, image):
+        img_strs = []
+        for i in image:
+            img = tensor2pil(i)
+            encoded_image = image_to_base64(img)
+            img_strs.append(encoded_image)
+        return (img_strs,)
+
+
+def base64_to_image(base64_string):
+    # 去除前缀
+    base64_list = base64_string.split(",", 1)
+    if len(base64_list) == 2:
+        prefix, base64_data = base64_list
+    else:
+        base64_data = base64_list[0]
+
+    # 从base64字符串中解码图像数据
+    image_data = base64.b64decode(base64_data)
+
+    # 创建一个内存流对象
+    image_stream = io.BytesIO(image_data)
+
+    # 使用PIL的Image模块打开图像数据
+    image = Image.open(image_stream)
+
+    return image
+
+
+class Base64ToImageNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "string": ("STRING", {"multiline": True, "defaultInput": False}),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "function"
+    OUTPUT_NODE = True
+    CATEGORY = "Fair/image"
+
+    def function(self, string):
+        images = []
+        if isinstance(string, list):
+            for i in string:
+                image = base64_to_image(i)
+                image = pil2tensor(image)
+                images.append(image)
+        else:
+            image = base64_to_image(string)
+            image = pil2tensor(image)
+            images.append(image)
+        return (images,)
