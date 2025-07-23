@@ -145,7 +145,7 @@ class StringCombineNode:
                     combined = sc + combine
                 out_string_list.append(combined)
 
-        if isinstance(combine, list):
+        elif isinstance(combine, list):
             for com in combine:
                 if combine_at == "start":
                     combined = com + string
