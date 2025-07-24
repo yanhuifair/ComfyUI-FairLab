@@ -134,6 +134,7 @@ def load_image_to_tensor(folder_path, recursive, channels):
             pil = pil.convert("RGB")
 
         image_tensor = pil2tensor(pil)
+        image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
         image_tensors.append(image_tensor)
         progress_bar.update(1)
 
@@ -170,7 +171,7 @@ class DownloadImageNode:
     def function(self, images, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
         filename_prefix += self.prefix_append
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
-        results = list()
+        results = []
         for batch_number, image in enumerate(images):
             i = 255.0 * image.cpu().numpy()
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
