@@ -11,6 +11,7 @@ from .text_utility import SequenceStringListNode
 from .text_utility import PrependTagsNode
 from .text_utility import AppendTagsNode
 from .text_utility import BlacklistTagsNode
+from .text_utility import ShowStringNode
 
 from .image_utility import DownloadImageNode
 from .image_utility import SaveImageToDirectoryNode
@@ -25,6 +26,10 @@ from .image_utility import Base64ToImageNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
+
+from .text_utility import OutputIsListNode
+from .text_utility import OutputIsNonListNode
+
 
 NODE_CLASS_MAPPINGS = {
     "CLIPTranslatedNode": CLIPTranslatedNode,
@@ -41,6 +46,7 @@ NODE_CLASS_MAPPINGS = {
     "PrependTagsNode": PrependTagsNode,
     "AppendTagsNode": AppendTagsNode,
     "BlacklistTagsNode": BlacklistTagsNode,
+    "ShowStringNode": ShowStringNode,
     "DownloadImageNode": DownloadImageNode,
     "SaveImageToDirectoryNode": SaveImageToDirectoryNode,
     "ImageResizeNode": ImageResizeNode,
@@ -51,6 +57,8 @@ NODE_CLASS_MAPPINGS = {
     "PrintImageNode": PrintImageNode,
     "ImageToBase64Node": ImageToBase64Node,
     "Base64ToImageNode": Base64ToImageNode,
+    "OutputIsListNode": OutputIsListNode,
+    "OutputIsNonListNode": OutputIsNonListNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -68,6 +76,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PrependTagsNode": "Prepend Tags",
     "AppendTagsNode": "Append Tags",
     "BlacklistTagsNode": "Blacklist Tags",
+    "ShowStringNode": "Show String",
     "DownloadImageNode": "Download Image",
     "SaveImageToDirectoryNode": "Save Image To Directory",
     "ImageResizeNode": "Image Resize",
@@ -78,6 +87,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PrintImageNode": "Print Image",
     "ImageToBase64Node": "Image To Base64",
     "Base64ToImageNode": "Base64 To Image",
+    "OutputIsListNode": "Output Is List",
+    "OutputIsNonListNode": "Output Is Non-List",
 }
 
 

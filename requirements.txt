@@ -3,4 +3,3 @@ datetime
 opencv-python
 asyncio
 requests
-base64

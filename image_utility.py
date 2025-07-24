@@ -110,6 +110,8 @@ def load_image_to_tensor(folder_path, recursive, channels):
     pils = []
     max_w, max_h = 0, 0
 
+    progress_bar = ProgressBar(image_file_paths.__len__())
+
     for image_path in image_file_paths:
         pil = Image.open(image_path)
         pil = ImageOps.exif_transpose(pil)
@@ -117,8 +119,6 @@ def load_image_to_tensor(folder_path, recursive, channels):
         max_w = max(max_w, w)
         max_h = max(max_h, h)
         pils.append(pil)
-
-    progress_bar = ProgressBar(pils.__len__())
 
     for pil in pils:
         if pil.size[0] != max_w or pil.size[1] != max_h:
@@ -136,12 +136,6 @@ def load_image_to_tensor(folder_path, recursive, channels):
         image_tensor = pil2tensor(pil)
         image_tensors.append(image_tensor)
         progress_bar.update(1)
-
-    image_tensors = torch.cat(image_tensors)
-    if channels == "RGB":
-        image_tensors = image_tensors.reshape(-1, max_h, max_w, 3)
-    else:
-        image_tensors = image_tensors.reshape(-1, max_h, max_w, 4)
 
     # names
     image_name_list = [os.path.basename(x) for x in image_file_paths]
@@ -480,10 +474,12 @@ class LoadImageFromDirectoryNode:
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
-    RETURN_NAMES = ("image", "directory", "name")
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
+
+    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("image", "directory", "name")
+    OUTPUT_IS_LIST = (True, True, True)
 
     def node_function(self, directory, recursive, channels):
         if not directory or not os.path.isdir(directory):
@@ -588,12 +584,9 @@ class ImageToBase64Node:
     CATEGORY = "Fair/image"
 
     def function(self, image):
-        base64_strings = []
-        for i in image:
-            img = tensor2pil(i)
-            encoded_image = image_to_base64(img)
-            base64_strings.append(encoded_image)
-        return (base64_strings,)
+        pil = tensor2pil(image)
+        encoded_base64 = image_to_base64(pil)
+        return (encoded_base64,)
 
 
 def base64_to_image(base64_string):
@@ -634,14 +627,6 @@ class Base64ToImageNode:
     CATEGORY = "Fair/image"
 
     def function(self, string):
-        image_tensors = []
-        if isinstance(string, list):
-            for i in string:
-                image = base64_to_image(i)
-                image = pil2tensor(image)
-                image_tensors.append(image)
-        else:
-            image = base64_to_image(string)
-            image = pil2tensor(image)
-            image_tensors.append(image)
-        return (image_tensors,)
+        image = base64_to_image(string)
+        image = pil2tensor(image)
+        return (image,)
