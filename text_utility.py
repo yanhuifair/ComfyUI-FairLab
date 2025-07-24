@@ -33,6 +33,40 @@ class SaveStringToDirectoryNode:
         return ()
 
 
+class LoadStringFromDirectoryNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "directory": ("STRING", {"defaultInput": True}),
+            }
+        }
+
+    CATEGORY = "Fair/string"
+    FUNCTION = "node_function"
+    OUTPUT_NODE = True
+
+    RETURN_TYPES = ("STRING", "STRING", "STRING")
+    RETURN_NAMES = ("string", "directory", "name")
+    OUTPUT_IS_LIST = (True, True, True)
+
+    def node_function(self, directory):
+        # load txt files from the directory
+        string_list = []
+        directory_list = []
+        name_without_ext_list = []
+        for file_name in os.listdir(directory):
+            if file_name.endswith(".txt"):
+                with open(os.path.join(directory, file_name), "r", encoding="utf-8") as file:
+                    string_list.append(file.read())
+                    directory_list.append(directory)
+                    name_without_ext_list.append(os.path.splitext(file_name)[0])
+        return (string_list, directory_list, name_without_ext_list)
+
+
 class FixUTF8StringNode:
     def __init__(self):
         pass

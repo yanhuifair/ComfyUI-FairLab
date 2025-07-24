@@ -2,6 +2,7 @@ from .translate_utility import CLIPTranslatedNode
 from .translate_utility import TranslateStringNode
 
 from .text_utility import SaveStringToDirectoryNode
+from .text_utility import LoadStringFromDirectoryNode
 from .text_utility import FixUTF8StringNode
 from .text_utility import StringCombineNode
 from .text_utility import StringNode
@@ -37,6 +38,7 @@ NODE_CLASS_MAPPINGS = {
     "LoadImageFromDirectoryNode": LoadImageFromDirectoryNode,
     "FillAlphaNode": FillAlphaNode,
     "SaveStringToDirectoryNode": SaveStringToDirectoryNode,
+    "LoadStringFromDirectoryNode": LoadStringFromDirectoryNode,
     "FixUTF8StringNode": FixUTF8StringNode,
     "StringCombineNode": StringCombineNode,
     "StringNode": StringNode,
@@ -67,6 +69,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LoadImageFromDirectoryNode": "Load Image From Directory",
     "FillAlphaNode": "Fill Alpha",
     "SaveStringToDirectoryNode": "Save String To Directory",
+    "LoadStringFromDirectoryNode": "Load String From Directory",
     "FixUTF8StringNode": "Fix UTF-8 String",
     "StringCombineNode": "String Combine",
     "StringNode": "String",
