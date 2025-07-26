@@ -32,6 +32,9 @@ from .text_utility import OutputIsListNode
 from .text_utility import OutputIsNonListNode
 
 
+from .ollama import OllamaVisionNode
+
+
 NODE_CLASS_MAPPINGS = {
     "CLIPTranslatedNode": CLIPTranslatedNode,
     "TranslateStringNode": TranslateStringNode,
@@ -61,6 +64,7 @@ NODE_CLASS_MAPPINGS = {
     "Base64ToImageNode": Base64ToImageNode,
     "OutputIsListNode": OutputIsListNode,
     "OutputIsNonListNode": OutputIsNonListNode,
+    "OllamaVisionNode": OllamaVisionNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -92,6 +96,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Base64ToImageNode": "Base64 To Image",
     "OutputIsListNode": "Output Is List",
     "OutputIsNonListNode": "Output Is Non-List",
+    "OllamaVisionNode": "🦙Ollama Vision",
 }
 
 

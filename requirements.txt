@@ -3,3 +3,4 @@ datetime
 opencv-python
 asyncio
 requests
+ollama

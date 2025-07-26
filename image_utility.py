@@ -551,7 +551,7 @@ class FillAlphaNode:
         return (image_tensors,)
 
 
-def image_to_base64(pli_image, pnginfo=None):
+def pil_to_base64(pli_image, pnginfo=None, header=False):
     # 创建一个BytesIO对象，用于临时存储图像数据
     image_data = io.BytesIO()
 
@@ -562,7 +562,7 @@ def image_to_base64(pli_image, pnginfo=None):
     image_data_bytes = image_data.getvalue()
 
     # 将图像数据编码为Base64字符串
-    encoded_image = "data:image/png;base64," + base64.b64encode(image_data_bytes).decode("utf-8")
+    encoded_image = "data:image/png;base64," + base64.b64encode(image_data_bytes).decode("utf-8") if header is True else base64.b64encode(image_data_bytes).decode("utf-8")
 
     return encoded_image
 
@@ -586,11 +586,11 @@ class ImageToBase64Node:
 
     def function(self, image):
         pil = tensor2pil(image)
-        encoded_base64 = image_to_base64(pil)
+        encoded_base64 = pil_to_base64(pil)
         return (encoded_base64,)
 
 
-def base64_to_image(base64_string):
+def base64_to_pil(base64_string):
     # 去除前缀
     base64_list = base64_string.split(",", 1)
     if len(base64_list) == 2:
@@ -628,6 +628,6 @@ class Base64ToImageNode:
     CATEGORY = "Fair/image"
 
     def function(self, string):
-        image = base64_to_image(string)
-        image = pil2tensor(image)
+        pil = base64_to_pil(string)
+        image = pil2tensor(pil)
         return (image,)
