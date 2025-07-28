@@ -1,3 +1,4 @@
+
 class AlwaysEqualProxy(str):
     def __eq__(self, _):
         return True
@@ -54,5 +55,4 @@ class PrintImageNode:
         print(f"log: {log}")
         print(f"shape: {image.shape}")
         print(image)
-
         return ()
