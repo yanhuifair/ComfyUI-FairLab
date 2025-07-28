@@ -33,6 +33,7 @@ from .text_utility import OutputIsNonListNode
 
 
 from .ollama import OllamaNode
+from .ollama import OllamaClientNode
 
 
 NODE_CLASS_MAPPINGS = {
@@ -65,6 +66,7 @@ NODE_CLASS_MAPPINGS = {
     "OutputIsListNode": OutputIsListNode,
     "OutputIsNonListNode": OutputIsNonListNode,
     "OllamaNode": OllamaNode,
+    "OllamaClientNode": OllamaClientNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -97,6 +99,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "OutputIsListNode": "Output Is List",
     "OutputIsNonListNode": "Output Is Non-List",
     "OllamaNode": "🦙 Ollama",
+    "OllamaClientNode": "🦙 Ollama Client",
 }
 
 

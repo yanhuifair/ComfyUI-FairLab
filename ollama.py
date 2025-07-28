@@ -8,6 +8,32 @@ from .image_utility import pil_to_base64
 import re
 
 
+class OllamaClientNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        # cls.model_list = [model.model for model in ollama.list().models]
+        return {
+            "required": {
+                "url": ("STRING", {"default": "http://127.0.0.1:11434"}),
+                "model": ((), {}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/ollama"
+    OUTPUT_NODE = True
+    RETURN_TYPES = ("ollama_connection",)
+    RETURN_NAMES = ("ollama_connection",)
+
+    def node_function(self, url, model):
+        ollama_client = Client(host=url)
+        ollama_connection = (ollama_client, model)
+        return (ollama_connection,)
+
+
 class OllamaNode:
     def __init__(self):
         pass
@@ -18,8 +44,7 @@ class OllamaNode:
         return {
             "required": {
                 "prompt": ("STRING", {"default": "describe the image", "multiline": True, "tooltip": "the prompt to generate a response for"}),
-                "url": ("STRING", {"default": "http://127.0.0.1:11434"}),
-                "model": ((), {"tooltip": "(required) the model name"}),
+                "ollama_connection": ("ollama_connection", {"forceInput": True}),
             },
             "optional": {
                 "images": ("IMAGE", {"tooltip": "(optional) a list of images"}),
@@ -48,7 +73,7 @@ class OllamaNode:
 
         return (out_think, out_response)
 
-    def node_function(self, prompt, url, model, images=None):
+    def node_function(self, prompt, ollama_connection, images=None):
         out_think = ""
         out_response = ""
 
@@ -58,10 +83,9 @@ class OllamaNode:
                 pil = tensor2pil(image)
                 base64_images.append(pil_to_base64(pil))
 
-        client = Client(host=url)
         try:
-            ollama_response = client.generate(
-                model=model,
+            ollama_response = ollama_connection[0].generate(
+                model=ollama_connection[1],
                 prompt=prompt,
                 images=base64_images,
             )
