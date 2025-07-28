@@ -33,17 +33,20 @@ class OllamaNode:
     RETURN_NAMES = ("think", "response")
 
     def separate_response(self, response):
+
+        out_think = ""
+        out_response = ""
+
         pattern = r"<think>\n(.*?)\n</think>\s*(.*)"
         match = re.search(pattern, response, re.DOTALL)
 
         if match:
-            think_content = match.group(1).strip()
-            response = match.group(2).strip()
+            out_think = match.group(1).strip()
+            out_response = match.group(2).strip()
         else:
-            think_content = ""
-            response = response.strip()
+            out_response = response.strip()
 
-        return (think_content, response)
+        return (out_think, out_response)
 
     def node_function(self, prompt, url, model, images=None):
         out_think = ""
@@ -67,6 +70,8 @@ class OllamaNode:
             return ("", "")
 
         out_think, out_response = self.separate_response(ollama_response.response)
-        print(f"🦙 Ollama think:\n{out_think}")
-        print(f"🦙 Ollama response:\n{out_response}")
+        if out_think is not "":
+            print(f"🦙 Ollama think:\n{out_think}")
+        if out_response is not "":
+            print(f"🦙 Ollama response:\n{out_response}")
         return (out_think, out_response)
