@@ -20,10 +20,9 @@ class OllamaNode:
                 "prompt": ("STRING", {"default": "describe the image", "multiline": True, "tooltip": "the prompt to generate a response for"}),
                 "url": ("STRING", {"default": "http://127.0.0.1:11434"}),
                 "model": ((), {"tooltip": "(required) the model name"}),
-                "debug": ("BOOLEAN", {"default": False}),
             },
             "optional": {
-                "images": ("IMAGE", {"tooltip": "(optional) a list of base64-encoded images"}),
+                "images": ("IMAGE", {"tooltip": "(optional) a list of images"}),
             },
         }
 
@@ -46,7 +45,7 @@ class OllamaNode:
 
         return (think_content, response)
 
-    def node_function(self, prompt, url, model, debug, images=None):
+    def node_function(self, prompt, url, model, images=None):
         out_think = ""
         out_response = ""
 
@@ -66,9 +65,6 @@ class OllamaNode:
         except ollama.ResponseError as e:
             print(f"Ollama Error: {e.error}")
             return ("", "")
-
-        if debug:
-            print(f"🦙 Ollama debug:\n{ollama_response}")
 
         out_think, out_response = self.separate_response(ollama_response.response)
         print(f"🦙 Ollama think:\n{out_think}")

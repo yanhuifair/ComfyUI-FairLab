@@ -80,7 +80,7 @@ let extension = {
     },
 
     async beforeRegisterNodeDef(nodeType, nodeData) {
-        if (["OllamaVisionNode", "OllamaChatNode"].includes(nodeData.name)) {
+        if (["OllamaNode"].includes(nodeData.name)) {
             const originalNodeCreated = nodeType.prototype.onNodeCreated;
             nodeType.prototype.onNodeCreated = async function () {
                 if (originalNodeCreated) {

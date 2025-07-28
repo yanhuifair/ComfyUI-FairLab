@@ -64,7 +64,7 @@ NODE_CLASS_MAPPINGS = {
     "Base64ToImageNode": Base64ToImageNode,
     "OutputIsListNode": OutputIsListNode,
     "OutputIsNonListNode": OutputIsNonListNode,
-    "OllamaVisionNode": OllamaNode,
+    "OllamaNode": OllamaNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -96,7 +96,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Base64ToImageNode": "Base64 To Image",
     "OutputIsListNode": "Output Is List",
     "OutputIsNonListNode": "Output Is Non-List",
-    "OllamaVisionNode": "🦙 Ollama",
+    "OllamaNode": "🦙 Ollama",
 }
 
 
