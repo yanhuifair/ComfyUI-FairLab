@@ -108,30 +108,18 @@ def load_image_to_tensor(folder_path, recursive, channels):
 
     image_tensors = []
     pils = []
-    max_w, max_h = 0, 0
-
     progress_bar = ProgressBar(image_file_paths.__len__())
 
     for image_path in image_file_paths:
         pil = Image.open(image_path)
         pil = ImageOps.exif_transpose(pil)
-        w, h = pil.size
-        max_w = max(max_w, w)
-        max_h = max(max_h, h)
         pils.append(pil)
 
     for pil in pils:
-        if pil.size[0] != max_w or pil.size[1] != max_h:
-            pil = pil.resize((max_w, max_h), Image.LANCZOS)
-
         if pil.mode == "RGBA" and channels == "RGB":
             pil = rgba2rgb(pil)
-        elif pil.mode == "RGBA" and channels == "RGBA":
-            pil = pil.convert("RGBA")
         elif pil.mode == "RGB" and channels == "RGBA":
             pil = pil.convert("RGBA")
-        elif pil.mode == "RGB" and channels == "RGB":
-            pil = pil.convert("RGB")
 
         image_tensor = pil2tensor(pil)
         image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension

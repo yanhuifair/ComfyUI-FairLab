@@ -13,6 +13,8 @@ from .text_utility import PrependTagsNode
 from .text_utility import AppendTagsNode
 from .text_utility import BlacklistTagsNode
 from .text_utility import ShowStringNode
+from .text_utility import LoadStringNode
+from .text_utility import RemoveDuplicateTagsNode
 
 from .image_utility import DownloadImageNode
 from .image_utility import SaveImageToDirectoryNode
@@ -27,9 +29,6 @@ from .image_utility import Base64ToImageNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
-
-from .text_utility import OutputIsListNode
-from .text_utility import OutputIsNonListNode
 
 
 from .ollama import OllamaNode
@@ -52,6 +51,8 @@ NODE_CLASS_MAPPINGS = {
     "PrependTagsNode": PrependTagsNode,
     "AppendTagsNode": AppendTagsNode,
     "BlacklistTagsNode": BlacklistTagsNode,
+    "LoadStringNode": LoadStringNode,
+    "RemoveDuplicateTagsNode": RemoveDuplicateTagsNode,
     "ShowStringNode": ShowStringNode,
     "DownloadImageNode": DownloadImageNode,
     "SaveImageToDirectoryNode": SaveImageToDirectoryNode,
@@ -63,8 +64,6 @@ NODE_CLASS_MAPPINGS = {
     "PrintImageNode": PrintImageNode,
     "ImageToBase64Node": ImageToBase64Node,
     "Base64ToImageNode": Base64ToImageNode,
-    "OutputIsListNode": OutputIsListNode,
-    "OutputIsNonListNode": OutputIsNonListNode,
     "OllamaNode": OllamaNode,
     "OllamaClientNode": OllamaClientNode,
 }
@@ -85,6 +84,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PrependTagsNode": "Prepend Tags",
     "AppendTagsNode": "Append Tags",
     "BlacklistTagsNode": "Blacklist Tags",
+    "LoadStringNode": "Load String",
+    "RemoveDuplicateTagsNode": "Remove Duplicate Tags",
     "ShowStringNode": "Show String",
     "DownloadImageNode": "Download Image",
     "SaveImageToDirectoryNode": "Save Image To Directory",
@@ -96,8 +97,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PrintImageNode": "Print Image",
     "ImageToBase64Node": "Image To Base64",
     "Base64ToImageNode": "Base64 To Image",
-    "OutputIsListNode": "Output Is List",
-    "OutputIsNonListNode": "Output Is Non-List",
     "OllamaNode": "🦙 Ollama",
     "OllamaClientNode": "🦙 Ollama Client",
 }

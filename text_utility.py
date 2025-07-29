@@ -54,7 +54,7 @@ class LoadStringFromDirectoryNode:
     OUTPUT_IS_LIST = (True, True, True)
 
     def node_function(self, directory):
-        # load txt files from the directory
+
         string_list = []
         directory_list = []
         name_without_ext_list = []
@@ -364,35 +364,58 @@ class ShowStringNode:
         return {"ui": {"text": string}, "result": (string,)}
 
 
-class OutputIsListNode:
+class LoadStringNode:
     def __init__(self):
         pass
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {}
+        return {
+            "required": {
+                "path": ("STRING", {"forceInput": True}),
+            }
+        }
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
-    RETURN_TYPES = ("STRING",)
-    OUTPUT_IS_LIST = (True,)
+    RETURN_TYPES = ("STRING", "STRING", "STRING")
 
-    def node_function(self):
-        return (["1", "2", "3"],)
+    def node_function(self, path):
+        out_string = ""
+        out_path = path
+        out_name = os.path.basename(path)
+
+        try:
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as file:
+                    out_string = file.read()
+            else:
+                out_string = f"File not found: {path}"
+        except Exception as e:
+            print(f"Error reading file {path}: {e}")
+
+        return (out_string, out_path, out_name)
 
 
-class OutputIsNonListNode:
+class RemoveDuplicateTagsNode:
     def __init__(self):
         pass
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {}
+        return {
+            "required": {
+                "string": ("STRING", {"forceInput": True}),
+            }
+        }
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     RETURN_TYPES = ("STRING",)
-    OUTPUT_IS_LIST = (False,)
 
-    def node_function(self):
-        return (["1", "2", "3"],)
+    def node_function(self, string):
+        out_string = ""
+        tags = [tag.strip() for tag in string.split(",")]
+        unique_tags = set(tags)
+        out_string = ", ".join(unique_tags)
+        return (out_string,)
