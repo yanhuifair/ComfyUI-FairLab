@@ -19,6 +19,7 @@ class OllamaClientNode:
             "required": {
                 "url": ("STRING", {"default": "http://127.0.0.1:11434"}),
                 "model": ((), {}),
+                "keep_alive": ("INT", {"default": -1, "tooltip": "controls how long the model will stay loaded into memory following the request, The unit is minutes"}),
             }
         }
 
@@ -28,9 +29,9 @@ class OllamaClientNode:
     RETURN_TYPES = ("ollama_connection",)
     RETURN_NAMES = ("ollama_connection",)
 
-    def node_function(self, url, model):
+    def node_function(self, url, model, keep_alive):
         ollama_client = Client(host=url)
-        ollama_connection = (ollama_client, model)
+        ollama_connection = (ollama_client, model, keep_alive)
         return (ollama_connection,)
 
 
@@ -74,6 +75,10 @@ class OllamaNode:
         return (out_think, out_response)
 
     def node_function(self, prompt, ollama_connection, images=None):
+        ollama_client = ollama_connection[0]
+        ollama_model = ollama_connection[1]
+        keep_alive = ollama_connection[2]
+
         out_think = ""
         out_response = ""
 
@@ -84,10 +89,11 @@ class OllamaNode:
                 base64_images.append(pil_to_base64(pil))
 
         try:
-            ollama_response = ollama_connection[0].generate(
-                model=ollama_connection[1],
+            ollama_response = ollama_client.generate(
+                model=ollama_model,
                 prompt=prompt,
                 images=base64_images,
+                keep_alive=keep_alive,
             )
         except ollama.ResponseError as e:
             print(f"Ollama Error: {e.error}")

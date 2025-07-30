@@ -18,11 +18,11 @@ class SaveStringToDirectoryNode:
             }
         }
 
-    RETURN_TYPES = ()
     CATEGORY = "Fair/string"
-
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    RETURN_TYPES = ("STRING", "STRING", "STRING")
+    RETURN_NAMES = ("string", "directory", "name")
 
     def node_function(self, string, directory, name, extension):
         file_name_with_suffix = f"{name}{extension}"
@@ -30,7 +30,7 @@ class SaveStringToDirectoryNode:
         with open(full_path, "w", encoding="utf-8") as file:
             file.write(string)
 
-        return ()
+        return (string, directory, name)
 
 
 class LoadStringFromDirectoryNode:
@@ -48,7 +48,6 @@ class LoadStringFromDirectoryNode:
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     OUTPUT_NODE = True
-
     RETURN_TYPES = ("STRING", "STRING", "STRING")
     RETURN_NAMES = ("string", "directory", "name")
     OUTPUT_IS_LIST = (True, True, True)

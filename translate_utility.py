@@ -1,23 +1,21 @@
 import asyncio
 from googletrans import Translator
 
-
 translator = Translator()
 
 
-async def translate_text(prompt, srcTrans=None, toTrans=None):
+def translate_text(string, srcTrans=None, toTrans=None):
     if not srcTrans:
         srcTrans = "auto"
 
     if not toTrans:
         toTrans = "en"
 
-    translate_text_prompt = ""
-    if prompt and prompt.strip() != "":
-        async with Translator() as translator:
-            translate_text_prompt = await translator.translate(prompt, src=srcTrans, dest=toTrans)
+    translated_text = ""
+    if string and string.strip() != "":
+        translated_text = translator.translate(string, src=srcTrans, dest=toTrans)
 
-    return translate_text_prompt.text if hasattr(translate_text_prompt, "text") else ""
+    return translated_text.text if hasattr(translated_text, "text") else ""
 
 
 class CLIPTranslatedNode:
@@ -42,7 +40,7 @@ class CLIPTranslatedNode:
         text = kwargs.get("text")
         clip = kwargs.get("clip")
 
-        text_translated = asyncio.run(translate_text(text))
+        text_translated = translate_text(text)
         tokens = clip.tokenize(text_translated)
         cond, pooled = clip.encode_from_tokens(tokens, return_pooled=True)
         return ([[cond, {"pooled_output": pooled}]], text_translated)
@@ -56,23 +54,22 @@ class TranslateStringNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"multiline": True}),
+                "string": ("STRING", {"defaultInput": True}),
                 "translate_mode": (["en_to_cn", "cn_to_en", "auto"], {"default": "en_to_cn"}),
             }
         }
 
     CATEGORY = "Fair/string"
-
     RETURN_TYPES = ("STRING",)
     FUNCTION = "node_function"
 
     def node_function(self, string, translate_mode):
         if translate_mode == "en_to_cn":
-            text_translated = asyncio.run(translate_text(string, "en", "zh-cn"))
+            text_translated = translate_text(string, "en", "zh-cn")
         elif translate_mode == "cn_to_en":
-            text_translated = asyncio.run(translate_text(string, "zh-cn", "en"))
+            text_translated = translate_text(string, "zh-cn", "en")
         elif translate_mode == "auto":
-            text_translated = asyncio.run(translate_text(string))
+            text_translated = translate_text(string)
         else:
             text_translated = ""
 
