@@ -94,46 +94,6 @@ def load_pil_from_url(url):
     return pil, name
 
 
-def load_image_to_tensor(folder_path, recursive, channels):
-    image_file_paths = []
-    if recursive:
-        for root, _, files in os.walk(folder_path):
-            for file_name in files:
-                if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
-                    image_file_paths.append(os.path.join(root, file_name))
-    else:
-        for file_name in os.listdir(folder_path):
-            if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
-                image_file_paths.append(os.path.join(folder_path, file_name))
-
-    image_tensors = []
-    pils = []
-    progress_bar = ProgressBar(image_file_paths.__len__())
-
-    for image_path in image_file_paths:
-        pil = Image.open(image_path)
-        pil = ImageOps.exif_transpose(pil)
-        pils.append(pil)
-
-    for pil in pils:
-        if pil.mode == "RGBA" and channels == "RGB":
-            pil = rgba2rgb(pil)
-        elif pil.mode == "RGB" and channels == "RGBA":
-            pil = pil.convert("RGBA")
-
-        image_tensor = pil2tensor(pil)
-        image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
-        image_tensors.append(image_tensor)
-        progress_bar.update(1)
-
-    # names
-    image_name_list = [os.path.basename(x) for x in image_file_paths]
-    image_names = [os.path.splitext(x)[0] for x in image_name_list]
-    image_dirs = [os.path.dirname(x) for x in image_file_paths]
-
-    return (image_tensors, image_dirs, image_names)
-
-
 class DownloadImageNode:
     def __init__(self):
         self.output_dir = folder_paths.get_temp_directory()
@@ -447,6 +407,45 @@ class LoadImageFromURLNode:
         pil.convert(channels)
         img_out = pil2tensor(pil)
         return (img_out, img_out, name)
+
+
+def load_image_to_tensor(folder_path, recursive, channels):
+    image_file_paths = []
+    if recursive:
+        for root, _, files in os.walk(folder_path):
+            for file_name in files:
+                if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
+                    image_file_paths.append(os.path.join(root, file_name))
+    else:
+        for file_name in os.listdir(folder_path):
+            if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
+                image_file_paths.append(os.path.join(folder_path, file_name))
+
+    image_tensors = []
+    image_dirs = []
+    image_names = []
+
+    progress_bar = ProgressBar(image_file_paths.__len__())
+
+    for image_path in image_file_paths:
+        pil = Image.open(image_path)
+
+        if pil.mode == "RGBA" and channels == "RGB":
+            pil = rgba2rgb(pil)
+        elif pil.mode == "RGB" and channels == "RGBA":
+            pil = pil.convert("RGBA")
+
+        image_tensor = pil2tensor(pil)
+        image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
+        image_tensors.append(image_tensor)
+
+        image_dirs.append(os.path.dirname(image_path))
+        file_name = os.path.basename(image_path)
+        image_names.append(os.path.splitext(file_name)[0])  # Remove file extension
+
+        progress_bar.update(1)
+
+    return (image_tensors, image_dirs, image_names)
 
 
 class LoadImageFromDirectoryNode:

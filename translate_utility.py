@@ -62,6 +62,7 @@ class TranslateStringNode:
     CATEGORY = "Fair/string"
     RETURN_TYPES = ("STRING",)
     FUNCTION = "node_function"
+    OUTPUT_NODE = True
 
     def node_function(self, string, translate_mode):
         if translate_mode == "en_to_cn":
@@ -72,5 +73,6 @@ class TranslateStringNode:
             text_translated = translate_text(string)
         else:
             text_translated = ""
-
+        if text_translated is not None:
+            print(f"Translate:\n{text_translated}")
         return (text_translated,)
