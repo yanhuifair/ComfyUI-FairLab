@@ -151,7 +151,7 @@ class DownloadImageNode:
 
 class SaveImageToDirectoryNode:
     def __init__(self):
-        self.compress_level = 4
+        pass
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -160,6 +160,8 @@ class SaveImageToDirectoryNode:
                 "image": ("IMAGE", {"defaultInput": True}),
                 "directory": ("STRING", {"defaultInput": True}),
                 "name": ("STRING", {"defaultInput": True}),
+                "type": (["png", "jpg"], {"default": "png"}),
+                "compress_level": ("INT", {"default": 4, "min": 0, "max": 9}),
             }
         }
 
@@ -168,23 +170,11 @@ class SaveImageToDirectoryNode:
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def function(self, image, directory, name):
-        progress_bar = ProgressBar(image.shape[0])
-
-        tensors = []
-        for i in range(image.shape[0]):
-            tensors.append(image[i])
-
-        if type(directory) != list:
-            directory = [directory]
-        if type(name) != list:
-            name = [name]
-
-        for tensor, file_dir, file_name in zip(tensors, directory, name):
-            pil = tensor2pil(tensor)
-            name = f"{file_name}.png"
-            pil.save(os.path.join(file_dir, name), compress_level=self.compress_level)
-            progress_bar.update(1)
+    def function(self, image, directory, name, type, compress_level):
+        for i in image:
+            pil = tensor2pil(i)
+            name = f"{name}.{type}"
+            pil.save(os.path.join(directory, name), compress_level=compress_level)
 
         return ()
 
@@ -409,17 +399,17 @@ class LoadImageFromURLNode:
         return (img_out, img_out, name)
 
 
-def load_image_to_tensor(folder_path, recursive, channels):
+def load_image_to_tensor(directory, recursive, channels):
     image_file_paths = []
     if recursive:
-        for root, _, files in os.walk(folder_path):
+        for root, _, files in os.walk(directory):
             for file_name in files:
                 if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
                     image_file_paths.append(os.path.join(root, file_name))
     else:
-        for file_name in os.listdir(folder_path):
+        for file_name in os.listdir(directory):
             if file_name.lower().endswith((".jpg", ".jpeg", ".png")):
-                image_file_paths.append(os.path.join(folder_path, file_name))
+                image_file_paths.append(os.path.join(directory, file_name))
 
     image_tensors = []
     image_dirs = []
