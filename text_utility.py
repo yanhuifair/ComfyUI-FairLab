@@ -14,7 +14,7 @@ class SaveStringToDirectoryNode:
                 "string": ("STRING", {"defaultInput": True}),
                 "directory": ("STRING", {"defaultInput": True}),
                 "name": ("STRING", {"defaultInput": True}),
-                "extension": ([".cap", ".caption", ".txt"], {"defaultInput": False, "default": ".txt"}),
+                "extension": ([".txt", ".cap", ".caption"], {"defaultInput": False, "default": ".txt"}),
             }
         }
 

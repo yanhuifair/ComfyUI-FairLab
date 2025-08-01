@@ -1,5 +1,4 @@
-from .translate_utility import CLIPTranslatedNode
-from .translate_utility import TranslateStringNode
+from .translate_utility import StringTranslateNode
 
 from .text_utility import SaveStringToDirectoryNode
 from .text_utility import LoadStringFromDirectoryNode
@@ -36,8 +35,7 @@ from .ollama import OllamaClientNode
 
 
 NODE_CLASS_MAPPINGS = {
-    "CLIPTranslatedNode": CLIPTranslatedNode,
-    "TranslateStringNode": TranslateStringNode,
+    "StringTranslateNode": StringTranslateNode,
     "LoadImageFromDirectoryNode": LoadImageFromDirectoryNode,
     "FillAlphaNode": FillAlphaNode,
     "SaveStringToDirectoryNode": SaveStringToDirectoryNode,
@@ -69,8 +67,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "CLIPTranslatedNode": "CLIP Text Encode Translated",
-    "TranslateStringNode": "Translate String",
+    "StringTranslateNode": "String Translate",
     "LoadImageFromDirectoryNode": "Load Image From Directory",
     "FillAlphaNode": "Fill Alpha",
     "SaveStringToDirectoryNode": "Save String To Directory",

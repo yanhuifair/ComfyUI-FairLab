@@ -419,6 +419,7 @@ def load_image_to_tensor(directory, recursive, channels):
 
     for image_path in image_file_paths:
         pil = Image.open(image_path)
+        pil = ImageOps.exif_transpose(pil)  # Handle EXIF orientation
 
         if pil.mode == "RGBA" and channels == "RGB":
             pil = rgba2rgb(pil)
