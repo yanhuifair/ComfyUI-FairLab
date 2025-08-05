@@ -1,4 +1,3 @@
-
 class AlwaysEqualProxy(str):
     def __eq__(self, _):
         return True
@@ -56,3 +55,47 @@ class PrintImageNode:
         print(f"shape: {image.shape}")
         print(image)
         return ()
+
+
+class MaxNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "int1": ("INT",),
+                "int2": ("INT",),
+            },
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/utility"
+    RETURN_TYPES = ("INT",)
+
+    def node_function(self, int1, int2):
+        max_value = max(int1, int2)
+        return (max_value,)
+
+
+class MinNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "int1": ("INT",),
+                "int2": ("INT",),
+            },
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/utility"
+    RETURN_TYPES = ("INT",)
+
+    def node_function(self, int1, int2):
+        min_value = min(int1, int2)
+        return (min_value,)

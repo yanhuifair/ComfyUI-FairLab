@@ -29,6 +29,8 @@ from .image_utility import OutpaintingPadNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
+from .utility import MaxNode
+from .utility import MinNode
 
 
 from .ollama import OllamaNode
@@ -61,6 +63,8 @@ NODE_CLASS_MAPPINGS = {
     "LoadImageFromURLNode": LoadImageFromURLNode,
     "PrintAnyNode": PrintAnyNode,
     "PrintImageNode": PrintImageNode,
+    "MaxNode": MaxNode,
+    "MinNode": MinNode,
     "ImageToBase64Node": ImageToBase64Node,
     "OutpaintingPadNode": OutpaintingPadNode,
     "Base64ToImageNode": Base64ToImageNode,
@@ -94,6 +98,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LoadImageFromURLNode": "Load Image From URL",
     "PrintAnyNode": "Print Any",
     "PrintImageNode": "Print Image",
+    "MaxNode": "Max",
+    "MinNode": "Min",
     "ImageToBase64Node": "Image To Base64",
     "Base64ToImageNode": "Base64 To Image",
     "OutpaintingPadNode": "Outpainting Pad",

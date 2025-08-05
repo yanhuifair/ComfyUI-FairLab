@@ -623,7 +623,7 @@ class OutpaintingPadNode:
                 "image": ("IMAGE", {"defaultInput": True, "forceInput": True}),
                 "target_width": ("INT", {"default": 1024}),
                 "target_height": ("INT", {"default": 1024}),
-                "align": (["left", "top", "right", "bottom"], {"default": "center"}),
+                "align": (["left", "left-top", "top", "top-right", "right", "right-bottom", "bottom", "left-bottom", "center"], {"default": "center"}),
             }
         }
 
@@ -632,13 +632,60 @@ class OutpaintingPadNode:
     RETURN_TYPES = ("INT", "INT", "INT", "INT")
     RETURN_NAMES = ("left", "top", "right", "bottom")
 
-    def node_function(self, image, target_width, target_height):
+    def node_function(self, image, target_width, target_height, align):
         image_height = image.shape[1]
         image_width = image.shape[2]
+        if image_width > target_width or image_height > target_height:
+            raise Exception("Image size is larger than target size")
+
         print(f"image size: {image_width}x{image_height}, target size: {target_width}x{target_height}")
-        left = (target_width - image_width) // 2
-        top = (target_height - image_height) // 2
-        right = target_width - image_width - left
-        bottom = target_height - image_height - top
+
+        # aligns
+        if align == "left":
+            left = 0
+            top = (target_height - image_height) // 2
+            right = target_width - image_width
+            bottom = target_height - image_height - top
+        elif align == "left-top":
+            left = 0
+            top = 0
+            right = target_width - image_width
+            bottom = target_height - image_height
+        elif align == "top":
+            left = (target_width - image_width) // 2
+            top = 0
+            right = target_width - image_width - left
+            bottom = target_height - image_height - top
+        elif align == "top-right":
+            left = target_width - image_width
+            top = 0
+            right = 0
+            bottom = target_height - image_height
+        elif align == "right":
+            left = target_width - image_width
+            top = (target_height - image_height) // 2
+            right = 0
+            bottom = target_height - image_height - top
+        elif align == "right-bottom":
+            left = target_width - image_width
+            top = target_height - image_height
+            right = 0
+            bottom = 0
+        elif align == "bottom":
+            left = (target_width - image_width) // 2
+            top = target_height - image_height
+            right = target_width - image_width - left
+            bottom = 0
+        elif align == "left-bottom":
+            left = 0
+            top = target_height - image_height
+            right = target_width - image_width
+            bottom = 0
+        elif align == "center":
+            left = (target_width - image_width) // 2
+            top = (target_height - image_height) // 2
+            right = target_width - image_width - left
+            bottom = target_height - image_height - top
+
         print(f"padding: left={left}, top={top}, right={right}, bottom={bottom}")
         return (left, top, right, bottom)
