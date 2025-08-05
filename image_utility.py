@@ -8,6 +8,7 @@ import cv2
 from io import BytesIO
 from PIL import Image, ImageOps, ImageSequence, ImageFile, ImageDraw
 from PIL.PngImagePlugin import PngInfo
+from sympy import prime
 
 import folder_paths
 import comfy.utils
@@ -609,3 +610,35 @@ class Base64ToImageNode:
         pil = base64_to_pil(string)
         image = pil2tensor(pil)
         return (image,)
+
+
+class OutpaintingPadNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE", {"defaultInput": True, "forceInput": True}),
+                "target_width": ("INT", {"default": 1024}),
+                "target_height": ("INT", {"default": 1024}),
+                "align": (["left", "top", "right", "bottom"], {"default": "center"}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = ("INT", "INT", "INT", "INT")
+    RETURN_NAMES = ("left", "top", "right", "bottom")
+
+    def node_function(self, image, target_width, target_height):
+        image_height = image.shape[1]
+        image_width = image.shape[2]
+        print(f"image size: {image_width}x{image_height}, target size: {target_width}x{target_height}")
+        left = (target_width - image_width) // 2
+        top = (target_height - image_height) // 2
+        right = target_width - image_width - left
+        bottom = target_height - image_height - top
+        print(f"padding: left={left}, top={top}, right={right}, bottom={bottom}")
+        return (left, top, right, bottom)

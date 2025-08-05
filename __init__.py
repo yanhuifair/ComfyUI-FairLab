@@ -25,6 +25,7 @@ from .image_utility import LoadImageFromDirectoryNode
 from .image_utility import FillAlphaNode
 from .image_utility import ImageToBase64Node
 from .image_utility import Base64ToImageNode
+from .image_utility import OutpaintingPadNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
@@ -61,6 +62,7 @@ NODE_CLASS_MAPPINGS = {
     "PrintAnyNode": PrintAnyNode,
     "PrintImageNode": PrintImageNode,
     "ImageToBase64Node": ImageToBase64Node,
+    "OutpaintingPadNode": OutpaintingPadNode,
     "Base64ToImageNode": Base64ToImageNode,
     "OllamaNode": OllamaNode,
     "OllamaClientNode": OllamaClientNode,
@@ -94,6 +96,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PrintImageNode": "Print Image",
     "ImageToBase64Node": "Image To Base64",
     "Base64ToImageNode": "Base64 To Image",
+    "OutpaintingPadNode": "Outpainting Pad",
     "OllamaNode": "🦙 Ollama",
     "OllamaClientNode": "🦙 Ollama Client",
 }

@@ -100,8 +100,8 @@ class OllamaNode:
             return ("", "")
 
         out_think, out_response = self.separate_response(ollama_response.response)
-        if out_think is not "":
+        if out_think != "":
             print(f"🦙 Ollama think:\n{out_think}")
-        if out_response is not "":
+        if out_response != "":
             print(f"🦙 Ollama response:\n{out_response}")
         return (out_think, out_response)
