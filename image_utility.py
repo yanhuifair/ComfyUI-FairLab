@@ -190,10 +190,7 @@ class ImageResizeNode:
             "required": {
                 "image": ("IMAGE",),
                 "resize_to": ("INT", {"default": 1024}),
-                "side": (
-                    ["shortest", "longest", "width", "height"],
-                    {"default": "longest"},
-                ),
+                "side": (["shortest", "longest", "width", "height"], {"default": "longest"}),
                 "interpolation": (
                     [
                         "lanczos",
@@ -203,6 +200,7 @@ class ImageResizeNode:
                         "area",
                         "nearest-exact",
                     ],
+                    {"default": "lanczos"},
                 ),
             },
             "optional": {
@@ -635,10 +633,10 @@ class OutpaintingPadNode:
     def node_function(self, image, target_width, target_height, align):
         image_height = image.shape[1]
         image_width = image.shape[2]
-        if image_width > target_width or image_height > target_height:
-            raise Exception("Image size is larger than target size")
 
         print(f"image size: {image_width}x{image_height}, target size: {target_width}x{target_height}")
+        if image_width > target_width or image_height > target_height:
+            raise Exception("Image size is larger than target size")
 
         # aligns
         if align == "left":
@@ -689,3 +687,30 @@ class OutpaintingPadNode:
 
         print(f"padding: left={left}, top={top}, right={right}, bottom={bottom}")
         return (left, top, right, bottom)
+
+
+class ImageSizeNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE", {"defaultInput": True, "forceInput": True}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = ("INT", "INT", "INT", "INT", "FLOAT")
+    RETURN_NAMES = ("width", "height", "max", "min", "aspect_ratio")
+
+    def node_function(self, image):
+        image_height = image.shape[1]
+        image_width = image.shape[2]
+        edge_max = max(image_width, image_height)
+        edge_min = min(image_width, image_height)
+        aspect_ratio = image_width / image_height
+
+        return (image_width, image_height, edge_max, edge_min, aspect_ratio)
