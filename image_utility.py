@@ -1,6 +1,7 @@
 from email.mime import image
 import os
 import io
+from turtle import width
 import requests
 import json
 import numpy as np
@@ -189,27 +190,17 @@ class ImageResizeNode:
         return {
             "required": {
                 "image": ("IMAGE",),
-                "resize_to": ("INT", {"default": 1024}),
+                "resize_to": ("INT", {"default": 1024, "max": 4096}),
                 "side": (["shortest", "longest", "width", "height"], {"default": "longest"}),
-                "interpolation": (
-                    [
-                        "lanczos",
-                        "nearest",
-                        "bilinear",
-                        "bicubic",
-                        "area",
-                        "nearest-exact",
-                    ],
-                    {"default": "lanczos"},
-                ),
+                "interpolation": (["lanczos", "nearest", "bilinear", "bicubic", "area", "nearest-exact"], {"default": "lanczos"}),
             },
             "optional": {
                 "mask": ("MASK",),
             },
         }
 
-    RETURN_TYPES = ("IMAGE", "MASK")
-
+    RETURN_TYPES = ("IMAGE", "MASK", "INT", "INT")
+    RETURN_NAMES = ("image", "mask", "width", "height")
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
@@ -222,7 +213,7 @@ class ImageResizeNode:
         longer_side = "height" if image_height > image_width else "width"
         shorter_side = "height" if image_height < image_width else "width"
 
-        new_height, new_width, scale_ratio = 0, 0, 0
+        height, width, scale_ratio = 0, 0, 0
 
         if side == "shortest":
             side = shorter_side
@@ -234,13 +225,13 @@ class ImageResizeNode:
         elif side == "height":
             scale_ratio = resize_to / image_height
 
-        new_height = image_height * scale_ratio
-        new_width = image_width * scale_ratio
+        height = image_height * scale_ratio
+        width = image_width * scale_ratio
 
-        new_width = int(new_width)
-        new_height = int(new_height)
+        width = int(width)
+        height = int(height)
 
-        image = comfy.utils.common_upscale(image, new_width, new_height, interpolation, "center")
+        image = comfy.utils.common_upscale(image, width, height, interpolation, "center")
         image = image.movedim(1, -1)
 
         if mask is not None:
@@ -249,7 +240,7 @@ class ImageResizeNode:
             mask = mask.unsqueeze(0)
             mask = NNF.interpolate(
                 mask,
-                size=(new_height, new_width),
+                size=(height, width),
                 mode="bilinear",
                 align_corners=False,
             )
@@ -259,7 +250,7 @@ class ImageResizeNode:
 
             mask = mask.permute(0, 1)
 
-        return (image, mask)
+        return (image, mask, width, height)
 
 
 class VideoToImageNode:
@@ -619,8 +610,8 @@ class OutpaintingPadNode:
         return {
             "required": {
                 "image": ("IMAGE", {"defaultInput": True, "forceInput": True}),
-                "target_width": ("INT", {"default": 1024}),
-                "target_height": ("INT", {"default": 1024}),
+                "target_width": ("INT", {"default": 1024, "min": 256, "max": 4096}),
+                "target_height": ("INT", {"default": 1024, "min": 256, "max": 4096}),
                 "align": (["left", "left-top", "top", "top-right", "right", "right-bottom", "bottom", "left-bottom", "center"], {"default": "center"}),
             }
         }
@@ -634,9 +625,8 @@ class OutpaintingPadNode:
         image_height = image.shape[1]
         image_width = image.shape[2]
 
-        print(f"image size: {image_width}x{image_height}, target size: {target_width}x{target_height}")
         if image_width > target_width or image_height > target_height:
-            raise Exception("Image size is larger than target size")
+            raise Exception(f"Image size is larger than target size\nimage size: {image_width}x{image_height}, target size: {target_width}x{target_height}")
 
         # aligns
         if align == "left":
@@ -685,7 +675,6 @@ class OutpaintingPadNode:
             right = target_width - image_width - left
             bottom = target_height - image_height - top
 
-        print(f"padding: left={left}, top={top}, right={right}, bottom={bottom}")
         return (left, top, right, bottom)
 
 
@@ -704,13 +693,13 @@ class ImageSizeNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
     RETURN_TYPES = ("INT", "INT", "INT", "INT", "FLOAT")
-    RETURN_NAMES = ("width", "height", "max", "min", "aspect_ratio")
+    RETURN_NAMES = ("width", "height", "max_side", "min_side", "aspect_ratio")
 
     def node_function(self, image):
-        image_height = image.shape[1]
-        image_width = image.shape[2]
-        edge_max = max(image_width, image_height)
-        edge_min = min(image_width, image_height)
-        aspect_ratio = image_width / image_height
+        height = image.shape[1]
+        width = image.shape[2]
+        max_side = max(width, height)
+        min_side = min(width, height)
+        aspect_ratio = width / height
 
-        return (image_width, image_height, edge_max, edge_min, aspect_ratio)
+        return (width, height, max_side, min_side, aspect_ratio)
