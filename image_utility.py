@@ -610,8 +610,8 @@ class OutpaintingPadNode:
         return {
             "required": {
                 "image": ("IMAGE", {"defaultInput": True, "forceInput": True}),
-                "target_width": ("INT", {"default": 1024, "min": 256, "max": 4096}),
-                "target_height": ("INT", {"default": 1024, "min": 256, "max": 4096}),
+                "target_width": ("INT", {"default": 1024, "min": 64, "max": 8192}),
+                "target_height": ("INT", {"default": 1024, "min": 64, "max": 8192}),
                 "align": (["left", "left-top", "top", "top-right", "right", "right-bottom", "bottom", "left-bottom", "center"], {"default": "center"}),
             }
         }
