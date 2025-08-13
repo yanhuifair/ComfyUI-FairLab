@@ -1,9 +1,68 @@
 [project]
 name = "comfyui-fairlab"
-description = ""
-version = "1.0.51"
+description = """
+CLIP Text Encode Translated
+
+Translate String
+
+Load Image From Directory
+
+Fill Alpha
+
+Save String To Directory
+
+Load String From Directory
+
+Fix UTF-8 String
+
+String Combine
+
+String
+
+Int
+
+Float
+
+Sequence String List
+
+Prepend Tags
+
+Append Tags
+
+Blacklist Tags
+
+Download Image
+
+Save Image To Directory
+
+Image Resize
+
+Video To Image
+
+Image To Video
+
+Load Image From URL
+
+Print Any
+
+Print Image
+
+Image To Base64
+
+Base64 To Image
+
+Outpainting Pad
+
+Image Size
+
+Ollama
+
+Ollama Client
+"""
+
+version = "1.0.52"
 license = { file = "LICENSE" }
-dependencies = ["googletrans-py==4.0.0", "datetime","opencv-python","asyncio","requests"]
+dependencies = ["googletrans-py==4.0.0", "datetime","opencv-python","asyncio","requests","ollama"]
 
 [project.urls]
 Repository = "https://github.com/yanhuifair/ComfyUI-FairLab"
