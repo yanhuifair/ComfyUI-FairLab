@@ -213,7 +213,7 @@ class ImageResizeNode:
         longer_side = "height" if image_height > image_width else "width"
         shorter_side = "height" if image_height < image_width else "width"
 
-        height, width, scale_ratio = 0, 0, 0
+        height, width = 0, 0
 
         if side == "shortest":
             side = shorter_side
@@ -221,12 +221,11 @@ class ImageResizeNode:
             side = longer_side
 
         if side == "width":
-            scale_ratio = resize_to / image_width
+            width = resize_to
+            height = image_height * (resize_to / image_width)
         elif side == "height":
-            scale_ratio = resize_to / image_height
-
-        height = image_height * scale_ratio
-        width = image_width * scale_ratio
+            width = image_width * (resize_to / image_height)
+            height = resize_to
 
         width = int(width)
         height = int(height)
