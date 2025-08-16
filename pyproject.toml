@@ -60,7 +60,7 @@ Ollama
 Ollama Client
 """
 
-version = "1.0.52"
+version = "1.0.53"
 license = { file = "LICENSE" }
 dependencies = ["googletrans-py==4.0.0", "datetime","opencv-python","asyncio","requests","ollama"]
 
