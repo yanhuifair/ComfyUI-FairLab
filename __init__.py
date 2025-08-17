@@ -30,8 +30,15 @@ from .image_utility import ImageSizeNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
-from .utility import MaxNode
-from .utility import MinNode
+
+
+from .logic import MaxNode
+from .logic import MinNode
+from .logic import AddNode
+from .logic import SubtractNode
+from .logic import MultiplyNode
+from .logic import DivideNode
+from .logic import IfNode
 
 
 from .ollama import OllamaNode
@@ -66,6 +73,11 @@ NODE_CLASS_MAPPINGS = {
     "PrintImageNode": PrintImageNode,
     "MaxNode": MaxNode,
     "MinNode": MinNode,
+    "AddNode": AddNode,
+    "SubtractNode": SubtractNode,
+    "MultiplyNode": MultiplyNode,
+    "DivideNode": DivideNode,
+    "IfNode": IfNode,
     "ImageToBase64Node": ImageToBase64Node,
     "OutpaintingPadNode": OutpaintingPadNode,
     "ImageSizeNode": ImageSizeNode,
@@ -102,6 +114,11 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PrintImageNode": "Print Image",
     "MaxNode": "Max",
     "MinNode": "Min",
+    "AddNode": "Add",
+    "SubtractNode": "Subtract",
+    "MultiplyNode": "Multiply",
+    "DivideNode": "Divide",
+    "IfNode": "If",
     "ImageToBase64Node": "Image To Base64",
     "Base64ToImageNode": "Base64 To Image",
     "OutpaintingPadNode": "Outpainting Pad",

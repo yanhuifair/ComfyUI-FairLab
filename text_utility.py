@@ -196,7 +196,20 @@ class IntNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"number": ("INT", {"multiline": False, "defaultInput": False, "default": 0, "max": 65535, "min": -65535})}}
+        return {
+            "required": {
+                "number": (
+                    "INT",
+                    {
+                        "multiline": False,
+                        "defaultInput": False,
+                        "default": 0,
+                        "max": 65535,
+                        "min": -65535,
+                    },
+                )
+            },
+        }
 
     RETURN_TYPES = ("INT",)
     CATEGORY = "Fair/string"
