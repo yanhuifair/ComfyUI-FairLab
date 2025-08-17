@@ -30,6 +30,7 @@ from .image_utility import ImageSizeNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
+from .utility import PythonScriptNode
 
 
 from .logic import MaxNode
@@ -71,6 +72,7 @@ NODE_CLASS_MAPPINGS = {
     "LoadImageFromURLNode": LoadImageFromURLNode,
     "PrintAnyNode": PrintAnyNode,
     "PrintImageNode": PrintImageNode,
+    "PythonScriptNode": PythonScriptNode,
     "MaxNode": MaxNode,
     "MinNode": MinNode,
     "AddNode": AddNode,
@@ -112,6 +114,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LoadImageFromURLNode": "Load Image From URL",
     "PrintAnyNode": "Print Any",
     "PrintImageNode": "Print Image",
+    "PythonScriptNode": "Python Script",
     "MaxNode": "Max",
     "MinNode": "Min",
     "AddNode": "Add",
