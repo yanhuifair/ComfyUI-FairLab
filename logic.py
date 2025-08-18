@@ -1,4 +1,5 @@
-from .utility import AlwaysEqualProxy
+from .utility import any
+import math
 
 
 class MaxNode:
@@ -9,17 +10,17 @@ class MaxNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "number0": ("FLOAT",),
-                "number1": ("FLOAT",),
+                "a": (any,),
+                "b": (any,),
             },
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
-    RETURN_TYPES = ("FLOAT",)
+    RETURN_TYPES = (any,)
 
-    def node_function(self, number0, number1):
-        out_value = max(number0, number1)
+    def node_function(self, a, b):
+        out_value = max(a, b)
         return (out_value,)
 
 
@@ -31,17 +32,17 @@ class MinNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "number0": ("FLOAT",),
-                "number1": ("FLOAT",),
+                "a": (any,),
+                "b": (any,),
             },
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
-    RETURN_TYPES = ("FLOAT",)
+    RETURN_TYPES = (any,)
 
-    def node_function(self, number0, number1):
-        out_value = min(number0, number1)
+    def node_function(self, a, b):
+        out_value = min(a, b)
         return (out_value,)
 
 
@@ -53,8 +54,8 @@ class AddNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "number0": ("FLOAT",),
-                "number1": ("FLOAT",),
+                "a": ("FLOAT",),
+                "b": ("FLOAT",),
             },
         }
 
@@ -62,8 +63,8 @@ class AddNode:
     CATEGORY = "Fair/logic"
     RETURN_TYPES = ("FLOAT",)
 
-    def node_function(self, number0, number1):
-        out_value = number0 + number1
+    def node_function(self, a, b):
+        out_value = a + b
         return (out_value,)
 
 
@@ -75,8 +76,8 @@ class SubtractNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "number0": ("FLOAT",),
-                "number1": ("FLOAT",),
+                "a": ("FLOAT",),
+                "b": ("FLOAT",),
             },
         }
 
@@ -84,8 +85,8 @@ class SubtractNode:
     CATEGORY = "Fair/logic"
     RETURN_TYPES = ("FLOAT",)
 
-    def node_function(self, number0, number1):
-        out_value = number0 - number1
+    def node_function(self, a, b):
+        out_value = a - b
         return (out_value,)
 
 
@@ -97,8 +98,8 @@ class MultiplyNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "number0": ("FLOAT",),
-                "number1": ("FLOAT",),
+                "a": ("FLOAT",),
+                "b": ("FLOAT",),
             },
         }
 
@@ -106,8 +107,8 @@ class MultiplyNode:
     CATEGORY = "Fair/logic"
     RETURN_TYPES = ("FLOAT",)
 
-    def node_function(self, number0, number1):
-        out_value = number0 * number1
+    def node_function(self, a, b):
+        out_value = a * b
         return (out_value,)
 
 
@@ -119,8 +120,8 @@ class DivideNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "number0": ("FLOAT",),
-                "number1": ("FLOAT",),
+                "a": ("FLOAT",),
+                "b": ("FLOAT",),
             },
         }
 
@@ -128,8 +129,80 @@ class DivideNode:
     CATEGORY = "Fair/logic"
     RETURN_TYPES = ("FLOAT",)
 
-    def node_function(self, number0, number1):
-        out_value = number0 / number1
+    def node_function(self, a, b):
+        out_value = a / b
+        return (out_value,)
+
+
+class NumberNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "number": ("FLOAT",),
+            },
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/logic"
+    RETURN_TYPES = ("INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
+    RETURN_NAMES = ("float", "int", "absolute", "round", "ceil", "floor", "sqrt", "exp", "log")
+
+    def node_function(self, number):
+        out_int = int(number)
+        out_float = float(out_int)
+        out_abs = abs(out_float)
+        out_round = round(out_float)
+        out_ceil = math.ceil(out_float)
+        out_floor = math.floor(out_float)
+        out_sqrt = math.sqrt(out_abs)
+        out_exp = math.exp(out_float)
+        out_log = math.log(out_float)
+        return (out_int, out_float, out_abs, out_round, out_ceil, out_floor, out_sqrt, out_exp, out_log)
+
+
+class FloatToIntNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "value": ("FLOAT",),
+            },
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/logic"
+    RETURN_TYPES = ("INT",)
+
+    def node_function(self, value):
+        out_value = int(value)
+        return (out_value,)
+
+
+class IntToFloatNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "value": ("INT",),
+            },
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/logic"
+    RETURN_TYPES = ("FLOAT",)
+
+    def node_function(self, value):
+        out_value = int(value)
         return (out_value,)
 
 
@@ -141,15 +214,15 @@ class IfNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "true_value": (AlwaysEqualProxy("*"),),
-                "false_value": (AlwaysEqualProxy("*"),),
+                "true_value": (any,),
+                "false_value": (any,),
                 "condition": ("BOOL",),
             },
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
-    RETURN_TYPES = (AlwaysEqualProxy("*"),)
+    RETURN_TYPES = (any,)
 
     def node_function(self, true_value, false_value, condition):
         if condition:

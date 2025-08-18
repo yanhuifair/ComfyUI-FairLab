@@ -1,9 +1,12 @@
-class AlwaysEqualProxy(str):
-    def __eq__(self, _):
+class AnyType(str):
+    def __eq__(self, __value: object) -> bool:
         return True
 
-    def __ne__(self, _):
+    def __ne__(self, __value: object) -> bool:
         return False
+
+
+any = AnyType("*")
 
 
 class PrintAnyNode:
@@ -14,7 +17,7 @@ class PrintAnyNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "any": (AlwaysEqualProxy("*"),),
+                "input": (any,),
                 "log": ("STRING",),
             },
         }
@@ -24,10 +27,10 @@ class PrintAnyNode:
     OUTPUT_NODE = True
     RETURN_TYPES = ()
 
-    def node_function(self, any, log):
+    def node_function(self, input, log):
         print(f"log: {log}")
-        print(f"type: {type(any)}")
-        print(any)
+        print(f"type: {type(input)}")
+        print(input)
 
         return ()
 
@@ -55,44 +58,3 @@ class PrintImageNode:
         print(f"shape: {image.shape}")
         print(image)
         return ()
-
-
-DEFAULT_SCRIPT = "RESULT = (A, B, C, D)"
-
-
-class AnyType(str):
-    def __ne__(self, __value: object) -> bool:
-        return False
-
-
-any = AnyType("*")
-
-
-class PythonScriptNode:
-    def __init__(self):
-        pass
-
-    RETURN_TYPES = (any, any, any, any)
-    FUNCTION = "run_script"
-    OUTPUT_NODE = True
-    CATEGORY = "Fair/utility"
-
-    @classmethod
-    def INPUT_TYPES(s):
-        return {
-            "required": {},
-            "optional": {
-                "text": ("STRING", {"default": DEFAULT_SCRIPT, "multiline": True}),
-                "A": (any, {}),
-                "B": (any, {}),
-                "C": (any, {}),
-                "D": (any, {}),
-            },
-        }
-
-    def run_script(self, text=DEFAULT_SCRIPT, A=None, B=None, C=None, D=None):
-        SCRIPT = text if text is not None and len(text) > 0 else DEFAULT_SCRIPT
-        r = compile(SCRIPT, "<string>", "exec")
-        ctxt = {"RESULT": None, "A": A, "B": B, "C": C, "D": D}
-        eval(r, ctxt)
-        return ctxt["RESULT"]

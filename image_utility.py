@@ -347,7 +347,7 @@ class ImageToVideoNode:
         height, width, layers = img0.shape
         print(f"video resolution:{width}*{height}")
 
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        fourcc = cv2.VideoWriter.fourcc(*"mp4v")
         video_writer = cv2.VideoWriter(video_path, fourcc, frame_rate, (width, height))
 
         progress_counter = 0

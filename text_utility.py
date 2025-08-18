@@ -198,7 +198,7 @@ class IntNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "number": (
+                "value": (
                     "INT",
                     {
                         "multiline": False,
@@ -217,8 +217,8 @@ class IntNode:
     FUNCTION = "node_function"
     OUTPUT_NODE = True
 
-    def node_function(self, number):
-        return (number,)
+    def node_function(self, value):
+        return (value,)
 
 
 class FloatNode:
@@ -227,7 +227,17 @@ class FloatNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"number": ("FLOAT", {"multiline": False, "defaultInput": False})}}
+        return {
+            "required": {
+                "value": (
+                    "FLOAT",
+                    {
+                        "multiline": False,
+                        "defaultInput": False,
+                    },
+                )
+            }
+        }
 
     RETURN_TYPES = ("FLOAT",)
     CATEGORY = "Fair/string"
@@ -235,8 +245,8 @@ class FloatNode:
     FUNCTION = "node_function"
     OUTPUT_NODE = True
 
-    def node_function(self, number):
-        return (number,)
+    def node_function(self, value):
+        return (value,)
 
 
 class SequenceStringListNode:

@@ -30,8 +30,8 @@ from .image_utility import ImageSizeNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
-from .utility import PythonScriptNode
 
+from .script import PythonScriptNode
 
 from .logic import MaxNode
 from .logic import MinNode
@@ -39,7 +39,10 @@ from .logic import AddNode
 from .logic import SubtractNode
 from .logic import MultiplyNode
 from .logic import DivideNode
+from .logic import NumberNode
 from .logic import IfNode
+from .logic import FloatToIntNode
+from .logic import IntToFloatNode
 
 
 from .ollama import OllamaNode
@@ -79,7 +82,10 @@ NODE_CLASS_MAPPINGS = {
     "SubtractNode": SubtractNode,
     "MultiplyNode": MultiplyNode,
     "DivideNode": DivideNode,
+    "NumberNode": NumberNode,
     "IfNode": IfNode,
+    "FloatToIntNode": FloatToIntNode,
+    "IntToFloatNode": IntToFloatNode,
     "ImageToBase64Node": ImageToBase64Node,
     "OutpaintingPadNode": OutpaintingPadNode,
     "ImageSizeNode": ImageSizeNode,
@@ -121,7 +127,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "SubtractNode": "Subtract",
     "MultiplyNode": "Multiply",
     "DivideNode": "Divide",
+    "NumberNode": "Number",
     "IfNode": "If",
+    "FloatToIntNode": "Float To Int",
+    "IntToFloatNode": "Int To Float",
     "ImageToBase64Node": "Image To Base64",
     "Base64ToImageNode": "Base64 To Image",
     "OutpaintingPadNode": "Outpainting Pad",
