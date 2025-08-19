@@ -60,14 +60,23 @@ Ollama
 Ollama Client
 
 Python Script
-"""
 
-version = "1.0.57"
+Load LoRA Dual
+"""
+version = "1.0.58"
 license = { file = "LICENSE" }
-dependencies = ["googletrans-py==4.0.0", "datetime","opencv-python","asyncio","requests","ollama"]
+dependencies = [
+    "googletrans-py==4.0.0",
+    "datetime",
+    "opencv-python",
+    "asyncio",
+    "requests",
+    "ollama"
+]
 
 [project.urls]
 Repository = "https://github.com/yanhuifair/ComfyUI-FairLab"
+
 [tool.comfy]
 PublisherId = "fffffair"
 DisplayName = "ComfyUI-FairLab"

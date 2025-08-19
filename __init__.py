@@ -30,6 +30,7 @@ from .image_utility import ImageSizeNode
 
 from .utility import PrintAnyNode
 from .utility import PrintImageNode
+from .utility import LoraLoaderDualNode
 
 from .script import PythonScriptNode
 
@@ -75,6 +76,7 @@ NODE_CLASS_MAPPINGS = {
     "LoadImageFromURLNode": LoadImageFromURLNode,
     "PrintAnyNode": PrintAnyNode,
     "PrintImageNode": PrintImageNode,
+    "LoraLoaderDualNode": LoraLoaderDualNode,
     "PythonScriptNode": PythonScriptNode,
     "MaxNode": MaxNode,
     "MinNode": MinNode,
@@ -120,6 +122,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LoadImageFromURLNode": "Load Image From URL",
     "PrintAnyNode": "Print Any",
     "PrintImageNode": "Print Image",
+    "LoraLoaderDualNode": "Load LoRA Dual",
     "PythonScriptNode": "Python Script",
     "MaxNode": "Max",
     "MinNode": "Min",
