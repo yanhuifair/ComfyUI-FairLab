@@ -3,6 +3,15 @@ import os
 import string
 
 
+def string_to_tags(string):
+    tags = [s.strip() for s in string.split(",")]
+    return tags
+
+
+def tags_to_string(tags):
+    return ",".join(tags)
+
+
 class SaveStringToDirectoryNode:
     def __init__(self):
         pass
@@ -53,7 +62,6 @@ class LoadStringFromDirectoryNode:
     OUTPUT_IS_LIST = (True, True, True)
 
     def node_function(self, directory):
-
         string_list = []
         directory_list = []
         name_without_ext_list = []
@@ -140,7 +148,7 @@ class FixUTF8StringNode:
         return (out_string,)
 
 
-class StringCombineNode:
+class StringAppendNode:
     def __init__(self):
         pass
 
@@ -148,15 +156,8 @@ class StringCombineNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"defaultInput": True}),
-                "combine": ("STRING", {"defaultInput": True}),
-                "combine_at": (
-                    ["front", "back"],
-                    {
-                        "default": "back",
-                        "defaultInput": False,
-                    },
-                ),
+                "front": ("STRING", {"defaultInput": True}),
+                "back": ("STRING", {"defaultInput": True}),
             }
         }
 
@@ -164,12 +165,9 @@ class StringCombineNode:
     FUNCTION = "node_function"
     RETURN_TYPES = ("STRING",)
 
-    def node_function(self, string, combine, combine_at):
-        if combine_at == "front":
-            combined = combine + string
-        else:
-            combined = string + combine
-        return (combined,)
+    def node_function(self, front, back):
+        append = front + back
+        return (append,)
 
 
 class StringNode:
@@ -197,18 +195,7 @@ class IntNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
-                "value": (
-                    "INT",
-                    {
-                        "multiline": False,
-                        "defaultInput": False,
-                        "default": 0,
-                        "max": 65535,
-                        "min": -65535,
-                    },
-                )
-            },
+            "required": {"value": ("INT", {"multiline": False, "defaultInput": False, "default": 0, "max": 65535, "min": -65535})},
         }
 
     RETURN_TYPES = ("INT",)
@@ -227,17 +214,7 @@ class FloatNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "value": (
-                    "FLOAT",
-                    {
-                        "multiline": False,
-                        "defaultInput": False,
-                    },
-                )
-            }
-        }
+        return {"required": {"value": ("FLOAT", {"multiline": False, "defaultInput": False})}}
 
     RETURN_TYPES = ("FLOAT",)
     CATEGORY = "Fair/string"
@@ -249,25 +226,32 @@ class FloatNode:
         return (value,)
 
 
-class SequenceStringListNode:
+class RangeStringNode:
     def __init__(self):
         pass
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {}
+        return {
+            "required": {
+                "start": ("INT", {"default": 0}),
+                "stop": ("INT", {"default": 0}),
+                "step": ("INT", {"default": 1}),
+            },
+        }
 
     RETURN_TYPES = ("STRING",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    OUTPUT_IS_LIST = True
 
-    def node_function(self):
-        out = []
-        for i in range(10):
-            out.append(f"{i}")
-        return (out,)
+    def node_function(self, start, stop, step):
+        number_list = []
+        for i in range(start, stop, step):
+            number_list.append(f"{i}")
+        return (number_list,)
 
 
 class PrependTagsNode:
@@ -290,14 +274,11 @@ class PrependTagsNode:
     OUTPUT_NODE = True
 
     def node_function(self, string, tags):
-        out_string_list = []
-        for st in string:
-            input_tags_list = [s.strip() for s in st.split(",")]
-            prepend_tags_list = [s.strip() for s in tags.split(",")]
-            out_string = prepend_tags_list + input_tags_list
-            out_string = ", ".join(out_string)
-            out_string_list.append(out_string)
-        return (out_string_list,)
+        input_tags = string_to_tags(string)
+        prepend_tags = string_to_tags(tags)
+        out_string = prepend_tags + input_tags
+        out_string = tags_to_string(out_string)
+        return (out_string,)
 
 
 class AppendTagsNode:
@@ -320,17 +301,14 @@ class AppendTagsNode:
     OUTPUT_NODE = True
 
     def node_function(self, string, tags):
-        out_string_list = []
-        for st in string:
-            input_tags_list = [s.strip() for s in st.split(",")]
-            append_tags_list = [s.strip() for s in tags.split(",")]
-            out_string = input_tags_list + append_tags_list
-            out_string = ", ".join(out_string)
-            out_string_list.append(out_string)
-        return (out_string_list,)
+        input_tags = string_to_tags(string)
+        append_tags = string_to_tags(tags)
+        out_string = input_tags + append_tags
+        out_string = tags_to_string(out_string)
+        return (out_string,)
 
 
-class BlacklistTagsNode:
+class ExcludeTagsNode:
     def __init__(self):
         pass
 
@@ -350,15 +328,12 @@ class BlacklistTagsNode:
     OUTPUT_NODE = True
 
     def node_function(self, string, tags):
-        out_string_list = []
-        for st in string:
-            input_tags_list = [s.strip() for s in st.split(",")]
-            blacklist_tags_list = [s.strip() for s in tags.split(",")]
-            b_set = set(blacklist_tags_list)
-            out_string = [x for x in input_tags_list if x not in b_set]
-            out_string = ", ".join(out_string)
-            out_string_list.append(out_string)
-        return (out_string_list,)
+        input_tags = string_to_tags(string)
+        exclude_tags = string_to_tags(tags)
+        e_set = set(exclude_tags)
+        out_string = [x for x in input_tags if x not in e_set]
+        out_string = tags_to_string(out_string)
+        return (out_string,)
 
 
 class ShowStringNode:
@@ -401,6 +376,7 @@ class LoadStringNode:
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     RETURN_TYPES = ("STRING", "STRING", "STRING")
+    RETURN_NAMES = ("string", "path", "name")
 
     def node_function(self, path):
         out_string = ""
@@ -419,7 +395,7 @@ class LoadStringNode:
         return (out_string, out_path, out_name)
 
 
-class RemoveDuplicateTagsNode:
+class UniqueTagsNode:
     def __init__(self):
         pass
 
@@ -437,7 +413,7 @@ class RemoveDuplicateTagsNode:
 
     def node_function(self, string):
         out_string = ""
-        tags = [tag.strip() for tag in string.split(",")]
+        tags = string_to_tags(string)
         unique_tags = set(tags)
-        out_string = ", ".join(unique_tags)
+        out_string = tags_to_string(unique_tags)
         return (out_string,)

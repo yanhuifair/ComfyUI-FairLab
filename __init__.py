@@ -3,17 +3,17 @@ from .translate_utility import StringTranslateNode
 from .text_utility import SaveStringToDirectoryNode
 from .text_utility import LoadStringFromDirectoryNode
 from .text_utility import FixUTF8StringNode
-from .text_utility import StringCombineNode
+from .text_utility import StringAppendNode
 from .text_utility import StringNode
 from .text_utility import IntNode
 from .text_utility import FloatNode
-from .text_utility import SequenceStringListNode
+from .text_utility import RangeStringNode
 from .text_utility import PrependTagsNode
 from .text_utility import AppendTagsNode
-from .text_utility import BlacklistTagsNode
+from .text_utility import ExcludeTagsNode
 from .text_utility import ShowStringNode
 from .text_utility import LoadStringNode
-from .text_utility import RemoveDuplicateTagsNode
+from .text_utility import UniqueTagsNode
 
 from .image_utility import DownloadImageNode
 from .image_utility import SaveImageToDirectoryNode
@@ -57,16 +57,16 @@ NODE_CLASS_MAPPINGS = {
     "SaveStringToDirectoryNode": SaveStringToDirectoryNode,
     "LoadStringFromDirectoryNode": LoadStringFromDirectoryNode,
     "FixUTF8StringNode": FixUTF8StringNode,
-    "StringCombineNode": StringCombineNode,
+    "StringAppendNode": StringAppendNode,
     "StringNode": StringNode,
     "IntNode": IntNode,
     "FloatNode": FloatNode,
-    "SequenceStringListNode": SequenceStringListNode,
+    "RangeStringNode": RangeStringNode,
     "PrependTagsNode": PrependTagsNode,
     "AppendTagsNode": AppendTagsNode,
-    "BlacklistTagsNode": BlacklistTagsNode,
+    "ExcludeTagsNode": ExcludeTagsNode,
     "LoadStringNode": LoadStringNode,
-    "RemoveDuplicateTagsNode": RemoveDuplicateTagsNode,
+    "UniqueTagsNode": UniqueTagsNode,
     "ShowStringNode": ShowStringNode,
     "DownloadImageNode": DownloadImageNode,
     "SaveImageToDirectoryNode": SaveImageToDirectoryNode,
@@ -103,16 +103,16 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "SaveStringToDirectoryNode": "Save String To Directory",
     "LoadStringFromDirectoryNode": "Load String From Directory",
     "FixUTF8StringNode": "Fix UTF-8 String",
-    "StringCombineNode": "String Combine",
+    "StringAppendNode": "String Append",
     "StringNode": "String",
     "IntNode": "Int",
     "FloatNode": "Float",
-    "SequenceStringListNode": "Sequence String List",
+    "RangeStringListNode": "Range String",
     "PrependTagsNode": "Prepend Tags",
     "AppendTagsNode": "Append Tags",
-    "BlacklistTagsNode": "Blacklist Tags",
+    "ExcludeTagsNode": "Exclude Tags",
     "LoadStringNode": "Load String",
-    "RemoveDuplicateTagsNode": "Remove Duplicate Tags",
+    "UniqueTagsNode": "Unique Tags",
     "ShowStringNode": "Show String",
     "DownloadImageNode": "Download Image",
     "SaveImageToDirectoryNode": "Save Image To Directory",
