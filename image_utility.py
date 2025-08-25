@@ -193,19 +193,16 @@ class ImageResizeNode:
                 "resize_to": ("INT", {"default": 1024, "max": 4096}),
                 "side": (["shortest", "longest", "width", "height"], {"default": "longest"}),
                 "interpolation": (["lanczos", "nearest", "bilinear", "bicubic", "area", "nearest-exact"], {"default": "lanczos"}),
-            },
-            "optional": {
-                "mask": ("MASK",),
-            },
+            }
         }
 
-    RETURN_TYPES = ("IMAGE", "MASK", "INT", "INT")
-    RETURN_NAMES = ("image", "mask", "width", "height")
+    RETURN_TYPES = ("IMAGE", "INT", "INT")
+    RETURN_NAMES = ("image", "width", "height")
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def node_function(self, image, resize_to, side, interpolation, mask=None):
+    def node_function(self, image, resize_to, side, interpolation):
         image = image.movedim(-1, 1)
 
         image_height, image_width = image.shape[-2:]
@@ -233,23 +230,7 @@ class ImageResizeNode:
         image = comfy.utils.common_upscale(image, width, height, interpolation, "center")
         image = image.movedim(1, -1)
 
-        if mask is not None:
-            mask = mask.permute(0, 1, 2)
-
-            mask = mask.unsqueeze(0)
-            mask = NNF.interpolate(
-                mask,
-                size=(height, width),
-                mode="bilinear",
-                align_corners=False,
-            )
-
-            mask = mask.squeeze(0)
-            mask = mask.squeeze(0)
-
-            mask = mask.permute(0, 1)
-
-        return (image, mask, width, height)
+        return (image, width, height)
 
 
 class VideoToImageNode:
@@ -407,23 +388,24 @@ def load_image_to_tensor(directory, recursive, channels):
     progress_bar = ProgressBar(image_file_paths.__len__())
 
     for image_path in image_file_paths:
-        pil = Image.open(image_path)
-        pil = ImageOps.exif_transpose(pil)  # Handle EXIF orientation
 
-        if pil.mode == "RGBA" and channels == "RGB":
-            pil = rgba2rgb(pil)
-        elif pil.mode == "RGB" and channels == "RGBA":
-            pil = pil.convert("RGBA")
+        with Image.open(image_path) as pil:
+            pil = ImageOps.exif_transpose(pil)  # Handle EXIF orientation
 
-        image_tensor = pil2tensor(pil)
-        image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
-        image_tensors.append(image_tensor)
+            if pil.mode == "RGBA" and channels == "RGB":
+                pil = rgba2rgb(pil)
+            elif pil.mode == "RGB" and channels == "RGBA":
+                pil = pil.convert("RGBA")
 
-        image_dirs.append(os.path.dirname(image_path))
-        file_name = os.path.basename(image_path)
-        image_names.append(os.path.splitext(file_name)[0])  # Remove file extension
+            image_tensor = pil2tensor(pil)
+            image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
+            image_tensors.append(image_tensor)
 
-        progress_bar.update(1)
+            image_dirs.append(os.path.dirname(image_path))
+            file_name = os.path.basename(image_path)
+            image_names.append(os.path.splitext(file_name)[0])  # Remove file extension
+
+            progress_bar.update(1)
 
     return (image_tensors, image_dirs, image_names)
 
