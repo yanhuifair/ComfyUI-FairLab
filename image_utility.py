@@ -22,6 +22,7 @@ import torch.nn.functional as NNF
 from torchvision import transforms
 
 import base64
+import sys
 
 # tensor [b,c,h,w]
 # pil [h,w,c]
@@ -684,3 +685,73 @@ class ImageSizeNode:
         aspect_ratio = width / height
 
         return (width, height, max_side, min_side, aspect_ratio)
+
+
+class ImagesRangeNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE", {"defaultInput": True}),
+                "start": ("INT", {"default": 0, "min": -sys.maxsize - 1, "max": sys.maxsize}),
+                "use_start": ("BOOL", {"default": False}),
+                "end": ("INT", {"default": -1, "min": -sys.maxsize - 1, "max": sys.maxsize}),
+                "use_end": ("BOOL", {"default": False}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("images",)
+
+    def node_function(self, images, start, use_start, end, use_end):
+        images = images[start if use_start else None : end if use_end else None]
+        return (images,)
+
+
+class ImagesIndexNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE", {"defaultInput": True}),
+                "index": ("INT", {"default": -1, "min": -sys.maxsize - 1, "max": sys.maxsize}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("image",)
+
+    def node_function(self, images, index):
+        return (images[index].unsqueeze(0),)
+
+
+class ImagesCatNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE", {"defaultInput": True}),
+                "images_cat": ("IMAGE", {"defaultInput": True}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("images",)
+
+    def node_function(self, images, images_cat):
+        return (torch.cat((images, images_cat), dim=0),)
