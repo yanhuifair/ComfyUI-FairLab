@@ -1,6 +1,6 @@
-from comfy.utils import ProgressBar
 import os
 import string
+from comfy.comfy_types.node_typing import IO
 
 
 def string_to_tags(string):
@@ -20,9 +20,9 @@ class SaveStringToDirectoryNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"defaultInput": True}),
-                "directory": ("STRING", {"defaultInput": True}),
-                "name": ("STRING", {"defaultInput": True}),
+                "string": (IO.STRING, {"defaultInput": True}),
+                "directory": (IO.STRING, {"defaultInput": True}),
+                "name": (IO.STRING, {"defaultInput": True}),
                 "extension": ([".txt", ".cap", ".caption"], {"defaultInput": False, "default": ".txt"}),
             }
         }
@@ -30,7 +30,7 @@ class SaveStringToDirectoryNode:
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     OUTPUT_NODE = True
-    RETURN_TYPES = ("STRING", "STRING", "STRING")
+    RETURN_TYPES = (IO.STRING, IO.STRING, IO.STRING)
     RETURN_NAMES = ("string", "directory", "name")
 
     def node_function(self, string, directory, name, extension):
@@ -50,14 +50,14 @@ class LoadStringFromDirectoryNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "directory": ("STRING", {"defaultInput": True}),
+                "directory": (IO.STRING, {"defaultInput": True}),
             }
         }
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     OUTPUT_NODE = True
-    RETURN_TYPES = ("STRING", "STRING", "STRING")
+    RETURN_TYPES = (IO.STRING, IO.STRING, IO.STRING)
     RETURN_NAMES = ("string", "directory", "name")
     OUTPUT_IS_LIST = (True, True, True)
 
@@ -80,9 +80,9 @@ class FixUTF8StringNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"string": ("STRING", {"defaultInput": True})}}
+        return {"required": {"string": (IO.STRING, {"defaultInput": True})}}
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
@@ -156,14 +156,14 @@ class StringAppendNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "front": ("STRING", {"defaultInput": True}),
-                "back": ("STRING", {"defaultInput": True}),
+                "front": (IO.STRING, {"defaultInput": True}),
+                "back": (IO.STRING, {"defaultInput": True}),
             }
         }
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
 
     def node_function(self, front, back):
         append = front + back
@@ -176,9 +176,9 @@ class StringNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"string": ("STRING", {"multiline": True, "defaultInput": False})}}
+        return {"required": {"string": (IO.STRING, {"multiline": True, "defaultInput": False})}}
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
@@ -195,10 +195,10 @@ class IntNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {"value": ("INT", {"multiline": False, "defaultInput": False, "default": 0, "max": 65535, "min": -65535})},
+            "required": {"value": (IO.INT, {"multiline": False, "defaultInput": False, "default": 0, "max": 65535, "min": -65535})},
         }
 
-    RETURN_TYPES = ("INT",)
+    RETURN_TYPES = (IO.INT,)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
@@ -234,13 +234,13 @@ class RangeStringNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "start": ("INT", {"default": 0}),
-                "stop": ("INT", {"default": 0}),
-                "step": ("INT", {"default": 1}),
+                "start": (IO.INT, {"default": 0}),
+                "stop": (IO.INT, {"default": 0}),
+                "step": (IO.INT, {"default": 1}),
             },
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
@@ -262,12 +262,12 @@ class PrependTagsNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"defaultInput": True}),
-                "tags": ("STRING", {"defaultInput": False, "multiline": True}),
+                "string": (IO.STRING, {"defaultInput": True}),
+                "tags": (IO.STRING, {"defaultInput": False, "multiline": True}),
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
@@ -289,12 +289,12 @@ class AppendTagsNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"defaultInput": True}),
-                "tags": ("STRING", {"defaultInput": False, "multiline": True}),
+                "string": (IO.STRING, {"defaultInput": True}),
+                "tags": (IO.STRING, {"defaultInput": False, "multiline": True}),
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
@@ -316,12 +316,12 @@ class ExcludeTagsNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"defaultInput": True}),
-                "tags": ("STRING", {"defaultInput": False, "multiline": True}),
+                "string": (IO.STRING, {"defaultInput": True}),
+                "tags": (IO.STRING, {"defaultInput": False, "multiline": True}),
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
@@ -344,7 +344,7 @@ class ShowStringNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"forceInput": True}),
+                "string": (IO.STRING, {"forceInput": True}),
             },
             "hidden": {
                 "unique_id": "UNIQUE_ID",
@@ -354,7 +354,7 @@ class ShowStringNode:
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     OUTPUT_NODE = True
 
     def node_function(self, string):
@@ -369,13 +369,13 @@ class LoadStringNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "path": ("STRING", {"forceInput": True}),
+                "path": (IO.STRING, {"forceInput": True}),
             }
         }
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
-    RETURN_TYPES = ("STRING", "STRING", "STRING")
+    RETURN_TYPES = (IO.STRING, IO.STRING, IO.STRING)
     RETURN_NAMES = ("string", "path", "name")
 
     def node_function(self, path):
@@ -403,13 +403,13 @@ class UniqueTagsNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"forceInput": True}),
+                "string": (IO.STRING, {"forceInput": True}),
             }
         }
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
 
     def node_function(self, string):
         out_string = ""

@@ -1,6 +1,6 @@
 import googletrans
 from googletrans import Translator
-
+from comfy.comfy_types.node_typing import IO
 
 translator = Translator()
 
@@ -22,14 +22,14 @@ class StringTranslateNode:
         language_list = list(googletrans.LANGUAGES.keys())
         return {
             "required": {
-                "string": ("STRING", {"defaultInput": False, "multiline": True}),
+                "string": (IO.STRING, {"defaultInput": False, "multiline": True}),
                 "src": (language_list, {"default": "en" if "en" in language_list else "auto"}),
                 "dest": (language_list, {"default": "zh-cn" if "zh-cn" in language_list else "en"}),
             }
         }
 
     CATEGORY = "Fair/string"
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     FUNCTION = "node_function"
 
     def node_function(self, string, src, dest):

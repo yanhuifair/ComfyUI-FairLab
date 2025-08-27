@@ -1,4 +1,4 @@
-from .utility import any
+from comfy.comfy_types.node_typing import IO
 
 DEFAULT_SCRIPT = "RESULT = (A, B, C, D)"
 
@@ -8,7 +8,7 @@ class PythonScriptNode:
     def __init__(self):
         pass
 
-    RETURN_TYPES = (any, any, any, any)
+    RETURN_TYPES = (IO.ANY, IO.ANY, IO.ANY, IO.ANY)
     FUNCTION = "run_script"
     OUTPUT_NODE = True
     CATEGORY = "Fair/utility"
@@ -18,11 +18,11 @@ class PythonScriptNode:
         return {
             "required": {},
             "optional": {
-                "text": ("STRING", {"default": DEFAULT_SCRIPT, "multiline": True}),
-                "A": (any, {}),
-                "B": (any, {}),
-                "C": (any, {}),
-                "D": (any, {}),
+                "text": (IO.STRING, {"default": DEFAULT_SCRIPT, "multiline": True}),
+                "A": (IO.ANY, {}),
+                "B": (IO.ANY, {}),
+                "C": (IO.ANY, {}),
+                "D": (IO.ANY, {}),
             },
         }
 

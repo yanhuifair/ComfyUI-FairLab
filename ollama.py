@@ -6,6 +6,7 @@ from ollama import Client
 from .image_utility import tensor2pil
 from .image_utility import pil_to_base64
 import re
+from comfy.comfy_types.node_typing import IO
 
 
 class OllamaClientNode:
@@ -17,9 +18,9 @@ class OllamaClientNode:
         # cls.model_list = [model.model for model in ollama.list().models]
         return {
             "required": {
-                "url": ("STRING", {"default": "http://127.0.0.1:11434"}),
+                "url": (IO.STRING, {"default": "http://127.0.0.1:11434"}),
                 "model": ((), {}),
-                "keep_alive": ("INT", {"default": -1, "tooltip": "controls how long the model will stay loaded into memory following the request, The unit is minutes.\nSet to -1 to keep the model loaded indefinitely."}),
+                "keep_alive": (IO.INT, {"default": -1, "tooltip": "controls how long the model will stay loaded into memory following the request, The unit is minutes.\nSet to -1 to keep the model loaded indefinitely."}),
             }
         }
 
@@ -44,18 +45,18 @@ class OllamaNode:
         # cls.model_list = [model.model for model in ollama.list().models]
         return {
             "required": {
-                "prompt": ("STRING", {"default": "describe the image", "multiline": True, "tooltip": "the prompt to generate a response for"}),
+                "prompt": (IO.STRING, {"default": "describe the image", "multiline": True, "tooltip": "the prompt to generate a response for"}),
                 "ollama_connection": ("ollama_connection", {"forceInput": True}),
             },
             "optional": {
-                "images": ("IMAGE", {"tooltip": "(optional) a list of images"}),
+                "images": (IO.IMAGE, {"tooltip": "(optional) a list of images"}),
             },
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/ollama"
     OUTPUT_NODE = True
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (IO.STRING, IO.STRING)
     RETURN_NAMES = ("think", "response")
 
     def separate_response(self, response):

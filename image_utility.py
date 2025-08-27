@@ -23,6 +23,7 @@ from torchvision import transforms
 
 import base64
 import sys
+from comfy.comfy_types.node_typing import IO
 
 # tensor [b,c,h,w]
 # pil [h,w,c]
@@ -108,8 +109,8 @@ class DownloadImageNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "images": ("IMAGE",),
-                "filename_prefix": ("STRING", {"default": "ComfyUI_%time%_%batch_num%"}),
+                "images": (IO.IMAGE,),
+                "filename_prefix": (IO.STRING, {"default": "ComfyUI_%time%_%batch_num%"}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -160,11 +161,11 @@ class SaveImageToDirectoryNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"defaultInput": True}),
-                "directory": ("STRING", {"defaultInput": True}),
-                "name": ("STRING", {"defaultInput": True}),
+                "image": (IO.IMAGE, {"defaultInput": True}),
+                "directory": (IO.STRING, {"defaultInput": True}),
+                "name": (IO.STRING, {"defaultInput": True}),
                 "type": (["png", "jpg"], {"default": "png"}),
-                "compress_level": ("INT", {"default": 4, "min": 0, "max": 9}),
+                "compress_level": (IO.INT, {"default": 4, "min": 0, "max": 9}),
             }
         }
 
@@ -190,14 +191,14 @@ class ImageResizeNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE",),
-                "resize_to": ("INT", {"default": 1024, "max": 4096}),
+                "image": (IO.IMAGE,),
+                "resize_to": (IO.INT, {"default": 1024, "max": 4096}),
                 "side": (["shortest", "longest", "width", "height"], {"default": "longest"}),
                 "interpolation": (["lanczos", "nearest", "bilinear", "bicubic", "area", "nearest-exact"], {"default": "lanczos"}),
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "INT", "INT")
+    RETURN_TYPES = (IO.IMAGE, IO.INT, IO.INT)
     RETURN_NAMES = ("image", "width", "height")
     FUNCTION = "node_function"
     OUTPUT_NODE = True
@@ -242,15 +243,15 @@ class VideoToImageNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "video_path": ("STRING", {"defaultInput": False}),
-                "capture_rate": ("INT", {"default": 30}),
-                "frame_offset": ("INT", {"default": 0}),
-                "image_dir": ("STRING", {"defaultInput": False}),
-                "image_name_prefix": ("STRING", {"defaultInput": False}),
+                "video_path": (IO.STRING, {"defaultInput": False}),
+                "capture_rate": (IO.INT, {"default": 30}),
+                "frame_offset": (IO.INT, {"default": 0}),
+                "image_dir": (IO.STRING, {"defaultInput": False}),
+                "image_name_prefix": (IO.STRING, {"defaultInput": False}),
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     RETURN_NAMES = ("image_paths",)
     FUNCTION = "node_function"
     OUTPUT_NODE = True
@@ -299,14 +300,14 @@ class ImageToVideoNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image_dir": ("STRING", {"defaultInput": False}),
-                "frame_rate": ("INT", {"default": 30}),
-                "video_dir": ("STRING", {"defaultInput": False}),
-                "video_name": ("STRING", {"defaultInput": False, "default": "output"}),
+                "image_dir": (IO.STRING, {"defaultInput": False}),
+                "frame_rate": (IO.INT, {"default": 30}),
+                "video_dir": (IO.STRING, {"defaultInput": False}),
+                "video_name": (IO.STRING, {"defaultInput": False, "default": "output"}),
             }
         }
 
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (IO.STRING, IO.STRING)
     RETURN_NAMES = ("image_paths", "video_path")
     FUNCTION = "node_function"
     OUTPUT_NODE = True
@@ -353,12 +354,12 @@ class LoadImageFromURLNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "url": ("STRING", {"defaultInput": False}),
+                "url": (IO.STRING, {"defaultInput": False}),
                 "channels": (["RGB", "RGBA"], {"default": "RGB"}),
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "MASK", "STRING")
+    RETURN_TYPES = (IO.IMAGE, IO.MASK, IO.STRING)
     RETURN_NAMES = ("image", "mask", "name")
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
@@ -419,8 +420,8 @@ class LoadImageFromDirectoryNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "directory": ("STRING", {"default": "", "forceInput": False}),
-                "recursive": ("BOOLEAN", {"default": False}),
+                "directory": (IO.STRING, {"default": "", "forceInput": False}),
+                "recursive": (IO.BOOLEAN, {"default": False}),
                 "channels": (["RGB", "RGBA"], {"default": "RGB"}),
             }
         }
@@ -428,7 +429,7 @@ class LoadImageFromDirectoryNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
 
-    RETURN_TYPES = ("IMAGE", "STRING", "STRING")
+    RETURN_TYPES = (IO.IMAGE, IO.STRING, IO.STRING)
     RETURN_NAMES = ("image", "directory", "name")
     OUTPUT_IS_LIST = (True, True, True)
 
@@ -449,15 +450,15 @@ class FillAlphaNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"default": "", "forceInput": True}),
-                "alpha_threshold": ("INT", {"default": "128"}),
-                "r": ("INT", {"default": "0"}),
-                "g": ("INT", {"default": "128"}),
-                "b": ("INT", {"default": "0"}),
+                "image": (IO.IMAGE, {"default": "", "forceInput": True}),
+                "alpha_threshold": (IO.INT, {"default": "128"}),
+                "r": (IO.INT, {"default": "0"}),
+                "g": (IO.INT, {"default": "128"}),
+                "b": (IO.INT, {"default": "0"}),
             }
         }
 
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("image",)
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
@@ -525,11 +526,11 @@ class ImageToBase64Node:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"defaultInput": True}),
+                "image": (IO.IMAGE, {"defaultInput": True}),
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     FUNCTION = "function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
@@ -568,11 +569,11 @@ class Base64ToImageNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "string": ("STRING", {"defaultInput": True, "forceInput": True}),
+                "string": (IO.STRING, {"defaultInput": True, "forceInput": True}),
             }
         }
 
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = (IO.IMAGE,)
     FUNCTION = "function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
@@ -591,16 +592,16 @@ class OutpaintingPadNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"defaultInput": True, "forceInput": True}),
-                "target_width": ("INT", {"default": 1024, "min": 64, "max": 8192}),
-                "target_height": ("INT", {"default": 1024, "min": 64, "max": 8192}),
+                "image": (IO.IMAGE, {"defaultInput": True, "forceInput": True}),
+                "target_width": (IO.INT, {"default": 1024, "min": 64, "max": 8192}),
+                "target_height": (IO.INT, {"default": 1024, "min": 64, "max": 8192}),
                 "align": (["left", "left-top", "top", "top-right", "right", "right-bottom", "bottom", "left-bottom", "center"], {"default": "center"}),
             }
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    RETURN_TYPES = ("INT", "INT", "INT", "INT")
+    RETURN_TYPES = (IO.INT, IO.INT, IO.INT, IO.INT)
     RETURN_NAMES = ("left", "top", "right", "bottom")
 
     def node_function(self, image, target_width, target_height, align):
@@ -668,13 +669,13 @@ class ImageSizeNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE", {"defaultInput": True, "forceInput": True}),
+                "image": (IO.IMAGE, {"defaultInput": True, "forceInput": True}),
             }
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    RETURN_TYPES = ("INT", "INT", "INT", "INT", "FLOAT")
+    RETURN_TYPES = (IO.INT, IO.INT, IO.INT, IO.INT, "FLOAT")
     RETURN_NAMES = ("width", "height", "max_side", "min_side", "aspect_ratio")
 
     def node_function(self, image):
@@ -695,17 +696,17 @@ class ImagesRangeNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "images": ("IMAGE", {"defaultInput": True}),
-                "start": ("INT", {"default": 0, "min": -sys.maxsize - 1, "max": sys.maxsize}),
+                "images": (IO.IMAGE, {"defaultInput": True}),
+                "start": (IO.INT, {"default": 0, "min": -sys.maxsize - 1, "max": sys.maxsize}),
                 "use_start": ("BOOL", {"default": False}),
-                "end": ("INT", {"default": -1, "min": -sys.maxsize - 1, "max": sys.maxsize}),
+                "end": (IO.INT, {"default": -1, "min": -sys.maxsize - 1, "max": sys.maxsize}),
                 "use_end": ("BOOL", {"default": False}),
             }
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("images",)
 
     def node_function(self, images, start, use_start, end, use_end):
@@ -721,14 +722,14 @@ class ImagesIndexNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "images": ("IMAGE", {"defaultInput": True}),
-                "index": ("INT", {"default": -1, "min": -sys.maxsize - 1, "max": sys.maxsize}),
+                "images": (IO.IMAGE, {"defaultInput": True}),
+                "index": (IO.INT, {"default": -1, "min": -sys.maxsize - 1, "max": sys.maxsize}),
             }
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("image",)
 
     def node_function(self, images, index):
@@ -743,14 +744,14 @@ class ImagesCatNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "images": ("IMAGE", {"defaultInput": True}),
-                "images_cat": ("IMAGE", {"defaultInput": True}),
+                "images": (IO.IMAGE, {"defaultInput": True}),
+                "images_cat": (IO.IMAGE, {"defaultInput": True}),
             }
         }
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("images",)
 
     def node_function(self, images, images_cat):

@@ -1,17 +1,7 @@
 import folder_paths
 import comfy.sd
 import comfy.utils
-
-
-class AnyType(str):
-    def __eq__(self, __value: object) -> bool:
-        return True
-
-    def __ne__(self, __value: object) -> bool:
-        return False
-
-
-any = AnyType("*")
+from comfy.comfy_types.node_typing import IO
 
 
 class PrintAnyNode:
@@ -22,8 +12,8 @@ class PrintAnyNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "input": (any,),
-                "log": ("STRING",),
+                "input": (IO.ANY,),
+                "log": (IO.STRING,),
             },
         }
 
@@ -48,8 +38,8 @@ class PrintImageNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": ("IMAGE",),
-                "log": ("STRING",),
+                "image": (IO.IMAGE,),
+                "log": (IO.STRING,),
             },
         }
 
@@ -73,18 +63,18 @@ class LoraLoaderDualNode:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "model": ("MODEL", {"tooltip": "The diffusion model the LoRA will be applied to."}),
-                "clip": ("CLIP", {"tooltip": "The CLIP model the LoRA will be applied to."}),
+                "model": (IO.MODEL, {"tooltip": "The diffusion model the LoRA will be applied to."}),
+                "clip": (IO.CLIP, {"tooltip": "The CLIP model the LoRA will be applied to."}),
                 "lora_name": (folder_paths.get_filename_list("loras"), {"tooltip": "The name of the LoRA."}),
-                "strength_model": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the diffusion model. This value can be negative."}),
-                "strength_clip": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the CLIP model. This value can be negative."}),
+                "strength_model": (IO.FLOAT, {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the diffusion model. This value can be negative."}),
+                "strength_clip": (IO.FLOAT, {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the CLIP model. This value can be negative."}),
                 "lora_name_2": (folder_paths.get_filename_list("loras"), {"tooltip": "The name of the LoRA."}),
-                "strength_model_2": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the diffusion model. This value can be negative."}),
-                "strength_clip_2": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the CLIP model. This value can be negative."}),
+                "strength_model_2": (IO.FLOAT, {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the diffusion model. This value can be negative."}),
+                "strength_clip_2": (IO.FLOAT, {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01, "tooltip": "How strongly to modify the CLIP model. This value can be negative."}),
             }
         }
 
-    RETURN_TYPES = ("MODEL", "CLIP")
+    RETURN_TYPES = (IO.MODEL, IO.CLIP)
     OUTPUT_TOOLTIPS = ("The modified diffusion model.", "The modified CLIP model.")
     FUNCTION = "node_function"
 
