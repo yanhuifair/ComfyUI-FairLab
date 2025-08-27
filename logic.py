@@ -202,7 +202,7 @@ class IntToFloatNode:
     RETURN_TYPES = (IO.FLOAT,)
 
     def node_function(self, value):
-        out_value = int(value)
+        out_value = float(value)
         return (out_value,)
 
 
@@ -214,9 +214,9 @@ class IfNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "true_value": (IO.ANY,),
-                "false_value": (IO.ANY,),
-                "condition": (IO.BOOLEAN, {"defaultInput": True}),
+                "true": (IO.ANY,),
+                "false": (IO.ANY,),
+                "condition": (IO.BOOLEAN,),
             },
         }
 
@@ -224,8 +224,8 @@ class IfNode:
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.ANY,)
 
-    def node_function(self, true_value, false_value, condition):
+    def node_function(self, true, false, condition):
         if condition:
-            return (true_value,)
+            return (true,)
         else:
-            return (false_value,)
+            return (false,)
