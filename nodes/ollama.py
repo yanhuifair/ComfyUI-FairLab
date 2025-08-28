@@ -15,12 +15,11 @@ class OllamaClientNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        # cls.model_list = [model.model for model in ollama.list().models]
         return {
             "required": {
                 "url": (IO.STRING, {"default": "http://127.0.0.1:11434"}),
                 "model": ((), {}),
-                "keep_alive": (IO.INT, {"default": -1, "tooltip": "controls how long the model will stay loaded into memory following the request, The unit is minutes.\nSet to -1 to keep the model loaded indefinitely."}),
+                "keep_alive": (IO.INT, {"default": 5, "tooltip": "controls how long the model will stay loaded into memory following the request, The unit is minutes.\nSet to -1 to keep the model loaded indefinitely.", "min": -1}),
             }
         }
 

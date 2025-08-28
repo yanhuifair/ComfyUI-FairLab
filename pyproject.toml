@@ -63,10 +63,10 @@ Python Script
 
 Load LoRA Dual
 """
-version = "1.0.63"
+version = "1.0.64"
 license = { file = "LICENSE" }
 dependencies = [
-    "googletrans-py==4.0.0",
+    "googletrans",
     "datetime",
     "opencv-python",
     "asyncio",

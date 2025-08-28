@@ -1,56 +1,56 @@
-from .translate_utility import StringTranslateNode
+from .nodes.translate_utility import StringTranslateNode
 
-from .text_utility import SaveStringToDirectoryNode
-from .text_utility import LoadStringFromDirectoryNode
-from .text_utility import FixUTF8StringNode
-from .text_utility import StringAppendNode
-from .text_utility import StringNode
-from .text_utility import IntNode
-from .text_utility import FloatNode
-from .text_utility import RangeStringNode
-from .text_utility import PrependTagsNode
-from .text_utility import AppendTagsNode
-from .text_utility import ExcludeTagsNode
-from .text_utility import ShowStringNode
-from .text_utility import LoadStringNode
-from .text_utility import UniqueTagsNode
+from .nodes.text_utility import SaveStringToDirectoryNode
+from .nodes.text_utility import LoadStringFromDirectoryNode
+from .nodes.text_utility import FixUTF8StringNode
+from .nodes.text_utility import StringAppendNode
+from .nodes.text_utility import StringNode
+from .nodes.text_utility import IntNode
+from .nodes.text_utility import FloatNode
+from .nodes.text_utility import RangeStringNode
+from .nodes.text_utility import PrependTagsNode
+from .nodes.text_utility import AppendTagsNode
+from .nodes.text_utility import ExcludeTagsNode
+from .nodes.text_utility import ShowStringNode
+from .nodes.text_utility import LoadStringNode
+from .nodes.text_utility import UniqueTagsNode
 
-from .image_utility import DownloadImageNode
-from .image_utility import SaveImageToDirectoryNode
-from .image_utility import ImageResizeNode
-from .image_utility import VideoToImageNode
-from .image_utility import ImageToVideoNode
-from .image_utility import LoadImageFromURLNode
-from .image_utility import LoadImageFromDirectoryNode
-from .image_utility import FillAlphaNode
-from .image_utility import ImageToBase64Node
-from .image_utility import Base64ToImageNode
-from .image_utility import OutpaintingPadNode
-from .image_utility import ImageSizeNode
-from .image_utility import ImagesRangeNode
-from .image_utility import ImagesIndexNode
-from .image_utility import ImagesCatNode
+from .nodes.image_utility import DownloadImageNode
+from .nodes.image_utility import SaveImageToDirectoryNode
+from .nodes.image_utility import ImageResizeNode
+from .nodes.image_utility import VideoToImageNode
+from .nodes.image_utility import ImageToVideoNode
+from .nodes.image_utility import LoadImageFromURLNode
+from .nodes.image_utility import LoadImageFromDirectoryNode
+from .nodes.image_utility import FillAlphaNode
+from .nodes.image_utility import ImageToBase64Node
+from .nodes.image_utility import Base64ToImageNode
+from .nodes.image_utility import OutpaintingPadNode
+from .nodes.image_utility import ImageSizeNode
+from .nodes.image_utility import ImagesRangeNode
+from .nodes.image_utility import ImagesIndexNode
+from .nodes.image_utility import ImagesCatNode
 
-from .utility import PrintAnyNode
-from .utility import PrintImageNode
-from .utility import LoraLoaderDualNode
+from .nodes.utility import PrintAnyNode
+from .nodes.utility import PrintImageNode
+from .nodes.utility import LoraLoaderDualNode
 
-from .script import PythonScriptNode
+from .nodes.script import PythonScriptNode
 
-from .logic import MaxNode
-from .logic import MinNode
-from .logic import AddNode
-from .logic import SubtractNode
-from .logic import MultiplyNode
-from .logic import DivideNode
-from .logic import NumberNode
-from .logic import IfNode
-from .logic import FloatToIntNode
-from .logic import IntToFloatNode
+from .nodes.logic import MaxNode
+from .nodes.logic import MinNode
+from .nodes.logic import AddNode
+from .nodes.logic import SubtractNode
+from .nodes.logic import MultiplyNode
+from .nodes.logic import DivideNode
+from .nodes.logic import NumberNode
+from .nodes.logic import IfNode
+from .nodes.logic import FloatToIntNode
+from .nodes.logic import IntToFloatNode
 
 
-from .ollama import OllamaNode
-from .ollama import OllamaClientNode
+from .nodes.ollama import OllamaNode
+from .nodes.ollama import OllamaClientNode
 
 
 NODE_CLASS_MAPPINGS = {
