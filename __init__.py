@@ -49,10 +49,6 @@ from .nodes.logic import FloatToIntNode
 from .nodes.logic import IntToFloatNode
 
 
-from .nodes.ollama import OllamaNode
-from .nodes.ollama import OllamaClientNode
-
-
 NODE_CLASS_MAPPINGS = {
     "StringTranslateNode": StringTranslateNode,
     "LoadImageFromDirectoryNode": LoadImageFromDirectoryNode,
@@ -98,8 +94,6 @@ NODE_CLASS_MAPPINGS = {
     "ImagesIndexNode": ImagesIndexNode,
     "ImagesCatNode": ImagesCatNode,
     "Base64ToImageNode": Base64ToImageNode,
-    "OllamaNode": OllamaNode,
-    "OllamaClientNode": OllamaClientNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -147,8 +141,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImagesRangeNode": "Images Range",
     "ImagesIndexNode": "Images Index",
     "ImagesCatNode": "Images Cat",
-    "OllamaNode": "🦙 Ollama",
-    "OllamaClientNode": "🦙 Ollama Client",
 }
 
 

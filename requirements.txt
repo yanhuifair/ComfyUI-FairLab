@@ -1,6 +1,5 @@
-googletrans-py==4.0.0
+googletrans
 datetime
 opencv-python
 asyncio
 requests
-ollama
