@@ -85,6 +85,10 @@ def batch2list(tensor_batch):
     return tensors
 
 
+def list2batch(tensor_list):
+    return torch.cat(tensor_list)
+
+
 def rgba2rgb(pil):
     bg = Image.new("RGB", pil.size, (255, 255, 255))
     bg.paste(pil, pil)
@@ -442,6 +446,37 @@ class LoadImageFromDirectoryNode:
         return (out_image, out_dir, out_name)
 
 
+class LoadImageBatchFromDirectoryNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "directory": (IO.STRING, {"default": "", "forceInput": False}),
+                "recursive": (IO.BOOLEAN, {"default": False}),
+                "channels": (["RGB", "RGBA"], {"default": "RGB"}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+
+    RETURN_TYPES = (IO.IMAGE, IO.STRING, IO.STRING)
+    RETURN_NAMES = ("images", "directory", "name")
+    OUTPUT_IS_LIST = (False, True, True)
+
+    def node_function(self, directory, recursive, channels):
+        if not directory or not os.path.isdir(directory):
+            raise Exception("folder_path is not valid: " + directory)
+
+        (out_image, out_dir, out_name) = load_image_to_tensor(directory, recursive, channels)
+        out_image = list2batch(out_image)
+
+        return (out_image, out_dir, out_name)
+
+
 class FillAlphaNode:
     def __init__(self):
         pass
@@ -485,21 +520,8 @@ class FillAlphaNode:
         return image_tensor
 
     def node_function(self, image, alpha_threshold, r, g, b):
-        height = image[0].shape[0]
-        width = image[0].shape[1]
-
-        progress_bar = ProgressBar(image.shape[0])
-
-        image_tensors = []
-
-        for tensor in batch2list(image):
-            tensor_filled = self.fill_alpha(tensor, alpha_threshold, (r, g, b))
-            image_tensors.append(tensor_filled)
-            progress_bar.update(1)
-
-        image_tensors = tensor2batch(image_tensors, height, width, 3)
-
-        return (image_tensors,)
+        tensor_filled = self.fill_alpha(image, alpha_threshold, (r, g, b))
+        return (tensor_filled,)
 
 
 def pil_to_base64(pli_image, pnginfo=None, header=False):

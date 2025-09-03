@@ -22,6 +22,7 @@ from .nodes.image_utility import VideoToImageNode
 from .nodes.image_utility import ImageToVideoNode
 from .nodes.image_utility import LoadImageFromURLNode
 from .nodes.image_utility import LoadImageFromDirectoryNode
+from .nodes.image_utility import LoadImageBatchFromDirectoryNode
 from .nodes.image_utility import FillAlphaNode
 from .nodes.image_utility import ImageToBase64Node
 from .nodes.image_utility import Base64ToImageNode
@@ -52,6 +53,7 @@ from .nodes.logic import IntToFloatNode
 NODE_CLASS_MAPPINGS = {
     "StringTranslateNode": StringTranslateNode,
     "LoadImageFromDirectoryNode": LoadImageFromDirectoryNode,
+    "LoadImageBatchFromDirectoryNode": LoadImageBatchFromDirectoryNode,
     "FillAlphaNode": FillAlphaNode,
     "SaveStringToDirectoryNode": SaveStringToDirectoryNode,
     "LoadStringFromDirectoryNode": LoadStringFromDirectoryNode,
@@ -99,6 +101,7 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "StringTranslateNode": "String Translate",
     "LoadImageFromDirectoryNode": "Load Image From Directory",
+    "LoadImageBatchFromDirectoryNode": "Load Image Batch From Directory",
     "FillAlphaNode": "Fill Alpha",
     "SaveStringToDirectoryNode": "Save String To Directory",
     "LoadStringFromDirectoryNode": "Load String From Directory",
