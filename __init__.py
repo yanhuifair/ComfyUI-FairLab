@@ -31,10 +31,12 @@ from .nodes.image_utility import ImageSizeNode
 from .nodes.image_utility import ImagesRangeNode
 from .nodes.image_utility import ImagesIndexNode
 from .nodes.image_utility import ImagesCatNode
+from .nodes.image_utility import ImagesInfoNode
 
 from .nodes.utility import PrintAnyNode
 from .nodes.utility import PrintImageNode
 from .nodes.utility import LoraLoaderDualNode
+from .nodes.utility import AspectRatiosNode
 
 from .nodes.script import PythonScriptNode
 
@@ -78,6 +80,7 @@ NODE_CLASS_MAPPINGS = {
     "PrintAnyNode": PrintAnyNode,
     "PrintImageNode": PrintImageNode,
     "LoraLoaderDualNode": LoraLoaderDualNode,
+    "AspectRatiosNode": AspectRatiosNode,
     "PythonScriptNode": PythonScriptNode,
     "MaxNode": MaxNode,
     "MinNode": MinNode,
@@ -95,6 +98,7 @@ NODE_CLASS_MAPPINGS = {
     "ImagesRangeNode": ImagesRangeNode,
     "ImagesIndexNode": ImagesIndexNode,
     "ImagesCatNode": ImagesCatNode,
+    "ImagesInfoNode": ImagesInfoNode,
     "Base64ToImageNode": Base64ToImageNode,
 }
 
@@ -126,6 +130,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "PrintAnyNode": "Print Any",
     "PrintImageNode": "Print Image",
     "LoraLoaderDualNode": "Load LoRA Dual",
+    "AspectRatiosNode": "Aspect Ratios",
     "PythonScriptNode": "Python Script",
     "MaxNode": "Max",
     "MinNode": "Min",
@@ -144,6 +149,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImagesRangeNode": "Images Range",
     "ImagesIndexNode": "Images Index",
     "ImagesCatNode": "Images Cat",
+    "ImagesInfoNode": "Images Info",
 }
 
 

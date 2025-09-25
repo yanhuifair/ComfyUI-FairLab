@@ -778,3 +778,25 @@ class ImagesCatNode:
 
     def node_function(self, images, images_cat):
         return (torch.cat((images, images_cat), dim=0),)
+
+
+class ImagesInfoNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": (IO.IMAGE, {"defaultInput": True}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.INT, IO.INT, IO.INT)
+    RETURN_NAMES = ("width", "height", "length")
+
+    def node_function(self, images):
+        width, height, length = (images.shape[2], images.shape[1], images.shape[0])
+        return (width, height, length)
