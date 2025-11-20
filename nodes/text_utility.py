@@ -418,3 +418,206 @@ class UniqueTagsNode:
         unique_tags = set(tags)
         out_string = tags_to_string(unique_tags)
         return (out_string,)
+
+
+class ASCIICharNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "string": (IO.STRING, {"forceInput": True}),
+            }
+        }
+
+    CATEGORY = "Fair/string"
+    FUNCTION = "node_function"
+    RETURN_TYPES = (IO.STRING,)
+
+    # 26个字母的ASCII艺术字
+    char_a = """
+▒█▀▀█
+▒█▄▄█
+▒█░▒█
+    """
+
+    char_b = """
+▒█▀▀▄
+▒█▀▀▄
+▒█▄▄▀
+    """
+
+    char_c = """
+▒█▀▀▀
+▒█░░░
+▒█▄▄▄
+    """
+
+    char_d = """
+▒█▀▀▄
+▒█░▒█
+▒█▄▄▀
+    """
+
+    char_e = """
+▒█▀▀▀
+▒█▀▀▀
+▒█▄▄▄
+    """
+
+    char_f = """
+▒█▀▀▀
+▒█▀▀▀
+▒█░░░
+    """
+
+    char_g = """
+▒█▀▀▀
+▒█░▀█
+▒█▄▄█
+    """
+
+    char_h = """
+▒█░▒█
+▒█▀▀█
+▒█░▒█
+    """
+
+    char_i = """
+░▒█░░
+░▒█░░
+░▒█░░
+    """
+
+    char_j = """
+░░▒█░
+░░▒█░
+▒█▄█░
+    """
+
+    char_k = """
+▒█░▄▀
+▒█▀▄░
+▒█░▒█
+    """
+
+    char_l = """
+▒█░░░
+▒█░░░
+▒█▄▄▄
+    """
+
+    char_m = """
+▒█▄ ▄█
+▒█▒█▒█
+▒█░░▒█
+    """
+
+    char_n = """
+▒█▄▒█
+▒██▒█
+▒█░▀█
+    """
+
+    char_o = """
+▒█▀▀█
+▒█░▒█
+▒█▄▄█
+    """
+
+    char_p = """
+▒█▀▀█
+▒█▄▄█
+▒█░░░
+    """
+
+    char_q = """
+▒█▀▀█
+▒█░▒█
+▒█▄▀▄
+    """
+
+    char_r = """
+▒█▀▀█
+▒█▄▄▀
+▒█░▒█
+    """
+
+    char_s = """
+▒▄▀▀▀░
+░░▀▄░░
+▒▄▄▄▀░
+    """
+
+    char_t = """
+▀▀█▀▀
+░▒█░░
+░▒█░░
+    """
+
+    char_u = """
+▒█░▒█
+▒█░▒█
+▒█▄▄█
+    """
+
+    char_v = """
+█░░▒█
+▒█▒█░
+░▒▀░░
+    """
+
+    char_w = """
+▒█░█░█
+▒█░█░█
+▒█▄▀▄█
+    """
+
+    char_x = """
+▀▄░▄▀
+░▒█░░
+▄▀░▀▄
+    """
+
+    char_y = """
+█░░▒█
+▒█▒█░
+░▒█░░
+    """
+
+    char_z = """
+▒▀▀▀█
+░░▄▀░
+▒█▄▄▄
+    """
+
+    def node_function(self, string):
+        # 将输入字符串转换为小写并过滤掉非字母字符
+        chars = [c.lower() for c in string if c.isalpha()]
+
+        if not chars:
+            return ("",)
+
+        # 获取所有字符的ASCII艺术字
+        char_lines = [[], [], []]  # 3行
+
+        for char in chars:
+            # 获取对应字母的ASCII艺术字
+            char_attr = f"char_{char}"
+            if hasattr(self, char_attr):
+                char_art = getattr(self, char_attr).strip().split("\n")
+                # 将每一行添加到对应的行中
+                for i in range(3):
+                    if i < len(char_art):
+                        char_lines[i].append(char_art[i])
+
+        # 组合所有行，字符之间加空格
+        out_string = ""
+        for line_parts in char_lines:
+            out_string += " ".join(line_parts) + "\n"
+
+        print(out_string)
+
+        return (out_string,)

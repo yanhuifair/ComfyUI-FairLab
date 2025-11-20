@@ -63,7 +63,7 @@ Python Script
 
 Load LoRA Dual
 """
-version = "1.0.68"
+version = "1.0.69"
 license = { file = "LICENSE" }
 dependencies = [
     "googletrans",

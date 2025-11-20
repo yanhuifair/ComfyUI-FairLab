@@ -14,6 +14,7 @@ from .nodes.text_utility import ExcludeTagsNode
 from .nodes.text_utility import ShowStringNode
 from .nodes.text_utility import LoadStringNode
 from .nodes.text_utility import UniqueTagsNode
+from .nodes.text_utility import ASCIICharNode
 
 from .nodes.image_utility import DownloadImageNode
 from .nodes.image_utility import SaveImageToDirectoryNode
@@ -100,6 +101,7 @@ NODE_CLASS_MAPPINGS = {
     "ImagesCatNode": ImagesCatNode,
     "ImagesInfoNode": ImagesInfoNode,
     "Base64ToImageNode": Base64ToImageNode,
+    "ASCIICharNode": ASCIICharNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -150,6 +152,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImagesIndexNode": "Images Index",
     "ImagesCatNode": "Images Cat",
     "ImagesInfoNode": "Images Info",
+    "ASCIICharNode": "ASCII Art Text",
 }
 
 
