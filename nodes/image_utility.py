@@ -824,7 +824,7 @@ class DitherNode:
         return {
             "required": {
                 "images": (IO.IMAGE, {"defaultInput": True}),
-                "dither": (["Modulation", "Floyd–Steinberg", "Halftone"], {"default": "Modulation"}),
+                "dither": (["Modulation", "Floyd Steinberg", "Halftone"], {"default": "Modulation"}),
             }
         }
 
@@ -834,8 +834,6 @@ class DitherNode:
     RETURN_NAMES = ("images",)
 
     def floyd_steinberg(self, image):
-        # image: np.array of shape (height, width), dtype=float, 0.0-1.0
-        # works in-place!
         h, w = image.shape
         for y in range(h):
             for x in range(w):
@@ -855,8 +853,6 @@ class DitherNode:
         return image
 
     def modulation(self, image):
-        # image: np.array of shape (height, width), dtype=float, 0.0-1.0
-        # works in-place!
         h, w = image.shape
         for y in range(h):
             for x in range(w):
@@ -872,13 +868,23 @@ class DitherNode:
     def node_function(self, images, dither):
         out_images = []
 
+        progress_counter = 0
+        progress_total = images.shape[0]
+        progress_bar = ProgressBar(progress_total)
+
         for image in images:
             pil = tensor_to_pil(image).convert("L")
             img_np = pil_to_np(pil)
-            img_np = self.modulation(img_np)
+            if dither == "Floyd Steinberg":
+                img_np = self.floyd_steinberg(img_np)
+            elif dither == "Modulation":
+                img_np = self.modulation(img_np)
             pil = np_to_pil(img_np).convert("RGB")
             image = pil_to_tensor(pil)
             out_images.append(image)
+
+            progress_counter += 1
+            progress_bar.update_absolute(progress_counter, progress_total)
 
         out_images = torch.stack(out_images, dim=0)
         return (out_images,)
