@@ -33,6 +33,8 @@ from .nodes.image_utility import ImagesRangeNode
 from .nodes.image_utility import ImagesIndexNode
 from .nodes.image_utility import ImagesCatNode
 from .nodes.image_utility import ImagesInfoNode
+from .nodes.image_utility import DitherNode
+
 
 from .nodes.utility import PrintAnyNode
 from .nodes.utility import PrintImageNode
@@ -102,6 +104,7 @@ NODE_CLASS_MAPPINGS = {
     "ImagesInfoNode": ImagesInfoNode,
     "Base64ToImageNode": Base64ToImageNode,
     "ASCIICharNode": ASCIICharNode,
+    "DitherNode": DitherNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -153,6 +156,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImagesCatNode": "Images Cat",
     "ImagesInfoNode": "Images Info",
     "ASCIICharNode": "ASCII Art Text",
+    "DitherNode": "Dither",
 }
 
 

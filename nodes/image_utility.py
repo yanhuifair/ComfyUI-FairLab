@@ -62,30 +62,30 @@ toPIL = transforms.ToPILImage()
 toTensor = transforms.ToTensor()
 
 
-def pil2tensor(pil):
+def pil_to_tensor(pil):
     # [C, H, W] to [H, W, C]
     return toTensor(pil).permute(1, 2, 0)
 
 
-def tensor2pil(tensor):
+def tensor_to_pil(tensor):
     # [H, W, C] to [C, H, W]
     return toPIL(tensor.permute(2, 0, 1))
 
 
-def tensor2batch(tensor, h, w, c):
+def tensor_to_batch(tensor, h, w, c):
     tensor = torch.cat(tensor)
     tensor = tensor.reshape(-1, h, w, c)
     return tensor
 
 
-def batch2list(tensor_batch):
+def batch_to_list(tensor_batch):
     tensors = []
     for i in range(tensor_batch.shape[0]):
         tensors.append(tensor_batch[i])
     return tensors
 
 
-def list2batch(tensor_list):
+def list_to_batch(tensor_list):
     return torch.cat(tensor_list)
 
 
@@ -100,6 +100,14 @@ def load_pil_from_url(url):
     pil = Image.open(BytesIO(response.content))
     name = url.split("/")[-1]
     return pil, name
+
+
+def pil_to_np(pilimage):
+    return np.array(pilimage) / 255
+
+
+def np_to_pil(image):
+    return Image.fromarray((image * 255).astype("uint8"))
 
 
 class DownloadImageNode:
@@ -180,7 +188,7 @@ class SaveImageToDirectoryNode:
 
     def function(self, image, directory, name, type, compress_level):
         for i in image:
-            pil = tensor2pil(i)
+            pil = tensor_to_pil(i)
             name = f"{name}.{type}"
             pil.save(os.path.join(directory, name), compress_level=compress_level)
 
@@ -371,7 +379,7 @@ class LoadImageFromURLNode:
     def node_function(self, url, channels):
         pil, name = load_pil_from_url(url)
         pil.convert(channels)
-        img_out = pil2tensor(pil)
+        img_out = pil_to_tensor(pil)
         return (img_out, img_out, name)
 
 
@@ -403,7 +411,7 @@ def load_image_to_tensor(directory, recursive, channels):
             elif pil.mode == "RGB" and channels == "RGBA":
                 pil = pil.convert("RGBA")
 
-            image_tensor = pil2tensor(pil)
+            image_tensor = pil_to_tensor(pil)
             image_tensor = image_tensor.unsqueeze(0)  # Add batch dimension
             image_tensors.append(image_tensor)
 
@@ -472,7 +480,7 @@ class LoadImageBatchFromDirectoryNode:
             raise Exception("folder_path is not valid: " + directory)
 
         (out_image, out_dir, out_name) = load_image_to_tensor(directory, recursive, channels)
-        out_image = list2batch(out_image)
+        out_image = list_to_batch(out_image)
 
         return (out_image, out_dir, out_name)
 
@@ -500,7 +508,7 @@ class FillAlphaNode:
 
     def fill_alpha(self, tensor, alpha_threshold, fill_color):
 
-        pil = tensor2pil(tensor)
+        pil = tensor_to_pil(tensor)
         if pil.mode != "RGBA":
             raise Exception("Image mode is not RGBA")
 
@@ -516,7 +524,7 @@ class FillAlphaNode:
 
         new_pil = Image.new("RGB", pil.size)
         new_pil.putdata(new_pixels)
-        image_tensor = pil2tensor(new_pil)
+        image_tensor = pil_to_tensor(new_pil)
         return image_tensor
 
     def node_function(self, image, alpha_threshold, r, g, b):
@@ -558,7 +566,7 @@ class ImageToBase64Node:
     CATEGORY = "Fair/image"
 
     def function(self, image):
-        pil = tensor2pil(image)
+        pil = tensor_to_pil(image)
         encoded_base64 = pil_to_base64(pil)
         return (encoded_base64,)
 
@@ -602,7 +610,7 @@ class Base64ToImageNode:
 
     def function(self, string):
         pil = base64_to_pil(string)
-        image = pil2tensor(pil)
+        image = pil_to_tensor(pil)
         return (image,)
 
 
@@ -800,3 +808,77 @@ class ImagesInfoNode:
     def node_function(self, images):
         width, height, length = (images.shape[2], images.shape[1], images.shape[0])
         return (width, height, length)
+
+
+class DitherNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": (IO.IMAGE, {"defaultInput": True}),
+                "dither": (["Modulation", "Floyd–Steinberg", "Halftone"], {"default": "Modulation"}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("images",)
+
+    def floyd_steinberg(self, image):
+        # image: np.array of shape (height, width), dtype=float, 0.0-1.0
+        # works in-place!
+        h, w = image.shape
+        for y in range(h):
+            for x in range(w):
+                old = image[y, x]
+                new = np.round(old)
+                image[y, x] = new
+                error = old - new
+                # precomputing the constants helps
+                if x + 1 < w:
+                    image[y, x + 1] += error * 0.4375  # right, 7 / 16
+                if (y + 1 < h) and (x + 1 < w):
+                    image[y + 1, x + 1] += error * 0.0625  # right, down, 1 / 16
+                if y + 1 < h:
+                    image[y + 1, x] += error * 0.3125  # down, 5 / 16
+                if (x - 1 >= 0) and (y + 1 < h):
+                    image[y + 1, x - 1] += error * 0.1875  # left, down, 3 / 16
+        return image
+
+    def modulation(self, image):
+        # image: np.array of shape (height, width), dtype=float, 0.0-1.0
+        # works in-place!
+        h, w = image.shape
+        for y in range(h):
+            for x in range(w):
+                old = image[y, x]
+                new = np.round(old)
+                image[y, x] = new
+                error = old - new
+                # precomputing the constants helps
+                if x + 1 < w:
+                    image[y, x + 1] += error * 1  # right
+        return image
+
+    def ErrorDiffusionDithering(self, pil):
+        # 转换为黑白255
+        paletted = pil.convert("1", matrix=Image.FLOYDSTEINBERG)
+        paletted = paletted.convert("RGB")
+        return paletted
+
+    def node_function(self, images, dither):
+        out_images = []
+
+        for image in images:
+            pil = tensor_to_pil(image).convert("L")
+            img_np = pil_to_np(pil)
+            img_np = self.modulation(img_np)
+            image = torch.from_numpy(img_np)
+            out_images.append(image)
+
+        out_images = torch.stack(out_images)
+        return (out_images,)
