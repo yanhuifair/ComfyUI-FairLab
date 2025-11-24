@@ -1,3 +1,4 @@
+from calendar import c
 from email.mime import image
 import os
 import io
@@ -87,6 +88,10 @@ def batch_to_list(tensor_batch):
 
 def list_to_batch(tensor_list):
     return torch.cat(tensor_list)
+
+
+def tensorlist_to_batch(tensors):
+    return torch.stack(tensors, dim=0)
 
 
 def rgba2rgb(pil):
@@ -864,12 +869,6 @@ class DitherNode:
                     image[y, x + 1] += error * 1  # right
         return image
 
-    def ErrorDiffusionDithering(self, pil):
-        # 转换为黑白255
-        paletted = pil.convert("1", matrix=Image.FLOYDSTEINBERG)
-        paletted = paletted.convert("RGB")
-        return paletted
-
     def node_function(self, images, dither):
         out_images = []
 
@@ -877,8 +876,9 @@ class DitherNode:
             pil = tensor_to_pil(image).convert("L")
             img_np = pil_to_np(pil)
             img_np = self.modulation(img_np)
-            image = torch.from_numpy(img_np)
+            pil = np_to_pil(img_np).convert("RGB")
+            image = pil_to_tensor(pil)
             out_images.append(image)
 
-        out_images = torch.stack(out_images)
+        out_images = torch.stack(out_images, dim=0)
         return (out_images,)
