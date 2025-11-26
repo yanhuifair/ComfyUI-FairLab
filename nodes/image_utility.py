@@ -212,6 +212,7 @@ class ImageResizeNode:
                 "resize_to": (IO.INT, {"default": 1024, "max": 4096}),
                 "side": (["shortest", "longest", "width", "height"], {"default": "longest"}),
                 "interpolation": (["lanczos", "nearest", "bilinear", "bicubic", "area", "nearest-exact"], {"default": "lanczos"}),
+                "divisible_by_2": (IO.BOOLEAN, {"default": False}),
             }
         }
 
@@ -221,7 +222,7 @@ class ImageResizeNode:
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def node_function(self, image, resize_to, side, interpolation):
+    def node_function(self, image, resize_to, side, interpolation, divisible_by_2):
         image = image.movedim(-1, 1)
 
         image_height, image_width = image.shape[-2:]
@@ -245,6 +246,10 @@ class ImageResizeNode:
 
         width = int(width)
         height = int(height)
+
+        if divisible_by_2:
+            width = width - width % 2
+            height = height - height % 2
 
         image = comfy.utils.common_upscale(image, width, height, interpolation, "center")
         image = image.movedim(1, -1)
@@ -815,7 +820,7 @@ class ImagesInfoNode:
         return (width, height, length)
 
 
-class DitherNode:
+class ModulationNode:
     def __init__(self):
         pass
 
@@ -824,7 +829,8 @@ class DitherNode:
         return {
             "required": {
                 "images": (IO.IMAGE, {"defaultInput": True}),
-                "dither": (["Modulation", "Floyd Steinberg", "Halftone"], {"default": "Modulation"}),
+                "direction": (["up_to_down", "down_to_up", "left_to_right", "right_to_left"], {"default": "up_to_down"}),
+                "speed": (IO.FLOAT, {"default": 0.01, "step": 0.01}),
             }
         }
 
@@ -852,36 +858,72 @@ class DitherNode:
                     image[y + 1, x - 1] += error * 0.1875  # left, down, 3 / 16
         return image
 
-    def modulation(self, image):
+    def modulation(self, image, offset, direction, speed):
         h, w = image.shape
-        for y in range(h):
+
+        if direction == "up_to_down":
             for x in range(w):
-                old = image[y, x]
-                new = np.round(old)
-                image[y, x] = new
-                error = old - new
-                # precomputing the constants helps
-                if x + 1 < w:
-                    image[y, x + 1] += error * 1  # right
+                for y in range(h):
+                    old = image[y, x]
+                    new = np.round(old)
+                    image[y, x] = new
+                    error = old - new
+                    if y == 0:
+                        error -= offset * speed
+                    if y + 1 < h:
+                        image[y + 1, x] += error
+        elif direction == "down_to_up":
+            for x in range(w):
+                for y in range(h - 1, -1, -1):
+                    old = image[y, x]
+                    new = np.round(old)
+                    image[y, x] = new
+                    error = old - new
+                    if y == h - 1:
+                        error -= offset * speed
+                    if y - 1 >= 0:
+                        image[y - 1, x] += error
+        elif direction == "left_to_right":
+            for y in range(h):
+                for x in range(w):
+                    old = image[y, x]
+                    new = np.round(old)
+                    image[y, x] = new
+                    error = old - new
+                    if x == 0:
+                        error -= offset * speed
+                    if x + 1 < w:
+                        image[y, x + 1] += error
+        elif direction == "right_to_left":
+            for y in range(h):
+                for x in range(w - 1, -1, -1):
+                    old = image[y, x]
+                    new = np.round(old)
+                    image[y, x] = new
+                    error = old - new
+                    if x == w - 1:
+                        error -= offset * speed
+                    if x - 1 >= 0:
+                        image[y, x - 1] += error
+
         return image
 
-    def node_function(self, images, dither):
+    def node_function(self, images, direction, speed):
         out_images = []
 
         progress_counter = 0
         progress_total = images.shape[0]
         progress_bar = ProgressBar(progress_total)
 
+        index = 0
         for image in images:
             pil = tensor_to_pil(image).convert("L")
             img_np = pil_to_np(pil)
-            if dither == "Floyd Steinberg":
-                img_np = self.floyd_steinberg(img_np)
-            elif dither == "Modulation":
-                img_np = self.modulation(img_np)
+            img_np = self.modulation(img_np, index, direction, speed)
             pil = np_to_pil(img_np).convert("RGB")
             image = pil_to_tensor(pil)
             out_images.append(image)
+            index += 1
 
             progress_counter += 1
             progress_bar.update_absolute(progress_counter, progress_total)
