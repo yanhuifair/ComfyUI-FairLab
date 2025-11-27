@@ -34,6 +34,7 @@ from .nodes.image_utility import ImagesIndexNode
 from .nodes.image_utility import ImagesCatNode
 from .nodes.image_utility import ImagesInfoNode
 from .nodes.image_utility import ModulationNode
+from .nodes.image_utility import ModulationDirectionNode
 
 
 from .nodes.utility import PrintAnyNode
@@ -48,6 +49,7 @@ from .nodes.logic import MinNode
 from .nodes.logic import AddNode
 from .nodes.logic import SubtractNode
 from .nodes.logic import MultiplyNode
+from .nodes.logic import MultiplyIntNode
 from .nodes.logic import DivideNode
 from .nodes.logic import NumberNode
 from .nodes.logic import IfNode
@@ -90,6 +92,7 @@ NODE_CLASS_MAPPINGS = {
     "AddNode": AddNode,
     "SubtractNode": SubtractNode,
     "MultiplyNode": MultiplyNode,
+    "MultiplyIntNode": MultiplyIntNode,
     "DivideNode": DivideNode,
     "NumberNode": NumberNode,
     "IfNode": IfNode,
@@ -105,6 +108,7 @@ NODE_CLASS_MAPPINGS = {
     "Base64ToImageNode": Base64ToImageNode,
     "ASCIICharNode": ASCIICharNode,
     "ModulationNode": ModulationNode,
+    "ModulationDirectionNode": ModulationDirectionNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -142,6 +146,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "AddNode": "Add",
     "SubtractNode": "Subtract",
     "MultiplyNode": "Multiply",
+    "MultiplyIntNode": "Multiply Int",
     "DivideNode": "Divide",
     "NumberNode": "Number",
     "IfNode": "If",
@@ -157,6 +162,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImagesInfoNode": "Images Info",
     "ASCIICharNode": "ASCII Art Text",
     "ModulationNode": "Modulation",
+    "ModulationDirectionNode": "Modulation Direction",
 }
 
 

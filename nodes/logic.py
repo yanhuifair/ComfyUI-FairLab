@@ -112,6 +112,29 @@ class MultiplyNode:
         return (out_value,)
 
 
+class MultiplyIntNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "a": (IO.INT,),
+                "b": (IO.INT,),
+            },
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/logic"
+    RETURN_TYPES = (IO.INT,)
+
+    def node_function(self, a, b):
+        out_value = a * b
+        out_value = int(out_value)
+        return (out_value,)
+
+
 class DivideNode:
     def __init__(self):
         pass

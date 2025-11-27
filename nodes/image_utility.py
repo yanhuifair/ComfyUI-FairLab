@@ -1,8 +1,5 @@
-from calendar import c
-from email.mime import image
 import os
 import io
-from turtle import width
 import requests
 import json
 import numpy as np
@@ -10,7 +7,6 @@ import cv2
 from io import BytesIO
 from PIL import Image, ImageOps, ImageSequence, ImageFile, ImageDraw
 from PIL.PngImagePlugin import PngInfo
-from sympy import prime
 
 import folder_paths
 import comfy.utils
@@ -237,6 +233,7 @@ class ResizeImageNode:
         elif side == "longest":
             side = longer_side
 
+        resize_to = float(resize_to)
         if side == "width":
             width = resize_to
             height = image_height * (resize_to / image_width)
@@ -542,6 +539,47 @@ class FillAlphaNode:
         return (tensor_filled,)
 
 
+class FillColorNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": (IO.IMAGE, {"default": "", "forceInput": True}),
+                "color": (IO.COLOR,),
+            }
+        }
+
+    RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("image",)
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+
+    def fill_color(self, image, color):
+        # change white to fill color
+        pil = tensor_to_pil(image)
+
+        pixels = pil.getdata()
+
+        new_pixels = []
+        for pixel in pixels:
+            r, g, b = pixel
+            l = int(0.299 * r + 0.587 * g + 0.114 * b)
+            # color lerp
+            new_pixels.append((int(r + (color[0] - r) * (1 - l / 255.0)), int(g + (color[1] - g) * (1 - l / 255.0)), int(b + (color[2] - b) * (1 - l / 255.0))))
+
+        new_pil = Image.new("RGB", pil.size)
+        new_pil.putdata(new_pixels)
+        image_tensor = pil_to_tensor(new_pil)
+        return image_tensor
+
+    def node_function(self, image, color):
+        tensor_filled = self.fill_color(image, color)
+        return (tensor_filled,)
+
+
 def pil_to_base64(pli_image, pnginfo=None, header=False):
     # 创建一个BytesIO对象，用于临时存储图像数据
     image_data = io.BytesIO()
@@ -829,7 +867,7 @@ class ModulationNode:
         return {
             "required": {
                 "images": (IO.IMAGE, {"defaultInput": True}),
-                "direction": (["up_to_down", "down_to_up", "left_to_right", "right_to_left"], {"default": "up_to_down"}),
+                "direction": ("ModulationDirection", {"default": "up_to_down"}),
                 "speed": (IO.FLOAT, {"default": 0.01, "step": 0.01}),
             }
         }
@@ -862,3 +900,24 @@ class ModulationNode:
 
         out_images = torch.stack(out_images, dim=0)
         return (out_images,)
+
+
+class ModulationDirectionNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "direction": (["up_to_down", "down_to_up", "left_to_right", "right_to_left"], {"default": "up_to_down"}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = ("ModulationDirection",)
+    RETURN_NAMES = ("direction",)
+
+    def node_function(self, direction):
+        return (direction,)
