@@ -839,94 +839,26 @@ class ModulationNode:
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("images",)
 
-    def floyd_steinberg(self, image):
-        h, w = image.shape
-        for y in range(h):
-            for x in range(w):
-                old = image[y, x]
-                new = np.round(old)
-                image[y, x] = new
-                error = old - new
-                # precomputing the constants helps
-                if x + 1 < w:
-                    image[y, x + 1] += error * 0.4375  # right, 7 / 16
-                if (y + 1 < h) and (x + 1 < w):
-                    image[y + 1, x + 1] += error * 0.0625  # right, down, 1 / 16
-                if y + 1 < h:
-                    image[y + 1, x] += error * 0.3125  # down, 5 / 16
-                if (x - 1 >= 0) and (y + 1 < h):
-                    image[y + 1, x - 1] += error * 0.1875  # left, down, 3 / 16
-        return image
-
-    def modulation(self, image, offset, direction, speed):
-        h, w = image.shape
-
-        if direction == "up_to_down":
-            for x in range(w):
-                for y in range(h):
-                    old = image[y, x]
-                    new = np.round(old)
-                    image[y, x] = new
-                    error = old - new
-                    if y == 0:
-                        error -= offset * speed
-                    if y + 1 < h:
-                        image[y + 1, x] += error
-        elif direction == "down_to_up":
-            for x in range(w):
-                for y in range(h - 1, -1, -1):
-                    old = image[y, x]
-                    new = np.round(old)
-                    image[y, x] = new
-                    error = old - new
-                    if y == h - 1:
-                        error -= offset * speed
-                    if y - 1 >= 0:
-                        image[y - 1, x] += error
-        elif direction == "left_to_right":
-            for y in range(h):
-                for x in range(w):
-                    old = image[y, x]
-                    new = np.round(old)
-                    image[y, x] = new
-                    error = old - new
-                    if x == 0:
-                        error -= offset * speed
-                    if x + 1 < w:
-                        image[y, x + 1] += error
-        elif direction == "right_to_left":
-            for y in range(h):
-                for x in range(w - 1, -1, -1):
-                    old = image[y, x]
-                    new = np.round(old)
-                    image[y, x] = new
-                    error = old - new
-                    if x == w - 1:
-                        error -= offset * speed
-                    if x - 1 >= 0:
-                        image[y, x - 1] += error
-
-        return image
-
     def node_function(self, images, direction, speed):
         out_images = []
 
-        progress_counter = 0
-        progress_total = images.shape[0]
-        progress_bar = ProgressBar(progress_total)
-
-        index = 0
+        images_np = []
         for image in images:
             pil = tensor_to_pil(image).convert("L")
             img_np = pil_to_np(pil)
-            img_np = self.modulation(img_np, index, direction, speed)
-            pil = np_to_pil(img_np).convert("RGB")
+            images_np.append(img_np)
+
+        from .modulation import process_modulation, modulation
+
+        images_np = process_modulation(images_np, direction, speed)
+
+        index = 0
+        for image_np in images_np:
+            # image_np = modulation(image_np, index, direction, speed)
+            pil = np_to_pil(image_np).convert("RGB")
             image = pil_to_tensor(pil)
             out_images.append(image)
             index += 1
-
-            progress_counter += 1
-            progress_bar.update_absolute(progress_counter, progress_total)
 
         out_images = torch.stack(out_images, dim=0)
         return (out_images,)
