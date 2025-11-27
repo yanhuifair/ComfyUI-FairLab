@@ -200,7 +200,7 @@ class SaveImageToDirectoryNode:
         return ()
 
 
-class ImageResizeNode:
+class ResizeImageNode:
     def __init__(self):
         self.compress_level = 4
 

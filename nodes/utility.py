@@ -101,14 +101,14 @@ class AspectRatiosNode:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "ratios": (["1:1", "3:2", "4:3", "5:4", "7:5", "16:9", "16:10", "21:9", "32:9"], {"default": "16:9", "tooltip": "The aspect ratio to use."}),
+                "ratios": (["1:1", "2:1", "3:2", "4:3", "5:4", "7:5", "16:9", "16:10", "21:9", "32:9"], {"default": "16:9", "tooltip": "The aspect ratio to use."}),
                 "direction": (["landscape", "portrait"], {"default": "landscape", "tooltip": "The orientation of the image."}),
                 "height": (IO.INT, {"default": 720, "min": 64, "max": 2048, "step": 64, "tooltip": "The height of the image."}),
             }
         }
 
     RETURN_TYPES = (IO.INT, IO.INT)
-    RETURN_NAMES = ("Width", "Height")
+    RETURN_NAMES = ("width", "height")
     FUNCTION = "node_function"
     CATEGORY = "Fair/utility"
 

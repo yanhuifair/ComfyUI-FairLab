@@ -18,7 +18,7 @@ from .nodes.text_utility import ASCIICharNode
 
 from .nodes.image_utility import DownloadImageNode
 from .nodes.image_utility import SaveImageToDirectoryNode
-from .nodes.image_utility import ImageResizeNode
+from .nodes.image_utility import ResizeImageNode
 from .nodes.image_utility import VideoToImageNode
 from .nodes.image_utility import ImageToVideoNode
 from .nodes.image_utility import LoadImageFromURLNode
@@ -76,7 +76,7 @@ NODE_CLASS_MAPPINGS = {
     "ShowStringNode": ShowStringNode,
     "DownloadImageNode": DownloadImageNode,
     "SaveImageToDirectoryNode": SaveImageToDirectoryNode,
-    "ImageResizeNode": ImageResizeNode,
+    "ResizeImageNode": ResizeImageNode,
     "VideoToImageNode": VideoToImageNode,
     "ImageToVideoNode": ImageToVideoNode,
     "LoadImageFromURLNode": LoadImageFromURLNode,
@@ -128,7 +128,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ShowStringNode": "Show String",
     "DownloadImageNode": "Download Image",
     "SaveImageToDirectoryNode": "Save Image To Directory",
-    "ImageResizeNode": "Image Resize",
+    "ResizeImageNode": "Resize Image",
     "VideoToImageNode": "Video To Image",
     "ImageToVideoNode": "Image To Video",
     "LoadImageFromURLNode": "Load Image From URL",
