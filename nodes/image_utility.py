@@ -22,6 +22,8 @@ import base64
 import sys
 from comfy.comfy_types.node_typing import IO
 
+from .modulation import process_modulation, process_modulation_ProcessPool
+
 # tensor [b,c,h,w]
 # pil [h,w,c]
 # np [h,w,c]
@@ -123,47 +125,90 @@ class DownloadImageNode:
         return {
             "required": {
                 "images": (IO.IMAGE,),
-                "filename_prefix": (IO.STRING, {"default": "ComfyUI_%time%_%batch_num%"}),
+                "filename_prefix": (IO.STRING, {"default": "ComfyUI_{time}_{batch_num}"}),
+            },
+            "optional": {
+                "masks": (IO.MASK,),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
 
     RETURN_TYPES = ()
-    FUNCTION = "function"
+    FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
 
-    def function(self, images, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
-        filename_prefix += self.prefix_append
-        full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
-        results = []
-        for batch_number, image in enumerate(images):
-            i = 255.0 * image.cpu().numpy()
-            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-            metadata = None
-            if not args.disable_metadata:
-                metadata = PngInfo()
-                if prompt is not None:
-                    metadata.add_text("prompt", json.dumps(prompt))
-                if extra_pnginfo is not None:
-                    for x in extra_pnginfo:
-                        metadata.add_text(x, json.dumps(extra_pnginfo[x]))
+    def node_function(self, images, masks=None, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
+        if masks is not None:
+            filename_prefix += self.prefix_append
+            full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
+            results = []
+            for batch_number, image, mask in zip(range(len(images)), images, masks):
+                i = 255.0 * image.cpu().numpy()
+                # mask
+                alpha = 1 - mask
+                a = 255.0 * alpha.cpu().numpy()
+                img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+                # alpha
+                a_resized = Image.fromarray(a).resize(img.size, Image.LANCZOS)
+                a_resized = np.clip(a_resized, 0, 255).astype(np.uint8)
+                img.putalpha(Image.fromarray(a_resized, mode="L"))
 
-            filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
+                metadata = None
+                if not args.disable_metadata:
+                    metadata = PngInfo()
+                    if prompt is not None:
+                        metadata.add_text("prompt", json.dumps(prompt))
+                    if extra_pnginfo is not None:
+                        for x in extra_pnginfo:
+                            metadata.add_text(x, json.dumps(extra_pnginfo[x]))
 
-            now = datetime.now()
-            timename = now.strftime("%Y-%m-%d-%H-%M-%S")
-            filename_with_batch_num = filename_with_batch_num.replace("%time%", timename)
-            file = f"{filename_with_batch_num}_.png"
-            img.save(
-                os.path.join(full_output_folder, file),
-                pnginfo=metadata,
-                compress_level=self.compress_level,
-            )
-            results.append({"filename": file, "subfolder": subfolder, "type": self.type})
-            counter += 1
+                filename_with_batch_num = filename.replace("{batch_num}", str(batch_number))
 
-        return {"ui": {"images": results}}
+                now = datetime.now()
+                timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+                filename_with_batch_num = filename_with_batch_num.replace("{time}", timestamp)
+                file_name = f"{filename_with_batch_num}.png"
+                img.save(
+                    os.path.join(full_output_folder, file_name),
+                    pnginfo=metadata,
+                    compress_level=self.compress_level,
+                )
+                results.append({"filename": file_name, "subfolder": subfolder, "type": self.type})
+                counter += 1
+
+            return {"ui": {"images": results}}
+        else:
+            filename_prefix += self.prefix_append
+            full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
+            results = []
+            for batch_number, image in enumerate(images):
+                i = 255.0 * image.cpu().numpy()
+                img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+                metadata = None
+                if not args.disable_metadata:
+                    metadata = PngInfo()
+                    if prompt is not None:
+                        metadata.add_text("prompt", json.dumps(prompt))
+                    if extra_pnginfo is not None:
+                        for x in extra_pnginfo:
+                            metadata.add_text(x, json.dumps(extra_pnginfo[x]))
+
+                filename_with_batch_num = filename.replace("{batch_num}", str(batch_number))
+
+                now = datetime.now()
+                timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+                filename_with_batch_num = filename_with_batch_num.replace("{time}", timestamp)
+                file_name = f"{filename_with_batch_num}.png"
+                img.save(
+                    os.path.join(full_output_folder, file_name),
+                    pnginfo=metadata,
+                    compress_level=self.compress_level,
+                )
+                results.append({"filename": file_name, "subfolder": subfolder, "type": self.type})
+                counter += 1
+
+            return {"ui": {"images": results}}
 
 
 class SaveImageToDirectoryNode:
@@ -886,17 +931,33 @@ class ModulationNode:
             img_np = pil_to_np(pil)
             images_np.append(img_np)
 
-        from .modulation import process_modulation, modulation
+        # Try ProcessPool first with proper error handling
+        try:
+            images_np = process_modulation_ProcessPool(images_np, direction, speed)
+        except Exception as e:
+            print(f"ProcessPool failed: {e}, using ThreadPool fallback")
+            # Fallback to ThreadPool (already handled in process_modulation_ProcessPool)
+            try:
+                images_np = process_modulation(images_np, direction, speed)
+            except Exception as inner_e:
+                print(f"ThreadPool also failed: {inner_e}, processing sequentially")
+                # Last resort: sequential processing
+                from .modulation import modulation
 
-        images_np = process_modulation(images_np, direction, speed)
+                processed_images = []
+                for idx, image_np in enumerate(images_np):
+                    try:
+                        processed = modulation(image_np, idx, direction, speed)
+                        processed_images.append(processed)
+                    except Exception as seq_e:
+                        print(f"Error processing image {idx}: {seq_e}, keeping original")
+                        processed_images.append(image_np)
+                images_np = processed_images
 
-        index = 0
         for image_np in images_np:
-            # image_np = modulation(image_np, index, direction, speed)
             pil = np_to_pil(image_np).convert("RGB")
             image = pil_to_tensor(pil)
             out_images.append(image)
-            index += 1
 
         out_images = torch.stack(out_images, dim=0)
         return (out_images,)

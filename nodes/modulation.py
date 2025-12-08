@@ -3,6 +3,8 @@ import concurrent.futures
 
 
 def modulation(image_np, index, direction, speed):
+    # Make a copy to avoid modifying the original
+    image_np = image_np.copy()
     h, w = image_np.shape
 
     if direction == "up_to_down":
@@ -77,3 +79,46 @@ def process_modulation(images_np, direction, speed):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         results = executor.map(modulation, images_np, range(len(images_np)), [direction] * len(images_np), [speed] * len(images_np))
     return list(results)
+
+
+def modulation_worker(args):
+    """Helper function for ProcessPoolExecutor with error handling"""
+    try:
+        img_np, idx, direction, speed = args
+        # Ensure we're working with a copy
+        img_np = np.array(img_np, copy=True)
+        return modulation(img_np, idx, direction, speed)
+    except Exception as e:
+        print(f"Error in modulation_worker for index {args[1]}: {e}")
+        # Return original image on error
+        return args[0]
+
+
+def process_modulation_ProcessPool(images_np, direction, speed):
+    """Process images using ProcessPool with proper error handling and resource limits"""
+
+    # Prepare arguments - ensure numpy arrays are properly copied
+    arg_list = [(img_np.copy(), idx, direction, speed) for idx, img_np in enumerate(images_np)]
+
+    try:
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            # Add timeout to prevent hanging
+            futures = [executor.submit(modulation_worker, args) for args in arg_list]
+            results = []
+
+            for future in concurrent.futures.as_completed(futures, timeout=300):  # 5 minutes timeout
+                try:
+                    result = future.result(timeout=60)  # 1 minute per image
+                    results.append(result)
+                except concurrent.futures.TimeoutError:
+                    print("Timeout error processing image, using original")
+                    results.append(arg_list[len(results)][0])
+                except Exception as e:
+                    print(f"Error processing image: {e}, using original")
+                    results.append(arg_list[len(results)][0])
+
+            return results
+    except Exception as e:
+        print(f"ProcessPool error: {e}, falling back to ThreadPool")
+        # Fallback to ThreadPool if ProcessPool fails
+        return process_modulation(images_np, direction, speed)
