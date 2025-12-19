@@ -71,6 +71,11 @@ def tensor_to_pil(tensor):
     return toPIL(tensor.permute(2, 0, 1))
 
 
+def tensor_to_pil_single(tensor):
+    # [H, W] to [ H, W]
+    return toPIL(tensor)
+
+
 def tensor_to_batch(tensor, h, w, c):
     tensor = torch.cat(tensor)
     tensor = tensor.reshape(-1, h, w, c)
@@ -982,3 +987,37 @@ class ModulationDirectionNode:
 
     def node_function(self, direction):
         return (direction,)
+
+
+class ImageRemoveAlphaNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": (IO.IMAGE, {"defaultInput": True}),
+                "masks": (IO.MASK, {"defaultInput": True}),
+                "fill_color": (IO.STRING, {"default": "#FFFFFF"}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("images",)
+
+    def node_function(self, images, masks, fill_color):
+        out_images = []
+        for image, mask in zip(images, masks):
+            pil = tensor_to_pil(image)
+            pil_mask = tensor_to_pil_single(mask)
+
+            new_pil = Image.new("RGBA", pil.size, fill_color)
+            new_pil.paste(pil, pil_mask)
+
+            image = pil_to_tensor(new_pil)
+            out_images.append(image)
+        out_images = torch.stack(out_images, dim=0)
+        return (out_images,)

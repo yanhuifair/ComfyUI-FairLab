@@ -35,6 +35,7 @@ from .nodes.image_utility import ImagesCatNode
 from .nodes.image_utility import ImagesInfoNode
 from .nodes.image_utility import ModulationNode
 from .nodes.image_utility import ModulationDirectionNode
+from .nodes.image_utility import ImageRemoveAlphaNode
 
 
 from .nodes.utility import PrintAnyNode
@@ -109,6 +110,7 @@ NODE_CLASS_MAPPINGS = {
     "ASCIICharNode": ASCIICharNode,
     "ModulationNode": ModulationNode,
     "ModulationDirectionNode": ModulationDirectionNode,
+    "ImageRemoveAlphaNode": ImageRemoveAlphaNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -163,6 +165,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ASCIICharNode": "ASCII Art Text",
     "ModulationNode": "Modulation",
     "ModulationDirectionNode": "Modulation Direction",
+    "ImageRemoveAlphaNode": "Image Remove Alpha",
 }
 
 
