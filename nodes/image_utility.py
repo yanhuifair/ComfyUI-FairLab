@@ -1012,12 +1012,14 @@ class ImageRemoveAlphaNode:
         out_images = []
         for image, mask in zip(images, masks):
             pil = tensor_to_pil(image)
-            pil_mask = tensor_to_pil_single(mask)
+            pil_mask = tensor_to_pil_single(1 - mask)
 
             new_pil = Image.new("RGBA", pil.size, fill_color)
             new_pil.paste(pil, pil_mask)
+            new_pil = new_pil.convert("RGB")
 
             image = pil_to_tensor(new_pil)
             out_images.append(image)
+
         out_images = torch.stack(out_images, dim=0)
         return (out_images,)
