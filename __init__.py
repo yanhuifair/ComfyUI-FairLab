@@ -32,10 +32,15 @@ from .nodes.image_utility import ImageSizeNode
 from .nodes.image_utility import ImagesRangeNode
 from .nodes.image_utility import ImagesIndexNode
 from .nodes.image_utility import ImagesCatNode
-from .nodes.image_utility import ImagesInfoNode
+from .nodes.image_utility import ImageShapeNode
 from .nodes.image_utility import ModulationNode
 from .nodes.image_utility import ModulationDirectionNode
 from .nodes.image_utility import ImageRemoveAlphaNode
+from .nodes.image_utility import MaskMapNode
+from .nodes.image_utility import DetailMapNode
+from .nodes.image_utility import RoughnessToSmoothnessNode
+from .nodes.image_utility import SaveImageToFolderNode
+from .nodes.image_utility import PureColorImageNode
 
 
 from .nodes.utility import PrintAnyNode
@@ -105,12 +110,17 @@ NODE_CLASS_MAPPINGS = {
     "ImagesRangeNode": ImagesRangeNode,
     "ImagesIndexNode": ImagesIndexNode,
     "ImagesCatNode": ImagesCatNode,
-    "ImagesInfoNode": ImagesInfoNode,
+    "ImageShapeNode": ImageShapeNode,
     "Base64ToImageNode": Base64ToImageNode,
     "ASCIICharNode": ASCIICharNode,
     "ModulationNode": ModulationNode,
     "ModulationDirectionNode": ModulationDirectionNode,
     "ImageRemoveAlphaNode": ImageRemoveAlphaNode,
+    "MaskMapNode": MaskMapNode,
+    "DetailMapNode": DetailMapNode,
+    "RoughnessToSmoothnessNode": RoughnessToSmoothnessNode,
+    "SaveImageToFolderNode": SaveImageToFolderNode,
+    "PureColorImageNode": PureColorImageNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -161,11 +171,16 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImagesRangeNode": "Images Range",
     "ImagesIndexNode": "Images Index",
     "ImagesCatNode": "Images Cat",
-    "ImagesInfoNode": "Images Info",
+    "ImageShapeNode": "Image Shape",
     "ASCIICharNode": "ASCII Art Text",
     "ModulationNode": "Modulation",
     "ModulationDirectionNode": "Modulation Direction",
     "ImageRemoveAlphaNode": "Image Remove Alpha",
+    "MaskMapNode": "Mask Map",
+    "DetailMapNode": "Detail Map",
+    "RoughnessToSmoothnessNode": "Roughness To Smoothness",
+    "SaveImageToFolderNode": "Save Image To Folder",
+    "PureColorImageNode": "Pure Color Image",
 }
 
 

@@ -1,5 +1,8 @@
 import os
 import io
+from random import random
+from turtle import color
+import black
 import requests
 import json
 import numpy as np
@@ -27,6 +30,7 @@ from .modulation import process_modulation, process_modulation_ProcessPool
 # tensor [b,c,h,w]
 # pil [h,w,c]
 # np [h,w,c]
+# comfy image [b,h,w,c]
 
 
 def pil2tensor_mask(pil):
@@ -886,7 +890,7 @@ class ImagesCatNode:
         return (torch.cat((images, images_cat), dim=0),)
 
 
-class ImagesInfoNode:
+class ImageShapeNode:
     def __init__(self):
         pass
 
@@ -900,12 +904,15 @@ class ImagesInfoNode:
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    RETURN_TYPES = (IO.INT, IO.INT, IO.INT)
-    RETURN_NAMES = ("width", "height", "length")
+    RETURN_TYPES = (IO.INT, IO.INT, IO.INT, IO.INT)
+    RETURN_NAMES = ("batch", "width", "height", "channel")
 
     def node_function(self, images):
-        width, height, length = (images.shape[2], images.shape[1], images.shape[0])
-        return (width, height, length)
+        # [b,h,w,c]
+        print("====================")
+        print(f"images.shape: {images.shape}")
+        batch, height, width, channel = (images.shape[0], images.shape[1], images.shape[2], images.shape[3])
+        return (batch, width, height, channel)
 
 
 class ModulationNode:
@@ -1021,3 +1028,201 @@ class ImageRemoveAlphaNode:
             out_images.append(image)
         out_images = torch.stack(out_images, dim=0)
         return (out_images,)
+
+
+class MaskMapNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "metallic": (IO.IMAGE,),
+                "ambient_occlusion": (IO.IMAGE,),
+                "detail_mask": (IO.IMAGE,),
+                "smoothness": (IO.IMAGE,),
+            },
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("mask_map",)
+
+    def node_function(self, metallic, ambient_occlusion, detail_mask, smoothness):
+        mask_maps = []
+        for metallic_tensor, ambient_occlusion_tensor, detail_mask_tensor, smoothness_tensor in zip(metallic, ambient_occlusion, detail_mask, smoothness):
+            if len(metallic_tensor.shape) == 2:
+                metallic_pil_single = tensor_to_pil_single(metallic_tensor)
+                metallic_pil = metallic_pil_single.convert("RGB")
+            else:
+                metallic_pil = tensor_to_pil(metallic_tensor)
+
+            if len(ambient_occlusion_tensor.shape) == 2:
+                ambient_occlusion_pil_single = tensor_to_pil_single(ambient_occlusion_tensor)
+                ambient_occlusion_pil = ambient_occlusion_pil_single.convert("RGB")
+            else:
+                ambient_occlusion_pil = tensor_to_pil(ambient_occlusion_tensor)
+
+            if len(detail_mask_tensor.shape) == 2:
+                detail_mask_pil_single = tensor_to_pil_single(detail_mask_tensor)
+                detail_mask_pil = detail_mask_pil_single.convert("RGB")
+            else:
+                detail_mask_pil = tensor_to_pil(detail_mask_tensor)
+
+            if len(smoothness_tensor.shape) == 2:
+                smoothness_pil_single = tensor_to_pil_single(smoothness_tensor)
+                smoothness_pil = smoothness_pil_single.convert("RGB")
+            else:
+                smoothness_pil = tensor_to_pil(smoothness_tensor)
+
+            metallic_pil_r = metallic_pil.split()[0]
+            ambient_pil_occlusion_r = ambient_occlusion_pil.split()[0]
+            detail_pil_r = detail_mask_pil.split()[0]
+            smoothness_pil_r = smoothness_pil.split()[0]
+
+            mask_map_pil = Image.merge("RGBA", (metallic_pil_r, ambient_pil_occlusion_r, detail_pil_r, smoothness_pil_r))
+            mask_map_tensor = pil_to_tensor(mask_map_pil)
+            mask_maps.append(mask_map_tensor)
+        mask_maps = torch.stack(mask_maps, dim=0)
+        return (mask_maps,)
+
+
+class DetailMapNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "albedo": (IO.IMAGE,),
+                "normal": (IO.IMAGE,),
+                "smoothness": (IO.IMAGE,),
+            },
+            "optional": {},
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("detail_map",)
+
+    def node_function(self, albedo, normal, smoothness):
+        detail_maps = []
+        for albedo_tensor, normal_tensor, smoothness_tensor in zip(albedo, normal, smoothness):
+            if len(albedo_tensor.shape) == 2:
+                albedo_pil_single = tensor_to_pil_single(albedo_tensor)
+                albedo_pil = albedo_pil_single.convert("RGB")
+            else:
+                albedo_pil = tensor_to_pil(albedo_tensor)
+
+            if len(normal_tensor.shape) == 2:
+                normal_pil_single = tensor_to_pil_single(normal_tensor)
+                normal_pil = normal_pil_single.convert("RGB")
+            else:
+                normal_pil = tensor_to_pil(normal_tensor)
+
+            if len(smoothness_tensor.shape) == 2:
+                smoothness_pil_single = tensor_to_pil_single(smoothness_tensor)
+                smoothness_pil = smoothness_pil_single.convert("RGB")
+            else:
+                smoothness_pil = tensor_to_pil(smoothness_tensor)
+
+            desaturate_albedo_pil = ImageOps.grayscale(albedo_pil)
+            normal_pil_r = normal_pil.split()[0]
+            normal_pil_g = normal_pil.split()[1]
+            smoothness_pil_r = smoothness_pil.split()[0]
+
+            # R:desaturate_albedo
+            # G:normal_pil_g
+            # B:smoothness_r
+            # A:normal_pil_r
+            detail_map_pil = Image.merge("RGBA", (desaturate_albedo_pil, normal_pil_g, smoothness_pil_r, normal_pil_r))
+            detail_map = pil_to_tensor(detail_map_pil)
+            detail_maps.append(detail_map)
+        detail_maps = torch.stack(detail_maps, dim=0)
+        return (detail_maps,)
+
+
+class RoughnessToSmoothnessNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "roughness": (IO.IMAGE,),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("smoothness",)
+
+    def node_function(self, roughness):
+        smoothness = 1.0 - roughness
+        return (smoothness,)
+
+
+class PureColorImageNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "color_hex": (IO.STRING, {"default": "#FFFFFF"}),
+                "width": (IO.INT, {"default": 1024, "min": 1, "max": 8192}),
+                "height": (IO.INT, {"default": 1024, "min": 1, "max": 8192}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("pure_color_image",)
+
+    def node_function(self, color_hex, width, height):
+        # color is hex format
+        color_255 = tuple(int(color_hex.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
+        pil = Image.new("RGB", (width, height), color=color_255)
+        pure_color_image = pil_to_tensor(pil)
+        pure_color_image = pure_color_image.unsqueeze(0)
+        return (pure_color_image,)
+
+
+class SaveImageToFolderNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": (IO.IMAGE,),
+                "folder_path": (IO.STRING, {"default": os.path.join(os.path.expanduser("~"), "Desktop")}),
+                "filename_prefix": (IO.STRING, {"default": "ComfyUI_{time}_{batch_num}"}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = ()
+    RETURN_NAMES = ()
+    OUTPUT_NODE = True
+
+    def node_function(self, images, folder_path, filename_prefix):
+        for index, image in enumerate(images):
+            pil = tensor_to_pil(image)
+            filename = filename_prefix
+            now = datetime.now()
+            timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+            filename = filename.replace("{time}", timestamp)
+            filename = filename.replace("{batch_num}", str(index))
+            pil.save(os.path.join(folder_path, f"{filename}.png"))
+        return ()
