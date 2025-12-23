@@ -1223,11 +1223,17 @@ class SaveImageToFolderNode:
 
     def node_function(self, images, folder_path, filename_prefix):
         for index, image in enumerate(images):
-            pil = tensor_to_pil(image)
+            if len(image.shape) == 2:
+                pil_single = tensor_to_pil_single(image)
+                pil = pil_single.convert("RGB")
+            else:
+                pil = tensor_to_pil(image)
+
             filename = filename_prefix
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
             filename = filename.replace("{time}", timestamp)
             filename = filename.replace("{batch_num}", str(index))
+
             pil.save(os.path.join(folder_path, f"{filename}.png"))
         return ()
