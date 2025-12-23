@@ -20,6 +20,7 @@ from comfy.utils import ProgressBar
 import torch
 import torch.nn.functional as NNF
 from torchvision import transforms
+import torchvision.transforms.functional as f
 
 import base64
 import sys
@@ -27,10 +28,11 @@ from comfy.comfy_types.node_typing import IO
 
 from .modulation import process_modulation, process_modulation_ProcessPool
 
-# tensor [b,c,h,w]
-# pil [h,w,c]
-# np [h,w,c]
-# comfy image [b,h,w,c]
+
+# tensor [B,C,H,W]
+# pil [H,W,C]
+# np [H,W,C]
+# comfyui image [B,H,W,C]
 
 
 def pil2tensor_mask(pil):
@@ -97,7 +99,7 @@ def list_to_batch(tensor_list):
     return torch.cat(tensor_list)
 
 
-def tensorlist_to_batch(tensors):
+def tensor_list_to_batch(tensors):
     return torch.stack(tensors, dim=0)
 
 
@@ -1102,8 +1104,7 @@ class DetailMapNode:
                 "albedo": (IO.IMAGE,),
                 "normal": (IO.IMAGE,),
                 "smoothness": (IO.IMAGE,),
-            },
-            "optional": {},
+            }
         }
 
     FUNCTION = "node_function"
@@ -1145,6 +1146,7 @@ class DetailMapNode:
             detail_map = pil_to_tensor(detail_map_pil)
             detail_maps.append(detail_map)
         detail_maps = torch.stack(detail_maps, dim=0)
+
         return (detail_maps,)
 
 
@@ -1171,6 +1173,7 @@ class RoughnessToSmoothnessNode:
 
 
 class PureColorImageNode:
+
     def __init__(self):
         pass
 
