@@ -911,8 +911,6 @@ class ImageShapeNode:
 
     def node_function(self, images):
         # [b,h,w,c]
-        print("====================")
-        print(f"images.shape: {images.shape}")
         batch, height, width, channel = (images.shape[0], images.shape[1], images.shape[2], images.shape[3])
         return (batch, width, height, channel)
 
