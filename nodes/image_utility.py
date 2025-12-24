@@ -1,8 +1,5 @@
 import os
 import io
-from random import random
-from turtle import color
-import black
 import requests
 import json
 import numpy as np
@@ -73,13 +70,12 @@ def pil_to_tensor(pil):
 
 
 def tensor_to_pil(tensor):
-    # [H, W, C] to [C, H, W]
-    return toPIL(tensor.permute(2, 0, 1))
-
-
-def tensor_to_pil_single(tensor):
-    # [H, W] to [ H, W]
-    return toPIL(tensor)
+    if len(tensor.shape) == 2:
+        # [H, W] to [H, W]
+        return toPIL(tensor)
+    else:
+        # [H, W, C] to [C, H, W]
+        return toPIL(tensor.permute(2, 0, 1))
 
 
 def tensor_to_batch(tensor, h, w, c):
@@ -1019,7 +1015,7 @@ class ImageRemoveAlphaNode:
         out_images = []
         for image, mask in zip(images, masks):
             pil = tensor_to_pil(image)
-            pil_mask = tensor_to_pil_single(1 - mask)
+            pil_mask = tensor_to_pil(1 - mask)
 
             new_pil = Image.new("RGBA", pil.size, fill_color)
             new_pil.paste(pil, pil_mask)
@@ -1056,25 +1052,25 @@ class MaskMapNode:
         mask_maps = []
         for metallic_tensor, ambient_occlusion_tensor, detail_mask_tensor, smoothness_tensor in zip(metallic, ambient_occlusion, detail_mask, smoothness):
             if len(metallic_tensor.shape) == 2:
-                metallic_pil_single = tensor_to_pil_single(metallic_tensor)
+                metallic_pil_single = tensor_to_pil(metallic_tensor)
                 metallic_pil = metallic_pil_single.convert("RGB")
             else:
                 metallic_pil = tensor_to_pil(metallic_tensor)
 
             if len(ambient_occlusion_tensor.shape) == 2:
-                ambient_occlusion_pil_single = tensor_to_pil_single(ambient_occlusion_tensor)
+                ambient_occlusion_pil_single = tensor_to_pil(ambient_occlusion_tensor)
                 ambient_occlusion_pil = ambient_occlusion_pil_single.convert("RGB")
             else:
                 ambient_occlusion_pil = tensor_to_pil(ambient_occlusion_tensor)
 
             if len(detail_mask_tensor.shape) == 2:
-                detail_mask_pil_single = tensor_to_pil_single(detail_mask_tensor)
+                detail_mask_pil_single = tensor_to_pil(detail_mask_tensor)
                 detail_mask_pil = detail_mask_pil_single.convert("RGB")
             else:
                 detail_mask_pil = tensor_to_pil(detail_mask_tensor)
 
             if len(smoothness_tensor.shape) == 2:
-                smoothness_pil_single = tensor_to_pil_single(smoothness_tensor)
+                smoothness_pil_single = tensor_to_pil(smoothness_tensor)
                 smoothness_pil = smoothness_pil_single.convert("RGB")
             else:
                 smoothness_pil = tensor_to_pil(smoothness_tensor)
@@ -1114,19 +1110,19 @@ class DetailMapNode:
         detail_maps = []
         for albedo_tensor, normal_tensor, smoothness_tensor in zip(albedo, normal, smoothness):
             if len(albedo_tensor.shape) == 2:
-                albedo_pil_single = tensor_to_pil_single(albedo_tensor)
+                albedo_pil_single = tensor_to_pil(albedo_tensor)
                 albedo_pil = albedo_pil_single.convert("RGB")
             else:
                 albedo_pil = tensor_to_pil(albedo_tensor)
 
             if len(normal_tensor.shape) == 2:
-                normal_pil_single = tensor_to_pil_single(normal_tensor)
+                normal_pil_single = tensor_to_pil(normal_tensor)
                 normal_pil = normal_pil_single.convert("RGB")
             else:
                 normal_pil = tensor_to_pil(normal_tensor)
 
             if len(smoothness_tensor.shape) == 2:
-                smoothness_pil_single = tensor_to_pil_single(smoothness_tensor)
+                smoothness_pil_single = tensor_to_pil(smoothness_tensor)
                 smoothness_pil = smoothness_pil_single.convert("RGB")
             else:
                 smoothness_pil = tensor_to_pil(smoothness_tensor)
@@ -1222,7 +1218,7 @@ class SaveImageToFolderNode:
     def node_function(self, images, folder_path, filename_prefix):
         for index, image in enumerate(images):
             if len(image.shape) == 2:
-                pil_single = tensor_to_pil_single(image)
+                pil_single = tensor_to_pil(image)
                 pil = pil_single.convert("RGB")
             else:
                 pil = tensor_to_pil(image)
