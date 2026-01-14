@@ -1,3 +1,4 @@
+from calendar import c
 import os
 import io
 import requests
@@ -24,7 +25,8 @@ import sys
 from comfy.comfy_types.node_typing import IO
 
 from .modulation import process_modulation, process_modulation_ProcessPool
-
+import matplotlib.pyplot as plt
+from perfect_pixel import get_perfect_pixel
 
 # tensor [B,C,H,W]
 # pil [H,W,C]
@@ -32,7 +34,22 @@ from .modulation import process_modulation, process_modulation_ProcessPool
 # comfyui image [B,H,W,C]
 
 
-def pil2tensor_mask(pil):
+def tensor_to_cv2(tensor):
+    tensor = tensor.permute(1, 2, 0)  # [C,H,W] to [H,W,C]
+    array = tensor.cpu().numpy()
+    array = (array * 255).astype(np.uint8)
+    array = cv2.cvtColor(array, cv2.COLOR_RGB2BGR)
+    return array
+
+
+def cv2_to_tensor(array):
+    array = cv2.cvtColor(array, cv2.COLOR_BGR2RGB)
+    array = array.astype(np.float32) / 255.0
+    tensor = torch.from_numpy(array).permute(2, 0, 1)
+    return tensor
+
+
+def pil_to_tensor_mask(pil):
     output_images = []
     output_masks = []
     for i in ImageSequence.Iterator(pil):
@@ -99,7 +116,7 @@ def tensor_list_to_batch(tensors):
     return torch.stack(tensors, dim=0)
 
 
-def rgba2rgb(pil):
+def rgba_to_rgb(pil):
     bg = Image.new("RGB", pil.size, (255, 255, 255))
     bg.paste(pil, pil)
     pil = bg
@@ -466,7 +483,7 @@ def load_image_to_tensor(directory, recursive, channels):
             pil = ImageOps.exif_transpose(pil)  # Handle EXIF orientation
 
             if pil.mode == "RGBA" and channels == "RGB":
-                pil = rgba2rgb(pil)
+                pil = rgba_to_rgb(pil)
             elif pil.mode == "RGB" and channels == "RGBA":
                 pil = pil.convert("RGBA")
 
@@ -1014,11 +1031,11 @@ class ImageRemoveAlphaNode:
     def node_function(self, images, masks, fill_color):
         out_images = []
         for image, mask in zip(images, masks):
-            pil = tensor_to_pil(image)
-            pil_mask = tensor_to_pil(1 - mask)
+            image_pil = tensor_to_pil(image)
+            mask_pil = tensor_to_pil(1 - mask)
 
-            new_pil = Image.new("RGBA", pil.size, fill_color)
-            new_pil.paste(pil, pil_mask)
+            new_pil = Image.new("RGBA", image_pil.size, fill_color)
+            new_pil.paste(image_pil, mask_pil)
             new_pil = new_pil.convert("RGB")
 
             image = pil_to_tensor(new_pil)
@@ -1231,3 +1248,93 @@ class SaveImageToFolderNode:
 
             pil.save(os.path.join(folder_path, f"{filename}.png"))
         return ()
+
+
+# class SaveWEBMNode:
+#     def __init__(self):
+#         pass
+
+#     @classmethod
+#     def INPUT_TYPES(cls):
+#         return {
+#             "required": {
+#                 "images": (IO.IMAGE,),
+#                 "folder_path": (IO.STRING, {"default": os.path.join(os.path.expanduser("~"), "Desktop")}),
+#                 "filename_prefix": (IO.STRING, {"default": "ComfyUI_{time}_{batch_num}"}),
+#             }
+#         }
+
+#     FUNCTION = "node_function"
+#     CATEGORY = "Fair/image"
+#     RETURN_TYPES = ()
+#     RETURN_NAMES = ()
+#     OUTPUT_NODE = True
+
+#     def node_function(self, images, folder_path, filename_prefix):
+#         for index, image in enumerate(images):
+#             if len(image.shape) == 2:
+#                 pil_single = tensor_to_pil(image)
+#                 pil = pil_single.convert("RGB")
+#             else:
+#                 pil = tensor_to_pil(image)
+
+#             filename = filename_prefix
+#             now = datetime.now()
+#             timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
+#             filename = filename.replace("{time}", timestamp)
+#             filename = filename.replace("{batch_num}", str(index))
+
+#             pil.save(os.path.join(folder_path, f"{filename}.png"))
+#         return ()
+
+
+# https://github.com/theamusing/perfectPixel
+class PerfectPixelNode:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": (IO.IMAGE,),
+                "sample_method": (["center", "majority"], {"default": "center"}),
+                # "grid_size": (IO.INT, {"default": 4}),
+                "min_size": (IO.INT, {"default": 4}),
+                "peak_width": (IO.INT, {"default": 4}),
+                "refine_intensity": (IO.FLOAT, {"default": 0.25, "min": 0.0, "max": 0.5, "step": 0.01}),
+                "fix_square": (IO.BOOLEAN, {"default": True}),
+                "debug": (IO.BOOLEAN, {"default": False}),
+            }
+        }
+
+    FUNCTION = "node_function"
+    CATEGORY = "Fair/image"
+    RETURN_TYPES = (IO.IMAGE, IO.INT, IO.INT)
+    RETURN_NAMES = ("scaled_image", "refined_w", "refined_h")
+
+    def tensor_to_cv2(self, tensor):
+        numpy_image = tensor.numpy() * 255.0
+        return numpy_image
+
+    def np_to_pil(self, np_image):
+        return Image.fromarray(np_image.astype("uint8"), "RGB")
+
+    def node_function(self, images, sample_method, min_size, peak_width, refine_intensity, fix_square, debug):
+        outs = []
+        for image in images:
+            image_cv2 = self.tensor_to_cv2(image)
+            w, h, out = get_perfect_pixel(
+                image_cv2,
+                sample_method=sample_method,
+                min_size=min_size,
+                peak_width=peak_width,
+                refine_intensity=refine_intensity,
+                fix_square=fix_square,
+                debug=debug,
+            )
+            out_pil = self.np_to_pil(out)
+            image_tensor = pil_to_tensor(out_pil)
+            outs.append(image_tensor)
+        outs = torch.stack(outs, dim=0)
+        return (outs, w, h)

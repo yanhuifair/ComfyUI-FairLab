@@ -41,6 +41,7 @@ from .nodes.image_utility import DetailMapNode
 from .nodes.image_utility import RoughnessToSmoothnessNode
 from .nodes.image_utility import SaveImageToFolderNode
 from .nodes.image_utility import PureColorImageNode
+from .nodes.image_utility import PerfectPixelNode
 
 
 from .nodes.utility import PrintAnyNode
@@ -121,6 +122,7 @@ NODE_CLASS_MAPPINGS = {
     "RoughnessToSmoothnessNode": RoughnessToSmoothnessNode,
     "SaveImageToFolderNode": SaveImageToFolderNode,
     "PureColorImageNode": PureColorImageNode,
+    "PerfectPixelNode": PerfectPixelNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -181,6 +183,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RoughnessToSmoothnessNode": "Roughness To Smoothness",
     "SaveImageToFolderNode": "Save Image To Folder",
     "PureColorImageNode": "Pure Color Image",
+    "PerfectPixelNode": "Perfect Pixel",
 }
 
 
