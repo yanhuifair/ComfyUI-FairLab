@@ -1300,11 +1300,11 @@ class PerfectPixelNode:
                 "images": (IO.IMAGE,),
                 "sample_method": (["center", "majority"], {"default": "center"}),
                 # "grid_size": (IO.INT, {"default": 4}),
-                "min_size": (IO.INT, {"default": 4}),
-                "peak_width": (IO.INT, {"default": 4}),
-                "refine_intensity": (IO.FLOAT, {"default": 0.25, "min": 0.0, "max": 0.5, "step": 0.01}),
-                "fix_square": (IO.BOOLEAN, {"default": True}),
-                "debug": (IO.BOOLEAN, {"default": False}),
+                "min_size": (IO.INT, {"default": 1, "tooltip": "Minimum size of the detected pixel pattern"}),
+                "peak_width": (IO.INT, {"default": 1, "tooltip": "Minimum peak width for peak detection."}),
+                "refine_intensity": (IO.FLOAT, {"default": 0.25, "min": 0.0, "max": 0.5, "step": 0.01, "tooltip": "Intensity for grid line refinement. Recommended range is [0, 0.5]. Given original estimated grid line at x, the refinement will search in [x * (1 - refine_intensity), x * (1 + refine_intensity)]."}),
+                "fix_square": (IO.BOOLEAN, {"default": True, "tooltip": "Whether to enforce output to be square when detected image is almost square."}),
+                "debug": (IO.BOOLEAN, {"default": False, "tooltip": "Whether to show debug plots.s"}),
             }
         }
 
