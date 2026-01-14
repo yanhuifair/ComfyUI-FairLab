@@ -4,3 +4,4 @@ opencv-python
 asyncio
 requests
 nest_asyncio
+perfect-pixel[opencv]
