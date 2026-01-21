@@ -1298,7 +1298,7 @@ class PerfectPixelNode:
         return {
             "required": {
                 "images": (IO.IMAGE,),
-                "sample_method": (["center", "majority"], {"default": "center"}),
+                "sample_method": (["majority", "center", "median"], {"default": "center"}),
                 # "grid_size": (IO.INT, {"default": 4}),
                 "min_size": (IO.INT, {"default": 1, "tooltip": "Minimum size of the detected pixel pattern"}),
                 "peak_width": (IO.INT, {"default": 1, "tooltip": "Minimum peak width for peak detection."}),
