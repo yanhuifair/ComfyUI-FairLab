@@ -1,7 +1,5 @@
 googletrans
-datetime
 opencv-python
-asyncio
 requests
 nest_asyncio
 perfect-pixel[opencv]>=0.1.4

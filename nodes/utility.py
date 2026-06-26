@@ -1,4 +1,3 @@
-from turtle import width
 import folder_paths
 import comfy.sd
 import comfy.utils
@@ -23,6 +22,8 @@ class PrintAnyNode:
     CATEGORY = "Fair/utility"
     OUTPUT_NODE = True
     RETURN_TYPES = ()
+    DESCRIPTION = "Print any input value to the ComfyUI backend console."
+    SEARCH_ALIASES = ["debug print", "console log"]
 
     def node_function(self, input, log):
         print(f"log: {log}")
@@ -49,6 +50,8 @@ class PrintImageNode:
     CATEGORY = "Fair/utility"
     OUTPUT_NODE = True
     RETURN_TYPES = ()
+    DESCRIPTION = "Print image tensor details to the ComfyUI backend console."
+    SEARCH_ALIASES = ["debug image", "print tensor"]
 
     def node_function(self, image, log):
         print(f"log: {log}")
@@ -77,11 +80,13 @@ class LoraLoaderDualNode:
         }
 
     RETURN_TYPES = (IO.MODEL, IO.CLIP)
+    RETURN_NAMES = ("models", "clips")
     OUTPUT_TOOLTIPS = ("The modified diffusion model.", "The modified CLIP model.")
     FUNCTION = "node_function"
 
     CATEGORY = "Fair/loaders"
     DESCRIPTION = "LoRAs are used to modify diffusion and CLIP models, altering the way in which latents are denoised such as applying styles. Multiple LoRA nodes can be linked together."
+    SEARCH_ALIASES = ["dual lora", "load two loras"]
 
     OUTPUT_IS_LIST = (True, True)
 
@@ -111,6 +116,8 @@ class AspectRatiosNode:
     RETURN_NAMES = ("width", "height")
     FUNCTION = "node_function"
     CATEGORY = "Fair/utility"
+    DESCRIPTION = "Convert a preset aspect ratio and height into output width and height."
+    SEARCH_ALIASES = ["aspect size", "ratio to size"]
 
     def node_function(self, ratios, direction, height):
         ratio_width, ratio_height = map(int, ratios.split(":"))

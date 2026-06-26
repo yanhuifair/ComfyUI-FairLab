@@ -63,7 +63,6 @@ from .nodes.logic import IfNode
 from .nodes.logic import FloatToIntNode
 from .nodes.logic import IntToFloatNode
 
-
 NODE_CLASS_MAPPINGS = {
     "StringTranslateNode": StringTranslateNode,
     "LoadImageFromDirectoryNode": LoadImageFromDirectoryNode,
@@ -137,7 +136,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "StringNode": "String",
     "IntNode": "Int",
     "FloatNode": "Float",
-    "RangeStringListNode": "Range String",
+    "RangeStringNode": "Range String",
     "PrependTagsNode": "Prepend Tags",
     "AppendTagsNode": "Append Tags",
     "ExcludeTagsNode": "Exclude Tags",

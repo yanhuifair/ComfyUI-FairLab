@@ -1,77 +1,14 @@
 [project]
 name = "comfyui-fairlab"
-description = """
-CLIP Text Encode Translated
-
-Translate String
-
-Load Image From Directory
-
-Fill Alpha
-
-Save String To Directory
-
-Load String From Directory
-
-Fix UTF-8 String
-
-String Combine
-
-String
-
-Int
-
-Float
-
-Sequence String List
-
-Prepend Tags
-
-Append Tags
-
-Blacklist Tags
-
-Download Image
-
-Save Image To Directory
-
-Image Resize
-
-Video To Image
-
-Image To Video
-
-Load Image From URL
-
-Print Any
-
-Print Image
-
-Image To Base64
-
-Base64 To Image
-
-Outpainting Pad
-
-Image Size
-
-Ollama
-
-Ollama Client
-
-Python Script
-
-Load LoRA Dual
-"""
-version = "1.0.88"
-license = { file = "LICENSE" }
+description = "Utility, text, logic, and image helper nodes for ComfyUI with updated IO typing and safer script evaluation."
+version = "1.0.89"
+license = { text = "MIT" }
 dependencies = [
     "googletrans",
-    "datetime",
     "opencv-python",
-    "asyncio",
     "requests",
-    "ollama"
+    "nest_asyncio",
+    "perfect-pixel[opencv]>=0.1.4"
 ]
 
 [project.urls]

@@ -30,7 +30,10 @@ class StringTranslateNode:
 
     CATEGORY = "Fair/string"
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     FUNCTION = "node_function"
+    DESCRIPTION = "Translate text between supported languages using googletrans."
+    SEARCH_ALIASES = ["translate text", "language translate"]
 
     def node_function(self, string, src, dest):
         try:

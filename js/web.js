@@ -1,70 +1,243 @@
 import { api } from "/scripts/api.js";
 import { app } from "/scripts/app.js";
 
-let extension = {
-    name: "FairLab",
-    nodeCreated(node, app) {
-        if (node?.comfyClass === "DownloadImageNode") {
-            node.onExecuted = function (output) {
-                let imgURLs = [];
-                if (output?.images) {
-                    imgURLs = imgURLs.concat(
-                        output.images.map((params) => {
-                            return api.apiURL("/view?" + new URLSearchParams(params).toString() + (this.animatedImages ? "" : app.getPreviewFormatParam()) + app.getRandParam());
-                        })
-                    );
-                }
+const EXTENSION_NAME =
+  "fairlab.web";
+const RESTART_BUTTON_ID =
+  "fairlab-restart-button";
+let executedListenerRegistered = false;
 
-                if (imgURLs.length > 0) {
-                    Promise.all(
-                        imgURLs.map((src) => {
-                            return new Promise((r) => {
-                                const img = new Image();
-                                img.onload = () => r(img);
-                                img.onerror = () => r(null);
-                                img.src = src;
-                            });
-                        })
-                    ).then((imgs) => {
-                        function download_images(imgs) {
-                            for (let i = 0; i < imgs.length; i++) {
-                                let img = imgs[i];
-                                let a = document.createElement("a");
-                                let url = new URL(img.src);
-                                url.searchParams.delete("preview");
-                                a.href = url;
-                                a.setAttribute("download", new URLSearchParams(url.search).get("filename"));
-                                document.body.append(a);
-                                a.click();
-                                requestAnimationFrame(() => a.remove());
-                            }
-                        }
+function buildImageUrl(
+  params,
+  node,
+) {
+  const query =
+    new URLSearchParams(
+      params,
+    ).toString();
+  return api.apiURL(
+    "/view?" +
+      query +
+      (node.animatedImages
+        ? ""
+        : app.getPreviewFormatParam()) +
+      app.getRandParam(),
+  );
+}
 
-                        if (imgs) download_images(imgs);
-                    });
-                }
-            };
-        }
-    },
+function getNodeById(
+  nodeId,
+) {
+  const numericNodeId =
+    Number(
+      nodeId,
+    );
+
+  if (
+    Number.isFinite(
+      numericNodeId,
+    ) &&
+    app
+      .graph
+      ?.getNodeById
+  ) {
+    return app.graph.getNodeById(
+      numericNodeId,
+    );
+  }
+
+  return (
+    app
+      .graph
+      ?._nodes_by_id?.[
+      nodeId
+    ] ??
+    null
+  );
+}
+
+function downloadImages(
+  images,
+) {
+  for (const image of images) {
+    if (
+      !image?.src
+    ) {
+      continue;
+    }
+
+    const anchor =
+      document.createElement(
+        "a",
+      );
+    const url =
+      new URL(
+        image.src,
+      );
+
+    url.searchParams.delete(
+      "preview",
+    );
+    anchor.href =
+      url;
+    anchor.setAttribute(
+      "download",
+      new URLSearchParams(
+        url.search,
+      ).get(
+        "filename",
+      ) ??
+        "image",
+    );
+    document.body.append(
+      anchor,
+    );
+    anchor.click();
+    requestAnimationFrame(
+      () =>
+        anchor.remove(),
+    );
+  }
+}
+
+async function handleExecuted(
+  event,
+) {
+  const detail =
+    event?.detail;
+  const node =
+    getNodeById(
+      detail?.node,
+    );
+
+  if (
+    node?.comfyClass !==
+    "DownloadImageNode"
+  ) {
+    return;
+  }
+
+  const imageParams =
+    detail
+      ?.output
+      ?.images;
+  if (
+    !Array.isArray(
+      imageParams,
+    ) ||
+    imageParams.length ===
+      0
+  ) {
+    return;
+  }
+
+  const loadedImages =
+    await Promise.all(
+      imageParams.map(
+        async (
+          params,
+        ) => {
+          const src =
+            buildImageUrl(
+              params,
+              node,
+            );
+
+          return await new Promise(
+            (
+              resolve,
+            ) => {
+              const image =
+                new Image();
+              image.onload =
+                () =>
+                  resolve(
+                    image,
+                  );
+              image.onerror =
+                () =>
+                  resolve(
+                    null,
+                  );
+              image.src =
+                src;
+            },
+          );
+        },
+      ),
+    );
+
+  downloadImages(
+    loadedImages.filter(
+      Boolean,
+    ),
+  );
+}
+
+const extension =
+  {
+    name: EXTENSION_NAME,
 
     async setup() {
-        let restartButton;
+      if (
+        !executedListenerRegistered
+      ) {
+        api.addEventListener(
+          "executed",
+          handleExecuted,
+        );
+        executedListenerRegistered = true;
+      }
 
-        //new ui
-        if (!app.menu?.element.style.display && app.menu?.settingsGroup) {
-            restartButton = new (await import("../../../scripts/ui/components/button.js")).ComfyButton({
-                icon: "restart",
-                action: () => {
-                    api.fetchApi("/manager/reboot");
+      if (
+        !app
+          .menu
+          ?.settingsGroup ||
+        document.getElementById(
+          RESTART_BUTTON_ID,
+        )
+      ) {
+        return;
+      }
+
+      try {
+        const {
+          ComfyButton,
+        } =
+          await import("/scripts/ui/components/button.js");
+        const restartButton =
+          new ComfyButton(
+            {
+              icon: "restart",
+              action:
+                async () => {
+                  await api.fetchApi(
+                    "/manager/reboot",
+                  );
                 },
-                tooltip: "Restart the server",
-                content: "Restart",
-            });
-            restartButton.enabled = true;
-            restartButton.element.style.display = "";
-            app.menu.settingsGroup.append(restartButton);
-        }
+              tooltip:
+                "Restart the server",
+              content:
+                "Restart",
+            },
+          );
+        restartButton.enabled = true;
+        restartButton.element.style.display =
+          "";
+        restartButton.element.id =
+          RESTART_BUTTON_ID;
+        app.menu.settingsGroup.append(
+          restartButton,
+        );
+      } catch (error) {
+        console.warn(
+          "FairLab: failed to attach restart button",
+          error,
+        );
+      }
     },
-};
+  };
 
-app.registerExtension(extension);
+app.registerExtension(
+  extension,
+);

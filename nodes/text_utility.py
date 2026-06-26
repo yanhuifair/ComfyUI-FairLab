@@ -32,6 +32,8 @@ class SaveStringToDirectoryNode:
     OUTPUT_NODE = True
     RETURN_TYPES = ()
     RETURN_NAMES = ()
+    DESCRIPTION = "Save a string to a file in the target directory."
+    SEARCH_ALIASES = ["save text", "write string"]
 
     def node_function(self, string, directory, name, extension):
         file_name_with_suffix = f"{name}{extension}"
@@ -60,6 +62,8 @@ class LoadStringFromDirectoryNode:
     RETURN_TYPES = (IO.STRING, IO.STRING, IO.STRING)
     RETURN_NAMES = ("string", "directory", "name")
     OUTPUT_IS_LIST = (True, True, True)
+    DESCRIPTION = "Load all text files from a directory and return their contents with paths."
+    SEARCH_ALIASES = ["load texts", "read folder text"]
 
     def node_function(self, directory):
         string_list = []
@@ -83,10 +87,13 @@ class FixUTF8StringNode:
         return {"required": {"string": (IO.STRING, {"defaultInput": True})}}
 
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    DESCRIPTION = "Normalize common UTF-8 punctuation and strip non-ASCII characters."
+    SEARCH_ALIASES = ["clean text", "ascii sanitize"]
 
     # Function to replace special characters with basic equivalents
     def replace_special_characters(self, text):
@@ -164,6 +171,9 @@ class StringAppendNode:
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
+    DESCRIPTION = "Concatenate two strings in order."
+    SEARCH_ALIASES = ["concat string", "join text"]
 
     def node_function(self, front, back):
         append = front + back
@@ -179,10 +189,13 @@ class StringNode:
         return {"required": {"string": (IO.STRING, {"multiline": True, "defaultInput": False})}}
 
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    DESCRIPTION = "Output a string value from a text widget."
+    SEARCH_ALIASES = ["text input", "string input"]
 
     def node_function(self, string):
         return (string,)
@@ -199,10 +212,13 @@ class IntNode:
         }
 
     RETURN_TYPES = (IO.INT,)
+    RETURN_NAMES = ("value",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    DESCRIPTION = "Output an integer value from a numeric widget."
+    SEARCH_ALIASES = ["integer input", "int value"]
 
     def node_function(self, value):
         return (value,)
@@ -214,13 +230,20 @@ class FloatNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"value": ("FLOAT", {"multiline": False, "defaultInput": False})}}
+        return {
+            "required": {
+                "value": (IO.FLOAT, {"default": 0.0, "step": 0.01, "defaultInput": False}),
+            }
+        }
 
-    RETURN_TYPES = ("FLOAT",)
+    RETURN_TYPES = (IO.FLOAT,)
+    RETURN_NAMES = ("value",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    DESCRIPTION = "Output a floating-point value from a numeric widget."
+    SEARCH_ALIASES = ["float input", "decimal value"]
 
     def node_function(self, value):
         return (value,)
@@ -241,11 +264,14 @@ class RangeStringNode:
         }
 
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("strings",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     OUTPUT_IS_LIST = True
+    DESCRIPTION = "Generate a list of stringified numbers from a numeric range."
+    SEARCH_ALIASES = ["string range", "sequence text"]
 
     def node_function(self, start, stop, step):
         number_list = []
@@ -268,10 +294,13 @@ class PrependTagsNode:
         }
 
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    DESCRIPTION = "Insert tag text before the existing comma-separated tags."
+    SEARCH_ALIASES = ["prefix tags", "prepend prompt tags"]
 
     def node_function(self, string, tags):
         input_tags = string_to_tags(string)
@@ -295,10 +324,13 @@ class AppendTagsNode:
         }
 
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    DESCRIPTION = "Append comma-separated tags and remove duplicates."
+    SEARCH_ALIASES = ["merge tags", "append prompt tags"]
 
     def node_function(self, front, back):
         front_tags = string_to_tags(front)
@@ -323,10 +355,13 @@ class ExcludeTagsNode:
         }
 
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
+    DESCRIPTION = "Remove matching tags from a comma-separated tag string."
+    SEARCH_ALIASES = ["remove tags", "filter tags"]
 
     def node_function(self, string, tags):
         input_tags = string_to_tags(string)
@@ -356,7 +391,10 @@ class ShowStringNode:
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     OUTPUT_NODE = True
+    DESCRIPTION = "Show a string in the node UI while forwarding it downstream."
+    SEARCH_ALIASES = ["preview text", "display string"]
 
     def node_function(self, string):
         return {"ui": {"text": string}, "result": (string,)}
@@ -378,6 +416,8 @@ class LoadStringNode:
     FUNCTION = "node_function"
     RETURN_TYPES = (IO.STRING, IO.STRING, IO.STRING)
     RETURN_NAMES = ("string", "path", "name")
+    DESCRIPTION = "Load one text file by path and return its contents and file info."
+    SEARCH_ALIASES = ["read text file", "load file text"]
 
     def node_function(self, path):
         out_string = ""
@@ -411,6 +451,9 @@ class UniqueTagsNode:
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
+    DESCRIPTION = "Deduplicate comma-separated tags."
+    SEARCH_ALIASES = ["dedupe tags", "unique prompt tags"]
 
     def node_function(self, string):
         out_string = ""
@@ -435,6 +478,9 @@ class ASCIICharNode:
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
+    DESCRIPTION = "Convert input text into stylized ASCII art letters."
+    SEARCH_ALIASES = ["ascii art", "text banner"]
 
     # 26个字母的ASCII艺术字
     char_a = """

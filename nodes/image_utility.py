@@ -161,6 +161,8 @@ class DownloadImageNode:
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Save images to ComfyUI output with optional mask alpha for preview and download."
+    SEARCH_ALIASES = ["preview image", "save temp image"]
 
     def node_function(self, images, masks=None, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
         if masks is not None:
@@ -255,6 +257,8 @@ class SaveImageToDirectoryNode:
     FUNCTION = "function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Save image batches to a specific directory with a chosen file format."
+    SEARCH_ALIASES = ["export images", "save image folder"]
 
     def function(self, image, directory, name, type, compress_level):
         for i in image:
@@ -286,6 +290,8 @@ class ResizeImageNode:
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Resize an image batch by width, height, or longest or shortest side."
+    SEARCH_ALIASES = ["scale image", "image resize"]
 
     def node_function(self, image, resize_to, side, interpolation, divisible_by_2):
         image = image.movedim(-1, 1)
@@ -344,6 +350,8 @@ class VideoToImageNode:
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Extract frames from a video into image files on disk."
+    SEARCH_ALIASES = ["extract frames", "video frames"]
 
     def node_function(self, video_path, capture_rate, frame_offset, image_dir, image_name_prefix):
         video_path = video_path.replace('"', "")
@@ -400,6 +408,8 @@ class ImageToVideoNode:
     FUNCTION = "node_function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Build an MP4 video from images in a directory."
+    SEARCH_ALIASES = ["images to mp4", "encode video"]
 
     def node_function(self, image_dir, frame_rate, video_dir, video_name):
         image_dir = image_dir.replace('"', "")
@@ -451,6 +461,8 @@ class LoadImageFromURLNode:
     RETURN_NAMES = ("image", "mask", "name")
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Download an image from a URL and convert it into Comfy image data."
+    SEARCH_ALIASES = ["http image", "load remote image"]
 
     def node_function(self, url, channels):
         pil, name = load_pil_from_url(url)
@@ -520,12 +532,14 @@ class LoadImageFromDirectoryNode:
     RETURN_TYPES = (IO.IMAGE, IO.STRING, IO.STRING)
     RETURN_NAMES = ("image", "directory", "name")
     OUTPUT_IS_LIST = (True, True, True)
+    DESCRIPTION = "Load images from a directory and return them as individual outputs."
+    SEARCH_ALIASES = ["folder images", "load images folder"]
 
     def node_function(self, directory, recursive, channels):
         if not directory or not os.path.isdir(directory):
             raise Exception("folder_path is not valid: " + directory)
 
-        (out_image, out_dir, out_name) = load_image_to_tensor(directory, recursive, channels)
+        out_image, out_dir, out_name = load_image_to_tensor(directory, recursive, channels)
 
         return (out_image, out_dir, out_name)
 
@@ -550,12 +564,14 @@ class LoadImageBatchFromDirectoryNode:
     RETURN_TYPES = (IO.IMAGE, IO.STRING, IO.STRING)
     RETURN_NAMES = ("images", "directory", "name")
     OUTPUT_IS_LIST = (False, True, True)
+    DESCRIPTION = "Load all images from a directory into a single image batch."
+    SEARCH_ALIASES = ["batch load images", "folder image batch"]
 
     def node_function(self, directory, recursive, channels):
         if not directory or not os.path.isdir(directory):
             raise Exception("folder_path is not valid: " + directory)
 
-        (out_image, out_dir, out_name) = load_image_to_tensor(directory, recursive, channels)
+        out_image, out_dir, out_name = load_image_to_tensor(directory, recursive, channels)
         out_image = list_to_batch(out_image)
 
         return (out_image, out_dir, out_name)
@@ -581,6 +597,8 @@ class FillAlphaNode:
     RETURN_NAMES = ("image",)
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Replace transparent pixels with a chosen RGB fill color."
+    SEARCH_ALIASES = ["flatten alpha", "alpha fill"]
 
     def fill_alpha(self, tensor, alpha_threshold, fill_color):
 
@@ -678,9 +696,12 @@ class ImageToBase64Node:
         }
 
     RETURN_TYPES = (IO.STRING,)
+    RETURN_NAMES = ("string",)
     FUNCTION = "function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Encode an image into a Base64 PNG string."
+    SEARCH_ALIASES = ["image encode", "base64 encode"]
 
     def function(self, image):
         pil = tensor_to_pil(image)
@@ -721,9 +742,12 @@ class Base64ToImageNode:
         }
 
     RETURN_TYPES = (IO.IMAGE,)
+    RETURN_NAMES = ("image",)
     FUNCTION = "function"
     OUTPUT_NODE = True
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Decode a Base64 image string into Comfy image data."
+    SEARCH_ALIASES = ["base64 decode", "string to image"]
 
     def function(self, string):
         pil = base64_to_pil(string)
@@ -750,6 +774,8 @@ class OutpaintingPadNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.INT, IO.INT, IO.INT, IO.INT)
     RETURN_NAMES = ("left", "top", "right", "bottom")
+    DESCRIPTION = "Calculate padding values to place an image on a larger target canvas."
+    SEARCH_ALIASES = ["outpaint padding", "canvas pad"]
 
     def node_function(self, image, target_width, target_height, align):
         image_height = image.shape[1]
@@ -822,8 +848,10 @@ class ImageSizeNode:
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    RETURN_TYPES = (IO.INT, IO.INT, IO.INT, IO.INT, "FLOAT")
+    RETURN_TYPES = (IO.INT, IO.INT, IO.INT, IO.INT, IO.FLOAT)
     RETURN_NAMES = ("width", "height", "max_side", "min_side", "aspect_ratio")
+    DESCRIPTION = "Return image width, height, side lengths, and aspect ratio."
+    SEARCH_ALIASES = ["image dimensions", "aspect ratio"]
 
     def node_function(self, image):
         height = image.shape[1]
@@ -845,9 +873,9 @@ class ImagesRangeNode:
             "required": {
                 "images": (IO.IMAGE, {"defaultInput": True}),
                 "start": (IO.INT, {"default": 0, "min": -sys.maxsize - 1, "max": sys.maxsize}),
-                "use_start": ("BOOL", {"default": False}),
+                "use_start": (IO.BOOLEAN, {"default": False}),
                 "end": (IO.INT, {"default": -1, "min": -sys.maxsize - 1, "max": sys.maxsize}),
-                "use_end": ("BOOL", {"default": False}),
+                "use_end": (IO.BOOLEAN, {"default": False}),
             }
         }
 
@@ -855,6 +883,8 @@ class ImagesRangeNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("images",)
+    DESCRIPTION = "Slice an image batch by optional start and end indices."
+    SEARCH_ALIASES = ["batch slice", "image range"]
 
     def node_function(self, images, start, use_start, end, use_end):
         images = images[start if use_start else None : end if use_end else None]
@@ -878,6 +908,8 @@ class ImagesIndexNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("image",)
+    DESCRIPTION = "Select one image from an image batch by index."
+    SEARCH_ALIASES = ["pick image", "batch index"]
 
     def node_function(self, images, index):
         return (images[index].unsqueeze(0),)
@@ -900,6 +932,8 @@ class ImagesCatNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("images",)
+    DESCRIPTION = "Concatenate two image batches into one batch."
+    SEARCH_ALIASES = ["merge image batch", "concat images"]
 
     def node_function(self, images, images_cat):
         return (torch.cat((images, images_cat), dim=0),)
@@ -921,6 +955,8 @@ class ImageShapeNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.INT, IO.INT, IO.INT, IO.INT)
     RETURN_NAMES = ("batch", "width", "height", "channel")
+    DESCRIPTION = "Return batch size, width, height, and channel count for images."
+    SEARCH_ALIASES = ["image shape", "tensor shape"]
 
     def node_function(self, images):
         # [b,h,w,c]
@@ -946,6 +982,8 @@ class ModulationNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("images",)
+    DESCRIPTION = "Apply the custom modulation effect across an image batch."
+    SEARCH_ALIASES = ["image modulation", "scanline effect"]
 
     def node_function(self, images, direction, speed):
         out_images = []
@@ -1004,6 +1042,8 @@ class ModulationDirectionNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = ("ModulationDirection",)
     RETURN_NAMES = ("direction",)
+    DESCRIPTION = "Output a reusable modulation direction value."
+    SEARCH_ALIASES = ["modulation preset", "direction token"]
 
     def node_function(self, direction):
         return (direction,)
@@ -1027,6 +1067,8 @@ class ImageRemoveAlphaNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("images",)
+    DESCRIPTION = "Composite RGBA images over a solid background color using masks."
+    SEARCH_ALIASES = ["remove transparency", "flatten rgba"]
 
     def node_function(self, images, masks, fill_color):
         out_images = []
@@ -1064,6 +1106,8 @@ class MaskMapNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("mask_map",)
+    DESCRIPTION = "Pack metallic, occlusion, detail mask, and smoothness into one RGBA mask map."
+    SEARCH_ALIASES = ["unity mask map", "channel pack"]
 
     def node_function(self, metallic, ambient_occlusion, detail_mask, smoothness):
         mask_maps = []
@@ -1122,6 +1166,8 @@ class DetailMapNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("detail_map",)
+    DESCRIPTION = "Build a detail map texture from albedo, normal, and smoothness inputs."
+    SEARCH_ALIASES = ["unity detail map", "detail texture"]
 
     def node_function(self, albedo, normal, smoothness):
         detail_maps = []
@@ -1177,6 +1223,8 @@ class RoughnessToSmoothnessNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("smoothness",)
+    DESCRIPTION = "Invert roughness into smoothness."
+    SEARCH_ALIASES = ["invert roughness", "roughness invert"]
 
     def node_function(self, roughness):
         smoothness = 1.0 - roughness
@@ -1202,6 +1250,8 @@ class PureColorImageNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("pure_color_image",)
+    DESCRIPTION = "Create a solid-color image from a hex color and size."
+    SEARCH_ALIASES = ["solid color", "blank image"]
 
     def node_function(self, color_hex, width, height):
         # color is hex format
@@ -1231,6 +1281,8 @@ class SaveImageToFolderNode:
     RETURN_TYPES = ()
     RETURN_NAMES = ()
     OUTPUT_NODE = True
+    DESCRIPTION = "Save an image batch to any folder path using a filename pattern."
+    SEARCH_ALIASES = ["save images folder", "export batch"]
 
     def node_function(self, images, folder_path, filename_prefix):
         for index, image in enumerate(images):
@@ -1312,6 +1364,8 @@ class PerfectPixelNode:
     CATEGORY = "Fair/image"
     RETURN_TYPES = (IO.IMAGE, IO.INT, IO.INT)
     RETURN_NAMES = ("scaled_image", "refined_w", "refined_h")
+    DESCRIPTION = "Detect pixel-grid spacing and upscale pixel art with refined dimensions."
+    SEARCH_ALIASES = ["pixel art upscale", "perfect pixel"]
 
     def tensor_to_cv2(self, tensor):
         numpy_image = tensor.numpy() * 255.0

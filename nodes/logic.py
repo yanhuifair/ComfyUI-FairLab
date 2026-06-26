@@ -18,6 +18,9 @@ class MaxNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.ANY,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Return the larger of two input values."
+    SEARCH_ALIASES = ["maximum", "max value"]
 
     def node_function(self, a, b):
         out_value = max(a, b)
@@ -40,6 +43,9 @@ class MinNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.ANY,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Return the smaller of two input values."
+    SEARCH_ALIASES = ["minimum", "min value"]
 
     def node_function(self, a, b):
         out_value = min(a, b)
@@ -62,6 +68,9 @@ class AddNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.FLOAT,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Add two floating-point values."
+    SEARCH_ALIASES = ["sum", "plus"]
 
     def node_function(self, a, b):
         out_value = a + b
@@ -84,6 +93,9 @@ class SubtractNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.FLOAT,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Subtract the second floating-point value from the first."
+    SEARCH_ALIASES = ["minus", "difference"]
 
     def node_function(self, a, b):
         out_value = a - b
@@ -106,6 +118,9 @@ class MultiplyNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.FLOAT,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Multiply two floating-point values."
+    SEARCH_ALIASES = ["product", "times"]
 
     def node_function(self, a, b):
         out_value = a * b
@@ -128,6 +143,9 @@ class MultiplyIntNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.INT,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Multiply two integer values and return an integer result."
+    SEARCH_ALIASES = ["integer multiply", "int product"]
 
     def node_function(self, a, b):
         out_value = a * b
@@ -151,6 +169,9 @@ class DivideNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.FLOAT,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Divide the first floating-point value by the second."
+    SEARCH_ALIASES = ["division", "quotient"]
 
     def node_function(self, a, b):
         out_value = a / b
@@ -173,6 +194,8 @@ class NumberNode:
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.INT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT)
     RETURN_NAMES = ("float", "int", "absolute", "round", "ceil", "floor", "sqrt", "exp", "log")
+    DESCRIPTION = "Expand one number into several commonly used derived values."
+    SEARCH_ALIASES = ["number breakdown", "math helpers"]
 
     def node_function(self, number):
         out_int = int(number)
@@ -202,6 +225,9 @@ class FloatToIntNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.INT,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Convert a float value to an integer."
+    SEARCH_ALIASES = ["cast int", "to integer"]
 
     def node_function(self, value):
         out_value = int(value)
@@ -223,6 +249,9 @@ class IntToFloatNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.FLOAT,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Convert an integer value to a float."
+    SEARCH_ALIASES = ["cast float", "to float"]
 
     def node_function(self, value):
         out_value = float(value)
@@ -246,6 +275,9 @@ class IfNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
     RETURN_TYPES = (IO.ANY,)
+    RETURN_NAMES = ("value",)
+    DESCRIPTION = "Return either the true input or false input based on the condition."
+    SEARCH_ALIASES = ["conditional", "ternary"]
 
     def node_function(self, true, false, condition):
         if condition:
