@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/ComfyUI-custom__nodes-blue?style=flat-square&logo=python" alt="ComfyUI Custom Nodes">
-  <img src="https://img.shields.io/badge/version-1.0.89-green?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.0.90-green?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/nodes-58-orange?style=flat-square" alt="Nodes Count">
   <a href="https://github.com/yanhuifair/ComfyUI-FairLab/stargazers"><img src="https://img.shields.io/github/stars/yanhuifair/ComfyUI-FairLab?style=flat-square" alt="GitHub stars"></a>
