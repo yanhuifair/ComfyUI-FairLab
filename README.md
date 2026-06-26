@@ -1,8 +1,10 @@
-# ComfyUI-FairLab
+> Language: [中文文档](./README-zh.md)
+
+<h1 align="center">ComfyUI-FairLab</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/ComfyUI-custom__nodes-blue?style=flat-square&logo=python" alt="ComfyUI Custom Nodes">
-  <img src="https://img.shields.io/badge/version-1.0.90-green?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.0.91-green?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-yellow?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/nodes-58-orange?style=flat-square" alt="Nodes Count">
   <a href="https://github.com/yanhuifair/ComfyUI-FairLab/stargazers"><img src="https://img.shields.io/github/stars/yanhuifair/ComfyUI-FairLab?style=flat-square" alt="GitHub stars"></a>
@@ -14,11 +16,9 @@
   All nodes conform to the ComfyUI <code>IO.*</code> type annotation convention.
 </p>
 
-> Language: [中文文档](./README-zh.md)
-
 ---
 
-## Contents
+<h2>Contents</h2>
 
 - [Overview](#overview)
 - [Installation](#installation)
@@ -39,12 +39,12 @@
 
 ---
 
-## Overview
+<h2>Overview</h2>
 
 ComfyUI-FairLab supplements the core ComfyUI node set with operations that are commonly needed in production workflows but not available in the base distribution.
 
 | Category  | Nodes | Scope |
-|:----------|:-----:|:------|
+|:----------|:-----|:------|
 | String    | 16   | String construction, tag manipulation, translation, encoding repair, file I/O |
 | Image     | 26   | File/URL/Base64 loading, batch I/O, video conversion, alpha & channel ops, PBR maps, modulation |
 | Logic     | 11   | Arithmetic operators, conditional branching, type casting |
@@ -52,22 +52,22 @@ ComfyUI-FairLab supplements the core ComfyUI node set with operations that are c
 
 ---
 
-## Installation
+<h2>Installation</h2>
 
-### Prerequisites
+<h3>Prerequisites</h3>
 
 - **ComfyUI** installed and working. If not, follow the [official guide](https://github.com/comfyanonymous/ComfyUI#installing).
 - **Python** 3.10+ (the same environment ComfyUI uses).
 - **Git** (for manual installation).
 
-### Method 1: ComfyUI Manager (Recommended)
+<h3>Method 1: ComfyUI Manager (Recommended)</h3>
 
 1. Open ComfyUI and navigate to the **Manager** panel.
 2. Click **Install Custom Nodes**.
 3. Search for `ComfyUI-FairLab`.
 4. Click **Install** and restart ComfyUI.
 
-### Method 2: Manual Installation
+<h3>Method 2: Manual Installation</h3>
 
 ```bash
 # 1. Navigate to the custom_nodes directory
@@ -85,11 +85,11 @@ pip install -r requirements.txt
 # 5. Restart ComfyUI
 ```
 
-### Verify Installation
+<h3>Verify Installation</h3>
 
 After restarting ComfyUI, double-click the canvas and search for `FairLab` or any node name (e.g., `String Append`, `Load Image Batch From Directory`). If the nodes appear in the search results, the installation was successful.
 
-### Updating
+<h3>Updating</h3>
 
 **ComfyUI Manager:** Click **Update All** in the Manager panel.
 
@@ -100,7 +100,7 @@ git pull
 pip install -r requirements.txt
 ```
 
-### Dependencies
+<h3>Dependencies</h3>
 
 | Package | Required By |
 |:--------|:------------|
@@ -110,7 +110,7 @@ pip install -r requirements.txt
 | `nest_asyncio`                     | Async event loop support      |
 | `perfect-pixel[opencv]>=0.1.4`     | Perfect Pixel                 |
 
-### Troubleshooting
+<h3>Troubleshooting</h3>
 
 **Nodes not showing up after installation**
 
@@ -133,9 +133,9 @@ pip install --upgrade googletrans
 
 ---
 
-## Node Reference
+<h2>Node Reference</h2>
 
-### String (16 nodes)
+<h3>String (16 nodes)</h3>
 
 String construction, persistence, and tag-oriented manipulation.
 
@@ -158,9 +158,9 @@ String construction, persistence, and tag-oriented manipulation.
 | **Unique Tags**            | Deduplicate entries in a tag list |
 | **ASCII Art Text**         | Render text as an ASCII-art image using system fonts |
 
-### Image (26 nodes)
+<h3>Image (26 nodes)</h3>
 
-#### I/O & Loading
+<h4>I/O & Loading</h4>
 
 | Node | Description |
 |:-----|:------------|
@@ -173,7 +173,7 @@ String construction, persistence, and tag-oriented manipulation.
 | **Image To Base64**                 | Encode an image tensor as a Base64 string |
 | **Base64 To Image**                 | Decode a Base64 string into an image tensor |
 
-#### Processing
+<h4>Processing</h4>
 
 | Node | Description |
 |:-----|:------------|
@@ -189,21 +189,21 @@ String construction, persistence, and tag-oriented manipulation.
 | **Outpainting Pad**        | Pad image borders for outpainting workflows |
 | **Perfect Pixel**          | Integer-scale an image without sub-pixel interpolation (nearest-neighbor at exact multiples) |
 
-#### Video
+<h4>Video</h4>
 
 | Node | Description |
 |:-----|:------------|
 | **Video To Image**   | Extract frames from a video file as an image batch tensor |
 | **Image To Video**   | Compose an image batch into a video file (configurable FPS) |
 
-#### Modulation
+<h4>Modulation</h4>
 
 | Node | Description |
 |:-----|:------------|
 | **Modulation**            | Apply error-diffusion modulation (Floyd–Steinberg-style halftoning) |
 | **Modulation Direction**  | Directional error-diffusion with configurable scan direction and speed |
 
-#### PBR Maps
+<h4>PBR Maps</h4>
 
 | Node | Description |
 |:-----|:------------|
@@ -211,7 +211,7 @@ String construction, persistence, and tag-oriented manipulation.
 | **Detail Map**                | Generate a detail map from an input image for PBR material pipelines |
 | **Roughness To Smoothness**   | Convert between roughness and smoothness maps (invert) |
 
-### Logic (11 nodes)
+<h3>Logic (11 nodes)</h3>
 
 Arithmetic and control-flow primitives for node-graph-level computation.
 
@@ -229,7 +229,7 @@ Arithmetic and control-flow primitives for node-graph-level computation.
 | **Float To Int**   | Cast FLOAT to INT (truncation) |
 | **Int To Float**   | Cast INT to FLOAT |
 
-### Utility (5 nodes)
+<h3>Utility (5 nodes)</h3>
 
 Diagnostics, presets, and extensibility.
 
@@ -243,7 +243,7 @@ Diagnostics, presets, and extensibility.
 
 ---
 
-## Technical Notes
+<h2>Technical Notes</h2>
 
 **Python Script sandbox**
 
@@ -263,7 +263,7 @@ Frame extraction and composition rely on `opencv-python`. Processing time scales
 
 ---
 
-## License
+<h2>License</h2>
 
 MIT — see [LICENSE](./LICENSE).
 

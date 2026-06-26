@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-fairlab"
 description = "Utility, text, logic, and image helper nodes for ComfyUI with updated IO typing and safer script evaluation."
-version = "1.0.90"
+version = "1.0.91"
 license = { text = "MIT" }
 dependencies = [
     "googletrans",
