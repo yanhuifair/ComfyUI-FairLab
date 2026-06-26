@@ -22,6 +22,13 @@
 
 - [Overview](#overview)
 - [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Method 1: ComfyUI Manager](#method-1-comfyui-manager-recommended)
+  - [Method 2: Manual](#method-2-manual-installation)
+  - [Verify Installation](#verify-installation)
+  - [Updating](#updating)
+  - [Dependencies](#dependencies)
+  - [Troubleshooting](#troubleshooting)
 - [Node Reference](#node-reference)
   - [String](#string-16-nodes)
   - [Image](#image-26-nodes)
@@ -47,16 +54,49 @@ ComfyUI-FairLab supplements the core ComfyUI node set with operations that are c
 
 ## Installation
 
-### ComfyUI Manager
+### Prerequisites
 
-Search for `ComfyUI-FairLab` in ComfyUI Manager and install.
+- **ComfyUI** installed and working. If not, follow the [official guide](https://github.com/comfyanonymous/ComfyUI#installing).
+- **Python** 3.10+ (the same environment ComfyUI uses).
+- **Git** (for manual installation).
 
-### Manual
+### Method 1: ComfyUI Manager (Recommended)
+
+1. Open ComfyUI and navigate to the **Manager** panel.
+2. Click **Install Custom Nodes**.
+3. Search for `ComfyUI-FairLab`.
+4. Click **Install** and restart ComfyUI.
+
+### Method 2: Manual Installation
 
 ```bash
+# 1. Navigate to the custom_nodes directory
 cd ComfyUI/custom_nodes
+
+# 2. Clone the repository
 git clone https://github.com/yanhuifair/ComfyUI-FairLab.git
+
+# 3. Enter the project directory
 cd ComfyUI-FairLab
+
+# 4. Install dependencies
+pip install -r requirements.txt
+
+# 5. Restart ComfyUI
+```
+
+### Verify Installation
+
+After restarting ComfyUI, double-click the canvas and search for `FairLab` or any node name (e.g., `String Append`, `Load Image Batch From Directory`). If the nodes appear in the search results, the installation was successful.
+
+### Updating
+
+**ComfyUI Manager:** Click **Update All** in the Manager panel.
+
+**Manual:**
+```bash
+cd ComfyUI/custom_nodes/ComfyUI-FairLab
+git pull
 pip install -r requirements.txt
 ```
 
@@ -69,6 +109,27 @@ pip install -r requirements.txt
 | `requests`                         | Download Image, Load Image From URL |
 | `nest_asyncio`                     | Async event loop support      |
 | `perfect-pixel[opencv]>=0.1.4`     | Perfect Pixel                 |
+
+### Troubleshooting
+
+**Nodes not showing up after installation**
+
+- Make sure you restarted ComfyUI after installing.
+- Check the ComfyUI terminal for import errors related to `ComfyUI-FairLab`.
+- Verify that dependencies were installed: `pip list | grep -E "opencv|googletrans|perfect-pixel"`
+
+**ImportError: No module named 'cv2'**
+
+```bash
+pip install opencv-python
+```
+
+**Google Translate not working**
+
+The `googletrans` library may require an updated version. Try:
+```bash
+pip install --upgrade googletrans
+```
 
 ---
 
