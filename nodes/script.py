@@ -5,6 +5,9 @@ from comfy.comfy_types.node_typing import IO
 
 DEFAULT_SCRIPT = "RESULT = (A, B, C, D)"
 
+# PythonScriptNode exposes A/B/C/D, so every evaluated result has to fit four sockets.
+OUTPUT_COUNT = 4
+
 
 SAFE_BIN_OPS = {
     ast.Add: operator.add,
@@ -182,6 +185,10 @@ class PythonScriptNode:
         evaluator = SafeScriptEvaluator({"A": A, "B": B, "C": C, "D": D, "RESULT": None})
         result = evaluator.evaluate(script)
 
+        # RETURN_TYPES always declares four outputs, so a script returning a shorter or
+        # longer tuple has to be fitted to it or the output sockets bind to the wrong values.
         if isinstance(result, tuple):
-            return result
+            if len(result) == OUTPUT_COUNT:
+                return result
+            return tuple(list(result)[:OUTPUT_COUNT] + [None] * max(0, OUTPUT_COUNT - len(result)))
         return (result, None, None, None)
