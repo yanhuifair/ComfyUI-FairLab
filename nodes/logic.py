@@ -1,4 +1,6 @@
 import math
+import sys
+
 from comfy.comfy_types.node_typing import IO
 
 
@@ -214,7 +216,14 @@ class NumberNode:
         out_ceil = math.ceil(out_float)
         out_floor = math.floor(out_float)
         out_sqrt = math.sqrt(out_float) if out_float >= 0 else 0.0
-        out_exp = math.exp(out_float)
+        # math.exp() raises past ~709, and the other guards here degrade instead of
+        # throwing, so clamp to the largest finite float rather than leaking inf.
+        if out_float > 709.78:
+            out_exp = sys.float_info.max
+        elif out_float < -745.13:
+            out_exp = 0.0
+        else:
+            out_exp = math.exp(out_float)
         out_log = math.log(out_float) if out_float > 0 else 0.0
         return (out_float, out_int, out_abs, out_round, out_ceil, out_floor, out_sqrt, out_exp, out_log)
 
