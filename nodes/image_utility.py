@@ -1,5 +1,6 @@
 import os
 import io
+import re
 import requests
 import json
 import numpy as np
@@ -26,10 +27,24 @@ from comfy.comfy_types.node_typing import IO
 from .modulation import process_modulation, process_modulation_ProcessPool
 from perfect_pixel import get_perfect_pixel
 
-# tensor [B,C,H,W]
+# tensor [B,H,W,C]
 # pil [H,W,C]
 # np [H,W,C]
 # cv2 [H,W,C]
+
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png")
+
+
+def natural_sort_key(name):
+    # "frame_10.png" has to sort after "frame_2.png"; plain sorted() puts 10 first.
+    return [int(part) if part.isdigit() else part.lower() for part in re.split(r"(\d+)", name)]
+
+
+def list_image_files(directory):
+    # os.listdir() yields directory order and every stray file (Finder's .DS_Store on
+    # macOS included), so filter to readable images and order them by name first.
+    names = [name for name in os.listdir(directory) if name.lower().endswith(IMAGE_EXTENSIONS)]
+    return [os.path.join(directory, name) for name in sorted(names, key=natural_sort_key)]
 
 
 def tensor_to_cv2(tensor):
@@ -431,15 +446,16 @@ class ImageToVideoNode:
         video_dir = video_dir.replace('"', "")
         video_path = os.path.join(video_dir, f"{video_name}.mp4")
 
-        image_paths = []
-        image_name_list = os.listdir(image_dir)
-        for image_name in image_name_list:
-            image_paths.append(os.path.join(image_dir, image_name))
+        image_paths = list_image_files(image_dir)
+        if not image_paths:
+            raise ValueError(f"no .jpg/.jpeg/.png images found in {image_dir}")
 
-        progress_total = len(image_name_list)
+        progress_total = len(image_paths)
         progress_bar = ProgressBar(progress_total)
 
         img0 = cv2.imread(image_paths[0])
+        if img0 is None:
+            raise ValueError(f"could not read {image_paths[0]}")
         height, width, layers = img0.shape
         print(f"video resolution:{width}*{height}")
 
@@ -449,6 +465,10 @@ class ImageToVideoNode:
         progress_counter = 0
         for image_path in image_paths:
             img = cv2.imread(image_path)
+            if img is None:
+                raise ValueError(f"could not read {image_path}")
+            if img.shape != img0.shape:
+                raise ValueError(f"{os.path.basename(image_path)} is {img.shape[1]}x{img.shape[0]}, expected {width}x{height}")
             video_writer.write(img)
 
             progress_counter += 1
