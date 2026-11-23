@@ -84,6 +84,17 @@ def pil_to_tensor(pil):
     return toTensor(pil).permute(1, 2, 0)
 
 
+def batchify_image(tensor):
+    # ComfyUI's IMAGE is [B, H, W, C]; the pil helpers above yield a single [H, W, C]
+    # frame, so nodes must add the batch dimension before handing images downstream.
+    return tensor.unsqueeze(0) if tensor.ndim == 3 else tensor
+
+
+def batchify_mask(mask):
+    # ComfyUI's MASK is [B, H, W].
+    return mask.unsqueeze(0) if mask.ndim == 2 else mask
+
+
 def tensor_to_pil(tensor):
     if len(tensor.shape) == 2:
         # [H, W] to [H, W]
@@ -471,13 +482,13 @@ class LoadImageFromURLNode:
     def node_function(self, url, channels):
         pil, name = load_pil_from_url(url)
         pil = pil.convert(channels)
-        img_out = pil_to_tensor(pil)
+        img_out = batchify_image(pil_to_tensor(pil))
         if channels == "RGBA" and "A" in pil.getbands():
             mask = np.array(pil.getchannel("A")).astype(np.float32) / 255.0
             mask = 1.0 - torch.from_numpy(mask)
         else:
-            mask = torch.zeros((img_out.shape[0], img_out.shape[1]), dtype=torch.float32, device="cpu")
-        return (img_out, mask, name)
+            mask = torch.zeros((img_out.shape[1], img_out.shape[2]), dtype=torch.float32, device="cpu")
+        return (img_out, batchify_mask(mask), name)
 
 
 def load_image_to_tensor(directory, recursive, channels):
@@ -632,7 +643,7 @@ class FillAlphaNode:
 
     def node_function(self, image, alpha_threshold, r, g, b):
         tensor_filled = self.fill_alpha(image, alpha_threshold, (r, g, b))
-        return (tensor_filled,)
+        return (batchify_image(tensor_filled),)
 
 
 class FillColorNode:
@@ -675,7 +686,7 @@ class FillColorNode:
 
     def node_function(self, image, color):
         tensor_filled = self.fill_color(image, color)
-        return (tensor_filled,)
+        return (batchify_image(tensor_filled),)
 
 
 def pil_to_base64(pli_image, pnginfo=None, header=False):
@@ -762,7 +773,7 @@ class Base64ToImageNode:
 
     def function(self, string):
         pil = base64_to_pil(string)
-        image = pil_to_tensor(pil)
+        image = batchify_image(pil_to_tensor(pil))
         return (image,)
 
 
@@ -970,7 +981,8 @@ class ImageShapeNode:
     SEARCH_ALIASES = ["image shape", "tensor shape"]
 
     def node_function(self, images):
-        # [b,h,w,c]
+        # [b,h,w,c]; tolerate a bare [h,w,c] frame left over from older workflows
+        images = batchify_image(images)
         batch, height, width, channel = (images.shape[0], images.shape[1], images.shape[2], images.shape[3])
         return (batch, width, height, channel)
 
