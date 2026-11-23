@@ -1,16 +1,13 @@
-import googletrans
-from googletrans import Translator
-from comfy.comfy_types.node_typing import IO
 import asyncio
+
+import googletrans
+from comfy.comfy_types.node_typing import IO
+from googletrans import Translator
 
 
 async def translate_text(string, src, dest):
     async with Translator() as translator:
-        translated_text = ""
-        if string and string.strip() != "":
-            translated_text = await translator.translate(string, src=src, dest=dest)
-
-        return translated_text.text if hasattr(translated_text, "text") else ""
+        return await translator.translate(string, src=src, dest=dest)
 
 
 class StringTranslateNode:
@@ -36,15 +33,32 @@ class StringTranslateNode:
     SEARCH_ALIASES = ["translate text", "language translate"]
 
     def node_function(self, string, src, dest):
-        try:
-            # Check if there's already a running event loop
-            loop = asyncio.get_running_loop()
-            # If we're here, there's a running loop, so we need to use a different approach
-            import nest_asyncio
+        if not string or not string.strip():
+            return ("",)
 
-            nest_asyncio.apply()
-            text_translated = asyncio.run(translate_text(string, src, dest))
+        try:
+            translated = self._translate_once(string, src, dest)
+        except Exception as error:
+            # Surface the cause: the previous version returned "", so a dead googletrans
+            # or a network error looked like "the text translated to nothing".
+            raise ValueError(f"translation failed ({type(error).__name__}): {error}") from error
+
+        text = getattr(translated, "text", None)
+        if not text:
+            raise ValueError(f"googletrans returned no translation for {string!r} ({src} -> {dest})")
+        return (text,)
+
+    def _translate_once(self, string, src, dest):
+        try:
+            asyncio.get_running_loop()
         except RuntimeError:
-            # No running loop, safe to use asyncio.run()
-            text_translated = asyncio.run(translate_text(string, src, dest))
-        return (text_translated,)
+            # No loop in this thread, so asyncio.run() is safe as is.
+            return asyncio.run(translate_text(string, src, dest))
+
+        # ComfyUI executes node functions inside its own event loop, so asyncio.run() only
+        # works after the re-entrant patch; before this the RuntimeError from a nested
+        # asyncio.run() was caught below and retried, then raised a second time.
+        import nest_asyncio
+
+        nest_asyncio.apply()
+        return asyncio.run(translate_text(string, src, dest))
