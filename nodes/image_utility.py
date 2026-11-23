@@ -639,45 +639,64 @@ class FillAlphaNode:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": (IO.IMAGE, {"default": "", "forceInput": True}),
-                "alpha_threshold": (IO.INT, {"default": "128"}),
-                "r": (IO.INT, {"default": "0"}),
-                "g": (IO.INT, {"default": "128"}),
-                "b": (IO.INT, {"default": "0"}),
-            }
+                "image": (IO.IMAGE, {"forceInput": True}),
+                "alpha_threshold": (IO.INT, {"default": 128, "min": 0, "max": 255}),
+                "r": (IO.INT, {"default": 0, "min": 0, "max": 255}),
+                "g": (IO.INT, {"default": 128, "min": 0, "max": 255}),
+                "b": (IO.INT, {"default": 0, "min": 0, "max": 255}),
+            },
+            "optional": {
+                "mask": (IO.MASK, {"forceInput": True}),
+            },
         }
 
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("image",)
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
-    DESCRIPTION = "Replace transparent pixels with a chosen RGB fill color."
+    DESCRIPTION = "Flatten transparent pixels onto a chosen RGB fill colour, from a 4th channel or a MASK."
     SEARCH_ALIASES = ["flatten alpha", "alpha fill"]
 
-    def fill_alpha(self, tensor, alpha_threshold, fill_color):
+    def fill_alpha(self, frame, mask, threshold, fill_color):
+        if frame.ndim == 2:
+            # A single channel carries no alpha either; widen it so stacking stays valid.
+            return frame.unsqueeze(-1).repeat(1, 1, 3)
 
-        pil = tensor_to_pil(tensor)
-        if pil.mode != "RGBA":
-            raise Exception("Image mode is not RGBA")
+        rgb = frame[..., :3]
+        if frame.shape[-1] >= 4:
+            alpha = frame[..., 3]
+        elif mask is not None:
+            if tuple(mask.shape[-2:]) != tuple(frame.shape[:2]):
+                raise ValueError(f"mask is {mask.shape[-1]}x{mask.shape[-2]} but the frame is {frame.shape[1]}x{frame.shape[0]}")
+            # core LoadImage reports mask = 1 - alpha, so invert to get coverage back
+            alpha = 1.0 - mask
+        else:
+            return rgb
 
-        pixels = pil.getdata()
+        alpha = alpha.to(device=rgb.device, dtype=rgb.dtype).clamp(0.0, 1.0)
+        alpha = torch.where(alpha < threshold, torch.zeros_like(alpha), alpha)
+        coverage = alpha.unsqueeze(-1)
+        # r/g/b are 0..255 widgets (the old PIL path put them straight into an RGB image),
+        # while tensors here are 0..1, so scale before blending.
+        fill = torch.tensor(fill_color, dtype=rgb.dtype, device=rgb.device) / 255.0
+        return rgb * coverage + fill * (1.0 - coverage)
 
-        new_pixels = []
-        for pixel in pixels:
-            r, g, b, a = pixel
-            if a < alpha_threshold:
-                new_pixels.append(fill_color)
-            else:
-                new_pixels.append((int(r * a / 255.0), int(g * a / 255.0), int(b * a / 255.0)))
+    def node_function(self, image, alpha_threshold, r, g, b, mask=None):
+        frames = batchify_image(image)
+        masks = None
+        if mask is not None:
+            masks = batchify_mask(mask)
+            if masks.shape[0] == 1 and frames.shape[0] > 1:
+                masks = masks.expand(frames.shape[0], -1, -1)
 
-        new_pil = Image.new("RGB", pil.size)
-        new_pil.putdata(new_pixels)
-        image_tensor = pil_to_tensor(new_pil)
-        return image_tensor
+        # The widget default was declared as the string "128", which would reach here as text.
+        threshold = float(alpha_threshold) / 255.0
+        filled = []
+        for index, frame in enumerate(frames):
+            frame_mask = None if masks is None else masks[index]
+            filled.append(self.fill_alpha(frame, frame_mask, threshold, (r, g, b)))
 
-    def node_function(self, image, alpha_threshold, r, g, b):
-        tensor_filled = self.fill_alpha(image, alpha_threshold, (r, g, b))
-        return (batchify_image(tensor_filled),)
+        return (torch.stack(filled, dim=0),)
 
 
 class FillColorNode:
