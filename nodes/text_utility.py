@@ -455,11 +455,12 @@ class UniqueTagsNode:
     SEARCH_ALIASES = ["dedupe tags", "unique prompt tags"]
 
     def node_function(self, string):
-        out_string = ""
         tags = string_to_tags(string)
-        unique_tags = set(tags)
-        out_string = tags_to_string(unique_tags)
-        return (out_string,)
+        # set() iterates in hash order, which reshuffled the tags differently in every
+        # process; deduplicate while keeping the order the user wrote them in.
+        seen = set()
+        unique_tags = [tag for tag in tags if not (tag in seen or seen.add(tag))]
+        return (tags_to_string(unique_tags),)
 
 
 class ASCIICharNode:
