@@ -81,7 +81,11 @@ const extension = {
     }
 
     try {
-      const { ComfyButton } = await import("/scripts/ui/components/button.js");
+      const ComfyButton = window.comfyAPI?.button?.ComfyButton;
+      if (!ComfyButton) {
+        return;
+      }
+
       const restartButton = new ComfyButton({
         icon: "restart",
         action: async () => {
