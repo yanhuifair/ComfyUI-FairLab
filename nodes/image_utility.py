@@ -177,6 +177,18 @@ def np_to_pil(image):
     return Image.fromarray(np.clip(image * 255, 0, 255).astype("uint8"))
 
 
+def batch_file_name(filename, batch_number, batch_size, timestamp, counter=None):
+    # A prefix without {batch_num} resolved to the same path for every frame, so a batch
+    # wrote one file and quietly overwrote the rest. {time} is only second-granular, so it
+    # does not make the name unique either. Fall back to a counter suffix for real batches.
+    if "{batch_num}" in filename:
+        filename = filename.replace("{batch_num}", str(batch_number))
+    elif batch_size > 1:
+        suffix = counter if counter is not None else batch_number + 1
+        filename = f"{filename}_{suffix:05}_"
+    return filename.replace("{time}", timestamp)
+
+
 class DownloadImageNode:
     def __init__(self):
         self.output_dir = folder_paths.get_temp_directory()
@@ -229,12 +241,8 @@ class DownloadImageNode:
                         for x in extra_pnginfo:
                             metadata.add_text(x, json.dumps(extra_pnginfo[x]))
 
-                filename_with_batch_num = filename.replace("{batch_num}", str(batch_number))
-
-                now = datetime.now()
-                timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-                filename_with_batch_num = filename_with_batch_num.replace("{time}", timestamp)
-                file_name = f"{filename_with_batch_num}.png"
+                timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                file_name = f"{batch_file_name(filename, batch_number, len(images), timestamp, counter)}.png"
                 img.save(
                     os.path.join(full_output_folder, file_name),
                     pnginfo=metadata,
@@ -260,12 +268,8 @@ class DownloadImageNode:
                         for x in extra_pnginfo:
                             metadata.add_text(x, json.dumps(extra_pnginfo[x]))
 
-                filename_with_batch_num = filename.replace("{batch_num}", str(batch_number))
-
-                now = datetime.now()
-                timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-                filename_with_batch_num = filename_with_batch_num.replace("{time}", timestamp)
-                file_name = f"{filename_with_batch_num}.png"
+                timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                file_name = f"{batch_file_name(filename, batch_number, len(images), timestamp, counter)}.png"
                 img.save(
                     os.path.join(full_output_folder, file_name),
                     pnginfo=metadata,
@@ -1335,8 +1339,7 @@ class SaveImageToFolderNode:
             filename = filename_prefix
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-            filename = filename.replace("{time}", timestamp)
-            filename = filename.replace("{batch_num}", str(index))
+            filename = batch_file_name(filename, index, len(images), timestamp)
 
             pil.save(os.path.join(folder_path, f"{filename}.png"))
         return ()
