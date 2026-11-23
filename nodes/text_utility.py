@@ -58,7 +58,6 @@ class LoadStringFromDirectoryNode:
 
     CATEGORY = "Fair/string"
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     RETURN_TYPES = (IO.STRING, IO.STRING, IO.STRING)
     RETURN_NAMES = ("string", "directory", "name")
     OUTPUT_IS_LIST = (True, True, True)
@@ -91,7 +90,6 @@ class FixUTF8StringNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     DESCRIPTION = "Normalize common UTF-8 punctuation and strip non-ASCII characters."
     SEARCH_ALIASES = ["clean text", "ascii sanitize"]
 
@@ -190,7 +188,6 @@ class StringNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     DESCRIPTION = "Output a string value from a text widget."
     SEARCH_ALIASES = ["text input", "string input"]
 
@@ -213,7 +210,6 @@ class IntNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     DESCRIPTION = "Output an integer value from a numeric widget."
     SEARCH_ALIASES = ["integer input", "int value"]
 
@@ -238,7 +234,6 @@ class FloatNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     DESCRIPTION = "Output a floating-point value from a numeric widget."
     SEARCH_ALIASES = ["float input", "decimal value"]
 
@@ -265,7 +260,6 @@ class RangeStringNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     OUTPUT_IS_LIST = (True,)
     DESCRIPTION = "Generate a list of stringified numbers from a numeric range."
     SEARCH_ALIASES = ["string range", "sequence text"]
@@ -295,7 +289,6 @@ class PrependTagsNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     DESCRIPTION = "Insert tag text before the existing comma-separated tags."
     SEARCH_ALIASES = ["prefix tags", "prepend prompt tags"]
 
@@ -325,7 +318,6 @@ class AppendTagsNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     DESCRIPTION = "Append comma-separated tags and remove duplicates."
     SEARCH_ALIASES = ["merge tags", "append prompt tags"]
 
@@ -358,7 +350,6 @@ class ExcludeTagsNode:
     CATEGORY = "Fair/string"
 
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     DESCRIPTION = "Remove matching tags from a comma-separated tag string."
     SEARCH_ALIASES = ["remove tags", "filter tags"]
 

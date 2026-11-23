@@ -162,7 +162,6 @@ class PythonScriptNode:
     RETURN_TYPES = (IO.ANY, IO.ANY, IO.ANY, IO.ANY)
     RETURN_NAMES = ("A", "B", "C", "D")
     FUNCTION = "run_script"
-    OUTPUT_NODE = True
     CATEGORY = "Fair/utility"
     DESCRIPTION = "Safely evaluate a limited Python expression and return up to four outputs."
     SEARCH_ALIASES = ["safe python", "expression evaluator"]

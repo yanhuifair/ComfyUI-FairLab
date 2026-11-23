@@ -270,7 +270,6 @@ class ResizeImageNode:
     RETURN_TYPES = (IO.IMAGE, IO.INT, IO.INT)
     RETURN_NAMES = ("image", "width", "height")
     FUNCTION = "node_function"
-    OUTPUT_NODE = True
     CATEGORY = "Fair/image"
     DESCRIPTION = "Resize an image batch by width, height, or longest or shortest side."
     SEARCH_ALIASES = ["scale image", "image resize"]
@@ -711,7 +710,6 @@ class ImageToBase64Node:
     RETURN_TYPES = (IO.STRING,)
     RETURN_NAMES = ("string",)
     FUNCTION = "function"
-    OUTPUT_NODE = True
     CATEGORY = "Fair/image"
     DESCRIPTION = "Encode an image into a Base64 PNG string."
     SEARCH_ALIASES = ["image encode", "base64 encode"]
@@ -757,7 +755,6 @@ class Base64ToImageNode:
     RETURN_TYPES = (IO.IMAGE,)
     RETURN_NAMES = ("image",)
     FUNCTION = "function"
-    OUTPUT_NODE = True
     CATEGORY = "Fair/image"
     DESCRIPTION = "Decode a Base64 image string into Comfy image data."
     SEARCH_ALIASES = ["base64 decode", "string to image"]
