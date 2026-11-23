@@ -200,7 +200,7 @@ class NumberNode:
 
     FUNCTION = "node_function"
     CATEGORY = "Fair/logic"
-    RETURN_TYPES = (IO.INT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT)
+    RETURN_TYPES = (IO.FLOAT, IO.INT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT, IO.FLOAT)
     RETURN_NAMES = ("float", "int", "absolute", "round", "ceil", "floor", "sqrt", "exp", "log")
     DESCRIPTION = "Expand one number into several commonly used derived values."
     SEARCH_ALIASES = ["number breakdown", "math helpers"]
