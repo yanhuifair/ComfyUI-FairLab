@@ -650,6 +650,4 @@ class ASCIICharNode:
         for line_parts in char_lines:
             out_string += " ".join(line_parts) + "\n"
 
-        print(out_string)
-
         return (out_string,)
