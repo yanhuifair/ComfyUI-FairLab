@@ -1,4 +1,3 @@
-from calendar import c
 import os
 import io
 import requests
@@ -25,13 +24,12 @@ import sys
 from comfy.comfy_types.node_typing import IO
 
 from .modulation import process_modulation, process_modulation_ProcessPool
-import matplotlib.pyplot as plt
 from perfect_pixel import get_perfect_pixel
 
 # tensor [B,C,H,W]
 # pil [H,W,C]
 # np [H,W,C]
-# comfyui image [B,H,W,C]
+# cv2 [H,W,C]
 
 
 def tensor_to_cv2(tensor):
@@ -45,7 +43,7 @@ def tensor_to_cv2(tensor):
 def cv2_to_tensor(array):
     array = cv2.cvtColor(array, cv2.COLOR_BGR2RGB)
     array = array.astype(np.float32) / 255.0
-    tensor = torch.from_numpy(array).permute(2, 0, 1)
+    tensor = torch.from_numpy(array)
     return tensor
 
 
@@ -63,7 +61,7 @@ def pil_to_tensor_mask(pil):
             mask = np.array(i.getchannel("A")).astype(np.float32) / 255.0
             mask = 1.0 - torch.from_numpy(mask)
         else:
-            mask = torch.zeros((64, 64), dtype=torch.float32, device="cpu")
+            mask = torch.zeros((image.shape[0], image.shape[1]), dtype=torch.float32, device="cpu")
         output_images.append(image)
         output_masks.append(mask.unsqueeze(0))
 
@@ -90,6 +88,9 @@ def tensor_to_pil(tensor):
     if len(tensor.shape) == 2:
         # [H, W] to [H, W]
         return toPIL(tensor)
+    elif len(tensor.shape) == 4:
+        # [B, H, W, C] to [C, H, W] (take first image)
+        return toPIL(tensor[0].permute(2, 0, 1))
     else:
         # [H, W, C] to [C, H, W]
         return toPIL(tensor.permute(2, 0, 1))
@@ -109,7 +110,7 @@ def batch_to_list(tensor_batch):
 
 
 def list_to_batch(tensor_list):
-    return torch.cat(tensor_list)
+    return torch.stack(tensor_list, dim=0)
 
 
 def tensor_list_to_batch(tensors):
@@ -119,7 +120,7 @@ def tensor_list_to_batch(tensors):
 def rgba_to_rgb(pil):
     bg = Image.new("RGB", pil.size, (255, 255, 255))
     bg.paste(pil, pil)
-    pil = bg
+    return bg
 
 
 def load_pil_from_url(url):
@@ -261,10 +262,10 @@ class SaveImageToDirectoryNode:
     SEARCH_ALIASES = ["export images", "save image folder"]
 
     def function(self, image, directory, name, type, compress_level):
-        for i in image:
+        for idx, i in enumerate(image):
             pil = tensor_to_pil(i)
-            name = f"{name}.{type}"
-            pil.save(os.path.join(directory, name), compress_level=compress_level)
+            file_name = f"{name}_{idx}.{type}" if len(image) > 1 else f"{name}.{type}"
+            pil.save(os.path.join(directory, file_name), compress_level=compress_level)
 
         return ()
 
@@ -466,9 +467,14 @@ class LoadImageFromURLNode:
 
     def node_function(self, url, channels):
         pil, name = load_pil_from_url(url)
-        pil.convert(channels)
+        pil = pil.convert(channels)
         img_out = pil_to_tensor(pil)
-        return (img_out, img_out, name)
+        if channels == "RGBA" and "A" in pil.getbands():
+            mask = np.array(pil.getchannel("A")).astype(np.float32) / 255.0
+            mask = 1.0 - torch.from_numpy(mask)
+        else:
+            mask = torch.zeros((img_out.shape[0], img_out.shape[1]), dtype=torch.float32, device="cpu")
+        return (img_out, mask, name)
 
 
 def load_image_to_tensor(directory, recursive, channels):
@@ -635,7 +641,7 @@ class FillColorNode:
         return {
             "required": {
                 "image": (IO.IMAGE, {"default": "", "forceInput": True}),
-                "color": (IO.COLOR,),
+                "color": ("COLOR", {"default": "#FFFFFF"}),
             }
         }
 
@@ -644,18 +650,20 @@ class FillColorNode:
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
 
-    def fill_color(self, image, color):
+    def fill_color(self, image, color_hex):
         # change white to fill color
         pil = tensor_to_pil(image)
+        hex_str = color_hex.lstrip("#")
+        r, g, b = tuple(int(hex_str[i : i + 2], 16) for i in (0, 2, 4))
 
         pixels = pil.getdata()
 
         new_pixels = []
         for pixel in pixels:
-            r, g, b = pixel
-            l = int(0.299 * r + 0.587 * g + 0.114 * b)
+            pr, pg, pb = pixel
+            l = int(0.299 * pr + 0.587 * pg + 0.114 * pb)
             # color lerp
-            new_pixels.append((int(r + (color[0] - r) * (1 - l / 255.0)), int(g + (color[1] - g) * (1 - l / 255.0)), int(b + (color[2] - b) * (1 - l / 255.0))))
+            new_pixels.append((int(pr + (r - pr) * (1 - l / 255.0)), int(pg + (g - pg) * (1 - l / 255.0)), int(pb + (b - pb) * (1 - l / 255.0))))
 
         new_pil = Image.new("RGB", pil.size)
         new_pil.putdata(new_pixels)
@@ -994,28 +1002,12 @@ class ModulationNode:
             img_np = pil_to_np(pil)
             images_np.append(img_np)
 
-        # Try ProcessPool first with proper error handling
+        # Try ProcessPool first, fallback to ThreadPool on failure
         try:
             images_np = process_modulation_ProcessPool(images_np, direction, speed)
         except Exception as e:
-            print(f"ProcessPool failed: {e}, using ThreadPool fallback")
-            # Fallback to ThreadPool (already handled in process_modulation_ProcessPool)
-            try:
-                images_np = process_modulation(images_np, direction, speed)
-            except Exception as inner_e:
-                print(f"ThreadPool also failed: {inner_e}, processing sequentially")
-                # Last resort: sequential processing
-                from .modulation import modulation
-
-                processed_images = []
-                for idx, image_np in enumerate(images_np):
-                    try:
-                        processed = modulation(image_np, idx, direction, speed)
-                        processed_images.append(processed)
-                    except Exception as seq_e:
-                        print(f"Error processing image {idx}: {seq_e}, keeping original")
-                        processed_images.append(image_np)
-                images_np = processed_images
+            print(f"ProcessPool failed: {e}, falling back to ThreadPool")
+            images_np = process_modulation(images_np, direction, speed)
 
         for image_np in images_np:
             pil = np_to_pil(image_np).convert("RGB")
@@ -1073,14 +1065,17 @@ class ImageRemoveAlphaNode:
     def node_function(self, images, masks, fill_color):
         out_images = []
         for image, mask in zip(images, masks):
-            image_pil = tensor_to_pil(image)
-            mask_pil = tensor_to_pil(1 - mask)
+            image_pil = tensor_to_pil(image).convert("RGBA")
+            if len(mask.shape) == 2:
+                mask_np = (1.0 - mask.cpu().numpy() * 255.0).astype(np.uint8)
+                mask_pil = Image.fromarray(mask_np, mode="L")
+            else:
+                mask_pil = tensor_to_pil(1.0 - mask).convert("L")
 
-            new_pil = Image.new("RGBA", image_pil.size, fill_color)
-            new_pil.paste(image_pil, mask_pil)
-            new_pil = new_pil.convert("RGB")
+            bg_pil = Image.new("RGB", image_pil.size, fill_color)
+            bg_pil.paste(image_pil, mask_pil)
 
-            image = pil_to_tensor(new_pil)
+            image = pil_to_tensor(bg_pil)
             out_images.append(image)
 
         out_images = torch.stack(out_images, dim=0)
@@ -1302,44 +1297,6 @@ class SaveImageToFolderNode:
         return ()
 
 
-# class SaveWEBMNode:
-#     def __init__(self):
-#         pass
-
-#     @classmethod
-#     def INPUT_TYPES(cls):
-#         return {
-#             "required": {
-#                 "images": (IO.IMAGE,),
-#                 "folder_path": (IO.STRING, {"default": os.path.join(os.path.expanduser("~"), "Desktop")}),
-#                 "filename_prefix": (IO.STRING, {"default": "ComfyUI_{time}_{batch_num}"}),
-#             }
-#         }
-
-#     FUNCTION = "node_function"
-#     CATEGORY = "Fair/image"
-#     RETURN_TYPES = ()
-#     RETURN_NAMES = ()
-#     OUTPUT_NODE = True
-
-#     def node_function(self, images, folder_path, filename_prefix):
-#         for index, image in enumerate(images):
-#             if len(image.shape) == 2:
-#                 pil_single = tensor_to_pil(image)
-#                 pil = pil_single.convert("RGB")
-#             else:
-#                 pil = tensor_to_pil(image)
-
-#             filename = filename_prefix
-#             now = datetime.now()
-#             timestamp = now.strftime("%Y-%m-%d-%H-%M-%S")
-#             filename = filename.replace("{time}", timestamp)
-#             filename = filename.replace("{batch_num}", str(index))
-
-#             pil.save(os.path.join(folder_path, f"{filename}.png"))
-#         return ()
-
-
 # https://github.com/theamusing/perfectPixel
 class PerfectPixelNode:
     def __init__(self):
@@ -1376,6 +1333,8 @@ class PerfectPixelNode:
 
     def node_function(self, images, sample_method, min_size, peak_width, refine_intensity, fix_square, debug):
         outs = []
+        out_w = 0
+        out_h = 0
         for image in images:
             image_cv2 = self.tensor_to_cv2(image)
             w, h, out = get_perfect_pixel(
@@ -1390,5 +1349,7 @@ class PerfectPixelNode:
             out_pil = self.np_to_pil(out)
             image_tensor = pil_to_tensor(out_pil)
             outs.append(image_tensor)
+            out_w = w
+            out_h = h
         outs = torch.stack(outs, dim=0)
-        return (outs, w, h)
+        return (outs, out_w, out_h)

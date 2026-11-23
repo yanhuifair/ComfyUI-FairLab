@@ -146,13 +146,10 @@ class FixUTF8StringNode:
         return "".join(c if ord(c) < 128 else "" for c in text)
 
     def node_function(self, string):
-        # Replace special characters
-        out_string = []
-        for content in string:
-            cleaned_content = self.replace_special_characters(content)
-            cleaned_content = self.remove_special_characters(cleaned_content)
-            out_string.append(cleaned_content)
-        return (out_string,)
+        # Replace special characters and strip non-ASCII
+        cleaned = self.replace_special_characters(string)
+        cleaned = self.remove_special_characters(cleaned)
+        return (cleaned,)
 
 
 class StringAppendNode:
@@ -336,8 +333,10 @@ class AppendTagsNode:
         front_tags = string_to_tags(front)
         back_tags = string_to_tags(back)
         out_tags = front_tags + back_tags
-        out_tags = set(out_tags)
-        out_string = tags_to_string(out_tags)
+        # Preserve order while removing duplicates
+        seen = set()
+        unique_tags = [x for x in out_tags if not (x in seen or seen.add(x))]
+        out_string = tags_to_string(unique_tags)
         return (out_string,)
 
 

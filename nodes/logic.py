@@ -23,7 +23,10 @@ class MaxNode:
     SEARCH_ALIASES = ["maximum", "max value"]
 
     def node_function(self, a, b):
-        out_value = max(a, b)
+        try:
+            out_value = max(a, b)
+        except TypeError:
+            out_value = a if a > b else b
         return (out_value,)
 
 
@@ -48,7 +51,10 @@ class MinNode:
     SEARCH_ALIASES = ["minimum", "min value"]
 
     def node_function(self, a, b):
-        out_value = min(a, b)
+        try:
+            out_value = min(a, b)
+        except TypeError:
+            out_value = a if a < b else b
         return (out_value,)
 
 
@@ -174,6 +180,8 @@ class DivideNode:
     SEARCH_ALIASES = ["division", "quotient"]
 
     def node_function(self, a, b):
+        if b == 0:
+            raise ValueError("Division by zero is not allowed")
         out_value = a / b
         return (out_value,)
 
@@ -204,9 +212,9 @@ class NumberNode:
         out_round = round(out_float)
         out_ceil = math.ceil(out_float)
         out_floor = math.floor(out_float)
-        out_sqrt = math.sqrt(out_abs)
+        out_sqrt = math.sqrt(out_abs) if out_abs >= 0 else 0.0
         out_exp = math.exp(out_float)
-        out_log = math.log(out_float)
+        out_log = math.log(out_float) if out_float > 0 else 0.0
         return (out_int, out_float, out_abs, out_round, out_ceil, out_floor, out_sqrt, out_exp, out_log)
 
 

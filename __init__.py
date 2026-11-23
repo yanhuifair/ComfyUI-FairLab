@@ -33,6 +33,7 @@ from .nodes.image_utility import ImagesRangeNode
 from .nodes.image_utility import ImagesIndexNode
 from .nodes.image_utility import ImagesCatNode
 from .nodes.image_utility import ImageShapeNode
+from .nodes.image_utility import FillColorNode
 from .nodes.image_utility import ModulationNode
 from .nodes.image_utility import ModulationDirectionNode
 from .nodes.image_utility import ImageRemoveAlphaNode
@@ -111,6 +112,7 @@ NODE_CLASS_MAPPINGS = {
     "ImagesIndexNode": ImagesIndexNode,
     "ImagesCatNode": ImagesCatNode,
     "ImageShapeNode": ImageShapeNode,
+    "FillColorNode": FillColorNode,
     "Base64ToImageNode": Base64ToImageNode,
     "ASCIICharNode": ASCIICharNode,
     "ModulationNode": ModulationNode,
@@ -173,6 +175,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "ImagesIndexNode": "Images Index",
     "ImagesCatNode": "Images Cat",
     "ImageShapeNode": "Image Shape",
+    "FillColorNode": "Fill Color",
     "ASCIICharNode": "ASCII Art Text",
     "ModulationNode": "Modulation",
     "ModulationDirectionNode": "Modulation Direction",
