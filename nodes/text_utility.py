@@ -266,7 +266,7 @@ class RangeStringNode:
 
     FUNCTION = "node_function"
     OUTPUT_NODE = True
-    OUTPUT_IS_LIST = True
+    OUTPUT_IS_LIST = (True,)
     DESCRIPTION = "Generate a list of stringified numbers from a numeric range."
     SEARCH_ALIASES = ["string range", "sequence text"]
 
