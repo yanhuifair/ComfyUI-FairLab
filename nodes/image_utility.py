@@ -136,6 +136,8 @@ def batch_to_list(tensor_batch):
 
 
 def list_to_batch(tensor_list):
+    if not tensor_list:
+        raise ValueError("no images found — the source directory holds no .jpg/.jpeg/.png file")
     # Callers hand over either [H, W, C] frames or already unsqueezed [1, H, W, C]
     # ones, so normalise first: stacking a list of 4D tensors would yield 5D.
     frames = [tensor.squeeze(0) if tensor.ndim == 4 else tensor for tensor in tensor_list]
@@ -164,7 +166,9 @@ def pil_to_np(pilimage):
 
 
 def np_to_pil(image):
-    return Image.fromarray((image * 255).astype("uint8"))
+    # Error diffusion pushes values outside [0, 1]; without clipping the cast to uint8
+    # wraps around (1.4 -> 101, -0.3 -> 180) and paints speckles over the result.
+    return Image.fromarray(np.clip(image * 255, 0, 255).astype("uint8"))
 
 
 class DownloadImageNode:
