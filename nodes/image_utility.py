@@ -1071,14 +1071,23 @@ class ImageRemoveAlphaNode:
     SEARCH_ALIASES = ["remove transparency", "flatten rgba"]
 
     def node_function(self, images, masks, fill_color):
+        images = batchify_image(images)
+        masks = batchify_mask(masks)
+        if masks.shape[0] == 1 and images.shape[0] > 1:
+            masks = masks.expand(images.shape[0], -1, -1)
+        if masks.shape[0] != images.shape[0]:
+            # zip() used to cut the batch short here: N images with 1 mask produced one
+            # output frame and said nothing about the N-1 that vanished.
+            raise ValueError(f"got {images.shape[0]} images but {masks.shape[0]} masks; pass one mask per image, or a single shared mask")
+
         out_images = []
         for image, mask in zip(images, masks):
             image_pil = tensor_to_pil(image).convert("RGBA")
-            if len(mask.shape) == 2:
-                mask_np = (1.0 - mask.cpu().numpy() * 255.0).astype(np.uint8)
-                mask_pil = Image.fromarray(mask_np, mode="L")
-            else:
-                mask_pil = tensor_to_pil(1.0 - mask).convert("L")
+            # (1.0 - mask * 255.0) mixed the 0..1 mask with byte units: mask 0 came out as
+            # 1 and mask 1 as 2, so a binary mask pasted almost nothing and the node
+            # returned the background colour for the whole frame.
+            mask_np = np.clip((1.0 - mask.cpu().numpy()) * 255.0, 0.0, 255.0).astype(np.uint8)
+            mask_pil = Image.fromarray(mask_np, mode="L")
 
             bg_pil = Image.new("RGB", image_pil.size, fill_color)
             bg_pil.paste(image_pil, mask_pil)
