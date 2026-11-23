@@ -26,7 +26,7 @@ class MaxNode:
         try:
             out_value = max(a, b)
         except TypeError:
-            out_value = a if a > b else b
+            raise ValueError(f"cannot compare {type(a).__name__} with {type(b).__name__}") from None
         return (out_value,)
 
 
@@ -54,7 +54,7 @@ class MinNode:
         try:
             out_value = min(a, b)
         except TypeError:
-            out_value = a if a < b else b
+            raise ValueError(f"cannot compare {type(a).__name__} with {type(b).__name__}") from None
         return (out_value,)
 
 
@@ -206,16 +206,17 @@ class NumberNode:
     SEARCH_ALIASES = ["number breakdown", "math helpers"]
 
     def node_function(self, number):
+        # RETURN_NAMES starts with "float" then "int", so the tuple must match that order.
+        out_float = float(number)
         out_int = int(number)
-        out_float = float(out_int)
         out_abs = abs(out_float)
         out_round = round(out_float)
         out_ceil = math.ceil(out_float)
         out_floor = math.floor(out_float)
-        out_sqrt = math.sqrt(out_abs) if out_abs >= 0 else 0.0
+        out_sqrt = math.sqrt(out_float) if out_float >= 0 else 0.0
         out_exp = math.exp(out_float)
         out_log = math.log(out_float) if out_float > 0 else 0.0
-        return (out_int, out_float, out_abs, out_round, out_ceil, out_floor, out_sqrt, out_exp, out_log)
+        return (out_float, out_int, out_abs, out_round, out_ceil, out_floor, out_sqrt, out_exp, out_log)
 
 
 class FloatToIntNode:
