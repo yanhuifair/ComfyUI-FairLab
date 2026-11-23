@@ -1341,13 +1341,14 @@ class PerfectPixelNode:
     SEARCH_ALIASES = ["pixel art upscale", "perfect pixel"]
 
     def tensor_to_cv2(self, tensor):
-        numpy_image = tensor.numpy() * 255.0
+        numpy_image = tensor.detach().cpu().numpy() * 255.0
         return numpy_image
 
     def np_to_pil(self, np_image):
         return Image.fromarray(np_image.astype("uint8"), "RGB")
 
     def node_function(self, images, sample_method, min_size, peak_width, refine_intensity, fix_square, debug):
+        images = batchify_image(images)
         outs = []
         out_w = 0
         out_h = 0
@@ -1367,5 +1368,11 @@ class PerfectPixelNode:
             outs.append(image_tensor)
             out_w = w
             out_h = h
+
+        if len({tuple(int(v) for v in frame.shape[:2]) for frame in outs}) > 1:
+            # The detected grid can differ per frame, and then refined_w/h would only
+            # describe the last one while torch.stack() below dies on ragged frames.
+            raise ValueError("Perfect Pixel detected different output sizes for this batch; run one image at a time (batch_size 1)")
+
         outs = torch.stack(outs, dim=0)
         return (outs, out_w, out_h)
