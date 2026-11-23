@@ -104,18 +104,19 @@ def process_modulation_ProcessPool(images_np, direction, speed):
         with concurrent.futures.ProcessPoolExecutor() as executor:
             # Add timeout to prevent hanging
             futures = [executor.submit(modulation_worker, args) for args in arg_list]
+            # Collect by index, not by completion order: as_completed() would hand the
+            # frames back shuffled whenever one image finishes ahead of its position.
             results = []
 
-            for future in concurrent.futures.as_completed(futures, timeout=300):  # 5 minutes timeout
+            for idx, future in enumerate(futures):
                 try:
-                    result = future.result(timeout=60)  # 1 minute per image
-                    results.append(result)
+                    results.append(future.result(timeout=300))  # 5 minutes per image
                 except concurrent.futures.TimeoutError:
-                    print("Timeout error processing image, using original")
-                    results.append(arg_list[len(results)][0])
+                    print(f"Timeout error processing image {idx}, using original")
+                    results.append(arg_list[idx][0])
                 except Exception as e:
-                    print(f"Error processing image: {e}, using original")
-                    results.append(arg_list[len(results)][0])
+                    print(f"Error processing image {idx}: {e}, using original")
+                    results.append(arg_list[idx][0])
 
             return results
     except Exception as e:
