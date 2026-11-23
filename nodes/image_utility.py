@@ -110,7 +110,10 @@ def batch_to_list(tensor_batch):
 
 
 def list_to_batch(tensor_list):
-    return torch.stack(tensor_list, dim=0)
+    # Callers hand over either [H, W, C] frames or already unsqueezed [1, H, W, C]
+    # ones, so normalise first: stacking a list of 4D tensors would yield 5D.
+    frames = [tensor.squeeze(0) if tensor.ndim == 4 else tensor for tensor in tensor_list]
+    return torch.stack(frames, dim=0)
 
 
 def tensor_list_to_batch(tensors):
