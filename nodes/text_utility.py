@@ -410,20 +410,15 @@ class LoadStringNode:
     SEARCH_ALIASES = ["read text file", "load file text"]
 
     def node_function(self, path):
-        out_string = ""
-        out_path = path
-        out_name = os.path.basename(path)
-
+        # Handing back "File not found: <path>" as the text made a missing file look like
+        # real content downstream, and a decode error was printed then reported as "".
         try:
-            if os.path.exists(path):
-                with open(path, "r", encoding="utf-8") as file:
-                    out_string = file.read()
-            else:
-                out_string = f"File not found: {path}"
-        except Exception as e:
-            print(f"Error reading file {path}: {e}")
+            with open(path, "r", encoding="utf-8") as file:
+                out_string = file.read()
+        except (OSError, UnicodeDecodeError) as error:
+            raise ValueError(f"could not read text file {path}: {error}") from error
 
-        return (out_string, out_path, out_name)
+        return (out_string, path, os.path.basename(path))
 
 
 class UniqueTagsNode:
