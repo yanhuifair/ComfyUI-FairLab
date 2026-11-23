@@ -109,6 +109,20 @@ def pil_to_np(pilimage):
     return np.array(pilimage) / 255
 
 
+def hex_to_rgb(color_hex):
+    # The COLOR widget yields "#RRGGBB"; accept #RGB and #RRGGBBAA too and name the bad
+    # value instead of raising inside int().
+    text = str(color_hex).strip().lstrip("#")
+    if len(text) == 3:
+        text = "".join(ch * 2 for ch in text)
+    if len(text) not in (6, 8):
+        raise ValueError(f"invalid hex color {color_hex!r}: expected #RGB, #RRGGBB or #RRGGBBAA")
+    try:
+        return tuple(int(text[i : i + 2], 16) for i in (0, 2, 4))
+    except ValueError as error:
+        raise ValueError(f"invalid hex color {color_hex!r}: {error}") from error
+
+
 def np_to_pil(image):
     # Error diffusion pushes values outside [0, 1]; without clipping the cast to uint8
     # wraps around (1.4 -> 101, -0.3 -> 180) and paints speckles over the result.
@@ -653,30 +667,21 @@ class FillColorNode:
     RETURN_NAMES = ("image",)
     FUNCTION = "node_function"
     CATEGORY = "Fair/image"
+    DESCRIPTION = "Blend a colour into an image by luminance: dark pixels take it, bright pixels keep their own."
+    SEARCH_ALIASES = ["colorize shadows", "tint image"]
 
-    def fill_color(self, image, color_hex):
-        # change white to fill color
-        pil = tensor_to_pil(image)
-        hex_str = color_hex.lstrip("#")
-        r, g, b = tuple(int(hex_str[i : i + 2], 16) for i in (0, 2, 4))
-
-        pixels = pil.getdata()
-
-        new_pixels = []
-        for pixel in pixels:
-            pr, pg, pb = pixel
-            l = int(0.299 * pr + 0.587 * pg + 0.114 * pb)
-            # color lerp
-            new_pixels.append((int(pr + (r - pr) * (1 - l / 255.0)), int(pg + (g - pg) * (1 - l / 255.0)), int(pb + (b - pb) * (1 - l / 255.0))))
-
-        new_pil = Image.new("RGB", pil.size)
-        new_pil.putdata(new_pixels)
-        image_tensor = pil_to_tensor(new_pil)
-        return image_tensor
+    def fill_color(self, frame, fill):
+        rgb = frame[..., :3]
+        # Luma drives the mix factor, which is the same 0.299/0.587/0.114 blend the
+        # per-pixel loop ran, minus two round trips through uint8.
+        luma = 0.299 * rgb[..., 0] + 0.587 * rgb[..., 1] + 0.114 * rgb[..., 2]
+        mix = (1.0 - luma).clamp(0.0, 1.0).unsqueeze(-1)
+        return rgb + (fill - rgb) * mix
 
     def node_function(self, image, color):
-        tensor_filled = self.fill_color(image, color)
-        return (batchify_image(tensor_filled),)
+        frames = batchify_image(image)
+        fill = frames.new_tensor(tuple(value / 255.0 for value in hex_to_rgb(color)))
+        return (torch.stack([self.fill_color(frame, fill) for frame in frames], dim=0),)
 
 
 def pil_to_base64(pli_image, pnginfo=None, header=False):
@@ -1253,7 +1258,7 @@ class PureColorImageNode:
 
     def node_function(self, color_hex, width, height):
         # color is hex format
-        color_255 = tuple(int(color_hex.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
+        color_255 = hex_to_rgb(color_hex)
         pil = Image.new("RGB", (width, height), color=color_255)
         pure_color_image = pil_to_tensor(pil)
         pure_color_image = pure_color_image.unsqueeze(0)
