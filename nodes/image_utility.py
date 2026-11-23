@@ -989,7 +989,9 @@ class ModulationNode:
         return {
             "required": {
                 "images": (IO.IMAGE, {"defaultInput": True}),
-                "direction": ("ModulationDirection", {"default": "up_to_down"}),
+                # A custom type has no widget, so a "default" here could never be used:
+                # the value has to come from a ModulationDirection node.
+                "direction": ("ModulationDirection",),
                 "speed": (IO.FLOAT, {"default": 0.01, "step": 0.01}),
             }
         }
