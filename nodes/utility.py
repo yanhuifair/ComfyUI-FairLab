@@ -84,7 +84,7 @@ class LoraLoaderDualNode:
     FUNCTION = "node_function"
 
     CATEGORY = "Fair/loaders"
-    DESCRIPTION = "LoRAs are used to modify diffusion and CLIP models, altering the way in which latents are denoised such as applying styles. Multiple LoRA nodes can be linked together."
+    DESCRIPTION = "Apply two LoRAs to the same model and clip independently and return both variants as lists, rather than chaining one onto the other. Each downstream node then runs once per variant."
     SEARCH_ALIASES = ["dual lora", "load two loras"]
 
     OUTPUT_IS_LIST = (True, True)
