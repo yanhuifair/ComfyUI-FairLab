@@ -1,6 +1,5 @@
 import folder_paths
 import comfy.sd
-import comfy.utils
 from comfy.comfy_types.node_typing import IO
 from nodes import LoraLoader
 

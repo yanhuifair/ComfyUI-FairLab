@@ -6,7 +6,7 @@ import json
 import numpy as np
 import cv2
 from io import BytesIO
-from PIL import Image, ImageOps, ImageSequence, ImageFile, ImageDraw
+from PIL import Image, ImageOps
 from PIL.PngImagePlugin import PngInfo
 
 import folder_paths
@@ -16,9 +16,7 @@ from datetime import datetime
 from comfy.utils import ProgressBar
 
 import torch
-import torch.nn.functional as NNF
 from torchvision import transforms
-import torchvision.transforms.functional as f
 
 import base64
 import sys
@@ -45,49 +43,6 @@ def list_image_files(directory):
     # macOS included), so filter to readable images and order them by name first.
     names = [name for name in os.listdir(directory) if name.lower().endswith(IMAGE_EXTENSIONS)]
     return [os.path.join(directory, name) for name in sorted(names, key=natural_sort_key)]
-
-
-def tensor_to_cv2(tensor):
-    tensor = tensor.permute(1, 2, 0)  # [C,H,W] to [H,W,C]
-    array = tensor.cpu().numpy()
-    array = (array * 255).astype(np.uint8)
-    array = cv2.cvtColor(array, cv2.COLOR_RGB2BGR)
-    return array
-
-
-def cv2_to_tensor(array):
-    array = cv2.cvtColor(array, cv2.COLOR_BGR2RGB)
-    array = array.astype(np.float32) / 255.0
-    tensor = torch.from_numpy(array)
-    return tensor
-
-
-def pil_to_tensor_mask(pil):
-    output_images = []
-    output_masks = []
-    for i in ImageSequence.Iterator(pil):
-        i = ImageOps.exif_transpose(i)
-        if i.mode == "I":
-            i = i.point(lambda i: i * (1 / 255))
-        image = i.convert("RGB")
-        image = np.array(image).astype(np.float32) / 255.0
-        image = torch.from_numpy(image)
-        if "A" in i.getbands():
-            mask = np.array(i.getchannel("A")).astype(np.float32) / 255.0
-            mask = 1.0 - torch.from_numpy(mask)
-        else:
-            mask = torch.zeros((image.shape[0], image.shape[1]), dtype=torch.float32, device="cpu")
-        output_images.append(image)
-        output_masks.append(mask.unsqueeze(0))
-
-    if len(output_images) > 1:
-        output_image = torch.cat(output_images, dim=0)
-        output_mask = torch.cat(output_masks, dim=0)
-    else:
-        output_image = output_images[0]
-        output_mask = output_masks[0]
-
-    return (output_image, output_mask)
 
 
 toPIL = transforms.ToPILImage()
@@ -122,19 +77,6 @@ def tensor_to_pil(tensor):
         return toPIL(tensor.permute(2, 0, 1))
 
 
-def tensor_to_batch(tensor, h, w, c):
-    tensor = torch.cat(tensor)
-    tensor = tensor.reshape(-1, h, w, c)
-    return tensor
-
-
-def batch_to_list(tensor_batch):
-    tensors = []
-    for i in range(tensor_batch.shape[0]):
-        tensors.append(tensor_batch[i])
-    return tensors
-
-
 def list_to_batch(tensor_list):
     if not tensor_list:
         raise ValueError("no images found — the source directory holds no .jpg/.jpeg/.png file")
@@ -142,10 +84,6 @@ def list_to_batch(tensor_list):
     # ones, so normalise first: stacking a list of 4D tensors would yield 5D.
     frames = [tensor.squeeze(0) if tensor.ndim == 4 else tensor for tensor in tensor_list]
     return torch.stack(frames, dim=0)
-
-
-def tensor_list_to_batch(tensors):
-    return torch.stack(tensors, dim=0)
 
 
 def rgba_to_rgb(pil):
