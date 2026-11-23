@@ -155,7 +155,13 @@ def rgba_to_rgb(pil):
 
 
 def load_pil_from_url(url):
-    response = requests.get(url)
+    # No timeout meant one unreachable host blocked the whole ComfyUI queue indefinitely.
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+    except requests.RequestException as error:
+        raise ValueError(f"could not download {url}: {error}") from error
+
     pil = Image.open(BytesIO(response.content))
     name = url.split("/")[-1]
     return pil, name
