@@ -372,10 +372,6 @@ class ShowStringNode:
             "required": {
                 "string": (IO.STRING, {"forceInput": True}),
             },
-            "hidden": {
-                "unique_id": "UNIQUE_ID",
-                "extra_pnginfo": "EXTRA_PNGINFO",
-            },
         }
 
     CATEGORY = "Fair/string"
@@ -387,7 +383,9 @@ class ShowStringNode:
     SEARCH_ALIASES = ["preview text", "display string"]
 
     def node_function(self, string):
-        return {"ui": {"text": string}, "result": (string,)}
+        # ui.text is a list in core's preview nodes; a bare string was another way this
+        # node never rendered.
+        return {"ui": {"text": [string]}, "result": (string,)}
 
 
 class LoadStringNode:
