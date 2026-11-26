@@ -170,6 +170,15 @@ class DownloadImageNode:
 
     def node_function(self, images, masks=None, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
         if masks is not None:
+            images = batchify_image(images)
+            masks = batchify_mask(masks)
+            if masks.shape[0] == 1 and images.shape[0] > 1:
+                masks = masks.expand(images.shape[0], -1, -1)
+            if masks.shape[0] != images.shape[0]:
+                # zip() used to stop at the shorter of the two: a 4-frame batch with one
+                # shared mask saved a single file and said nothing about the other 3.
+                raise ValueError(f"got {images.shape[0]} images but {masks.shape[0]} masks; pass one mask per image, or a single shared mask")
+
             filename_prefix += self.prefix_append
             full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
             results = []
