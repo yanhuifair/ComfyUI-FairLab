@@ -4,10 +4,8 @@ description = "Utility, text, logic, and image helper nodes for ComfyUI with upd
 version = "1.0.96"
 license = { text = "MIT" }
 dependencies = [
-    "googletrans",
     "opencv-python",
     "requests",
-    "nest_asyncio",
     "perfect-pixel[opencv]>=0.1.4"
 ]
 

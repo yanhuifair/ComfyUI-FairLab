@@ -1,5 +1,3 @@
-googletrans
 opencv-python
 requests
-nest_asyncio
 perfect-pixel[opencv]>=0.1.4

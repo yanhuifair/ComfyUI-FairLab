@@ -104,10 +104,8 @@ pip install -r requirements.txt
 
 | Package | Required By |
 |:--------|:------------|
-| `googletrans`                      | String Translate              |
 | `opencv-python`                    | Video ↔ image; general processing |
-| `requests`                         | Download Image, Load Image From URL |
-| `nest_asyncio`                     | Async event loop support      |
+| `requests`                         | Download Image, Load Image From URL, String Translate |
 | `perfect-pixel[opencv]>=0.1.4`     | Perfect Pixel                 |
 
 <h3>Troubleshooting</h3>
@@ -116,7 +114,7 @@ pip install -r requirements.txt
 
 - Make sure you restarted ComfyUI after installing.
 - Check the ComfyUI terminal for import errors related to `ComfyUI-FairLab`.
-- Verify that dependencies were installed: `pip list | grep -E "opencv|googletrans|perfect-pixel"`
+- Verify that dependencies were installed: `pip list | grep -E "opencv|requests|perfect-pixel"`
 
 **ImportError: No module named 'cv2'**
 
@@ -126,10 +124,10 @@ pip install opencv-python
 
 **Google Translate not working**
 
-The `googletrans` library may require an updated version. Try:
-```bash
-pip install --upgrade googletrans
-```
+String Translate calls the public Google Translate endpoint directly (no API key, no
+`googletrans` — that library is abandoned and broke against modern `httpx`). It needs
+outbound network access; if it is blocked, the node now fails with
+`translation request failed (...)` instead of returning empty text.
 
 ---
 
